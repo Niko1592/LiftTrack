@@ -2054,6 +2054,11 @@ function toggleSessionBW(exId, n) {
 
 function removeSessionSet(exId, n) {
   document.getElementById(`sset-${exId}-${n}`)?.remove();
+  // Renumber remaining sets for this exercise
+  document.querySelectorAll(`#session-sets-${exId} .session-set-row`).forEach((row, i) => {
+    const numEl = row.querySelector('.set-num');
+    if (numEl) numEl.textContent = i + 1;
+  });
 }
 
 function saveWorkoutSession() {
@@ -2162,6 +2167,19 @@ function addSet() {
     <button class="btn-danger" onclick="removeSet(${n})">×</button>
   `;
   document.getElementById('sets-container').appendChild(row);
+  renumberSets();
+}
+
+function removeSet(n) {
+  document.getElementById('set-row-'+n)?.remove();
+  renumberSets();
+}
+
+function renumberSets() {
+  document.querySelectorAll('#sets-container .set-row').forEach((row, i) => {
+    const numEl = row.querySelector('.set-num');
+    if (numEl) numEl.textContent = i + 1;
+  });
 }
 
 function toggleBWInput(n) {
@@ -2171,10 +2189,6 @@ function toggleBWInput(n) {
   weightInput.value = isBW ? '' : weightInput.value;
   weightInput.placeholder = isBW ? 'Bodyweight' : 'Weight';
   weightInput.style.opacity = isBW ? '0.35' : '1';
-}
-
-function removeSet(n) {
-  document.getElementById('set-row-'+n)?.remove();
 }
 
 function saveWorkout() {
