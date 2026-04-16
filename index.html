@@ -68,7 +68,7 @@
   /* LOG FORM */
   .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; max-width: 600px; }
   .form-card h2 { font-size: 0.95rem; margin-bottom: 20px; color: var(--text); font-weight: 600; letter-spacing: -0.01em; }
-  .form-group { margin-bottom: 16px; }
+  .form-group { margin-bottom: 16px; position: relative; }
   .form-group label { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
   .form-group input, .form-group select { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 0.875rem; outline: none; transition: border 0.15s; font-family: 'Inter', system-ui, sans-serif; }
   .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
@@ -261,9 +261,48 @@
     .chart-card.full { grid-column: 1; }
   }
 
+  .email-suggestion { padding: 9px 14px; font-size: 0.82rem; cursor: pointer; color: var(--text); font-family: 'Inter', system-ui, sans-serif; transition: background 0.12s; }
+  .email-suggestion:hover, .email-suggestion:active { background: rgba(108,99,255,0.15); color: var(--accent); }
+
+  /* AUTH SCREEN */
+  .auth-screen { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 1000; align-items: center; justify-content: center; }
+  .auth-screen.visible { display: flex; }
+  .auth-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px; width: 100%; max-width: 380px; margin: 16px; }
+  .auth-logo { font-weight: 700; font-size: 1.1rem; color: var(--accent); letter-spacing: 0.3px; text-transform: uppercase; text-align: center; margin-bottom: 6px; }
+  .auth-tagline { font-size: 0.75rem; color: var(--muted); text-align: center; margin-bottom: 28px; letter-spacing: 0.3px; }
+  .auth-tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
+  .auth-tab { flex: 1; background: none; border: none; padding: 9px; font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; font-family: 'Inter', system-ui, sans-serif; transition: all 0.15s; }
+  .auth-tab.active { background: var(--accent); color: #fff; }
+  .auth-error { color: var(--accent2); font-size: 0.78rem; margin-bottom: 12px; min-height: 18px; text-align: center; }
+  .user-badge { font-size: 0.68rem; color: var(--muted); margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .user-badge span { color: var(--text); font-weight: 500; }
+
 </style>
 </head>
 <body>
+
+<!-- AUTH SCREEN -->
+<div class="auth-screen visible" id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">LiftTrack</div>
+    <div class="auth-tagline">Track your workouts. Sync everywhere.</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Create Account</button>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email" oninput="showEmailSuggestions(this.value)" onblur="hideEmailSuggestions()" autocapitalize="none">
+      <div id="email-suggestions" style="display:none;position:absolute;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-top:4px;overflow:hidden;z-index:100;width:100%;left:0;"></div>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="auth-error" id="auth-error"></div>
+    <button class="btn" style="width:100%;margin-top:4px;" id="auth-btn" onclick="handleAuth()">Sign In</button>
+  </div>
+</div>
 
 <div class="topbar">
   <div class="logo">LiftTrack</div>
@@ -275,7 +314,11 @@
     <button class="nav-tab" onclick="showPage('stretch')">🧘 Stretch</button>
     <button class="nav-tab" onclick="showPage('history')">📅 History</button>
   </nav>
-  <div id="sync-status">⚪ Loading…</div>
+  <div class="user-badge">
+    <span id="user-email-display"></span>
+    <button class="btn-sm" onclick="signOut()">Sign Out</button>
+    <div id="sync-status"></div>
+  </div>
 </div>
 
 <!-- DASHBOARD -->
@@ -298,13 +341,31 @@
       <div class="freq-grid" id="freq-grid"></div>
     </div>
   </div>
-  <div class="chart-card">
-    <div class="chart-title">Personal Records</div>
-    <table class="pr-table" id="pr-table">
-      <thead><tr><th>Exercise</th><th>PR Weight</th><th>Reps</th><th>Date</th></tr></thead>
-      <tbody id="pr-tbody"></tbody>
-    </table>
+  <div class="chart-grid" style="margin-bottom:24px;">
+    <div class="chart-card">
+      <div class="chart-title">Personal Records</div>
+      <table class="pr-table" id="pr-table">
+        <thead><tr><th>Exercise</th><th>PR Weight</th><th>Reps</th><th>Date</th></tr></thead>
+        <tbody id="pr-tbody"></tbody>
+      </table>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Weight Progress</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;position:relative;z-index:2;">
+        <div style="flex:1;">
+          <div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;font-weight:600;">Today's Weight</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="bw-input" placeholder="e.g. 185" min="50" max="500" step="0.1" style="width:110px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;position:relative;z-index:3;">
+            <span style="font-size:0.75rem;color:var(--muted);">lbs</span>
+            <input type="date" id="bw-date" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.82rem;outline:none;font-family:'Inter',system-ui,sans-serif;position:relative;z-index:3;">
+            <button class="btn-sm" onclick="logBodyWeight()" style="position:relative;z-index:3;">Log</button>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="bwChart"></canvas></div>
+    </div>
   </div>
+
 </div>
 
 <!-- LOG -->
@@ -626,12 +687,74 @@
 const SUPABASE_URL = 'https://hqadddgitbhdseymxmej.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxYWRkZGdpdGJoZHNleW14bWVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyOTgzNzksImV4cCI6MjA5MTg3NDM3OX0.iTOLKuR2h5f1vfkm4xNBkzXKRTMUpwpAY48qQ3l-7as';
 
+let currentSession = null; // holds the logged-in user's session
+
+// ── AUTH HELPERS ──────────────────────────────────────
+async function signUp(email, password) {
+  const res = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.msg || data.error_description || 'Sign up failed');
+  return data;
+}
+
+async function signIn(email, password) {
+  const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.msg || data.error_description || 'Sign in failed');
+  return data;
+}
+
+async function signOut() {
+  if (currentSession?.access_token) {
+    await fetch(SUPABASE_URL + '/auth/v1/logout', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentSession.access_token }
+    }).catch(() => {});
+  }
+  currentSession = null;
+  localStorage.removeItem('lt_session');
+  showAuthScreen();
+}
+
+function saveSession(session) {
+  currentSession = session;
+  localStorage.setItem('lt_session', JSON.stringify(session));
+}
+
+async function restoreSession() {
+  try {
+    const raw = localStorage.getItem('lt_session');
+    if (!raw) return false;
+    const session = JSON.parse(raw);
+    // Try to refresh the token
+    const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: session.refresh_token })
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    saveSession(data);
+    return true;
+  } catch { return false; }
+}
+
+// ── SUPABASE FETCH (auth-aware) ───────────────────────
 async function sbFetch(path, options = {}) {
+  const token = currentSession?.access_token || SUPABASE_KEY;
   const res = await fetch(SUPABASE_URL + path, {
     ...options,
     headers: {
       'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json',
       'Prefer': options.prefer || '',
       ...(options.headers || {})
@@ -646,56 +769,222 @@ async function sbFetch(path, options = {}) {
 }
 
 // ── DATA ─────────────────────────────────────────────
-// ── PERSISTENCE ──────────────────────────────────────
 const DEFAULTS = {
   exercises: [
-    // Push
-    { id:  1, name: 'Bench Press',            cat: 'Push' },
-    { id:  5, name: 'Overhead Press',          cat: 'Push' },
-    { id:  7, name: 'Incline Bench Press',     cat: 'Push' },
-    { id:  8, name: 'Dumbbell Shoulder Press', cat: 'Push' },
-    { id:  9, name: 'Lateral Raise',           cat: 'Push' },
-    { id: 10, name: 'Tricep Pushdown',         cat: 'Push' },
-    { id: 11, name: 'Skull Crusher',           cat: 'Push' },
-    { id: 12, name: 'Dips',                    cat: 'Push' },
-    // Pull
-    { id:  3, name: 'Deadlift',                cat: 'Pull' },
-    { id:  4, name: 'Pull-Up',                 cat: 'Pull' },
-    { id:  6, name: 'Barbell Row',             cat: 'Pull' },
-    { id: 13, name: 'Dumbbell Row',            cat: 'Pull' },
-    { id: 14, name: 'Lat Pulldown',            cat: 'Pull' },
-    { id: 15, name: 'Seated Cable Row',        cat: 'Pull' },
-    { id: 16, name: 'Face Pull',               cat: 'Pull' },
-    { id: 17, name: 'Incline Dumbbell Curl',   cat: 'Pull' },
-    { id: 18, name: 'Hammer Curl',             cat: 'Pull' },
-    { id: 19, name: 'Barbell Curl',            cat: 'Pull' },
-    // Legs
-    { id:  2, name: 'Squat',                   cat: 'Legs' },
-    { id: 20, name: 'Romanian Deadlift',       cat: 'Legs' },
-    { id: 21, name: 'Leg Press',               cat: 'Legs' },
-    { id: 22, name: 'Leg Curl',                cat: 'Legs' },
-    { id: 23, name: 'Leg Extension',           cat: 'Legs' },
-    { id: 24, name: 'Calf Raise',              cat: 'Legs' },
-    { id: 25, name: 'Bulgarian Split Squat',   cat: 'Legs' },
-    { id: 26, name: 'Hip Thrust',              cat: 'Legs' },
+    // Push — Chest
+    { id:  1, name: 'Barbell Bench Press',           cat: 'Push' },
+    { id:  7, name: 'Incline Barbell Bench Press',   cat: 'Push' },
+    { id: 37, name: 'Decline Barbell Bench Press',   cat: 'Push' },
+    { id: 38, name: 'Dumbbell Bench Press',          cat: 'Push' },
+    { id: 39, name: 'Incline Dumbbell Press',        cat: 'Push' },
+    { id:102, name: 'Decline Dumbbell Press',        cat: 'Push' },
+    { id: 41, name: 'Dumbbell Flyes',                cat: 'Push' },
+    { id:103, name: 'Incline Dumbbell Flyes',        cat: 'Push' },
+    { id: 40, name: 'Cable Crossover',               cat: 'Push' },
+    { id: 42, name: 'Pec Deck Machine',              cat: 'Push' },
+    { id: 43, name: 'Push-Up',                       cat: 'Push' },
+    { id:104, name: 'Wide Grip Push-Up',             cat: 'Push' },
+    { id: 51, name: 'Diamond Push-Up',               cat: 'Push' },
+    { id: 12, name: 'Chest Dip',                     cat: 'Push' },
+    // Back
+    { id:  4, name: 'Pull-Up',                       cat: 'Pull' },
+    { id: 56, name: 'Chin-Up',                       cat: 'Pull' },
+    { id: 14, name: 'Lat Pulldown Wide Grip',        cat: 'Pull' },
+    { id:105, name: 'Lat Pulldown Close Grip',       cat: 'Pull' },
+    { id: 15, name: 'Seated Cable Row',              cat: 'Pull' },
+    { id:  6, name: 'Bent-Over Barbell Row',         cat: 'Pull' },
+    { id: 13, name: 'Bent-Over Dumbbell Row',        cat: 'Pull' },
+    { id:106, name: 'Single-Arm Dumbbell Row',       cat: 'Pull' },
+    { id: 54, name: 'T-Bar Row',                     cat: 'Pull' },
+    { id:107, name: 'Machine Row',                   cat: 'Pull' },
+    { id: 16, name: 'Face Pull',                     cat: 'Pull' },
+    { id: 55, name: 'Straight-Arm Pulldown',         cat: 'Pull' },
+    { id:  3, name: 'Deadlift',                      cat: 'Pull' },
+    { id:108, name: 'Rack Pull',                     cat: 'Pull' },
+    { id: 74, name: 'Good Morning',                  cat: 'Pull' },
+    { id:109, name: 'Back Extension',                cat: 'Pull' },
+    { id: 59, name: 'Inverted Row',                  cat: 'Pull' },
+    { id:100, name: 'Trap Bar Deadlift',             cat: 'Pull' },
+    // Shoulders
+    { id:  5, name: 'Barbell Overhead Press',        cat: 'Push' },
+    { id:  8, name: 'Seated Dumbbell Shoulder Press',cat: 'Push' },
+    { id: 45, name: 'Arnold Press',                  cat: 'Push' },
+    { id:  9, name: 'Lateral Raise',                 cat: 'Push' },
+    { id: 47, name: 'Cable Lateral Raise',           cat: 'Push' },
+    { id: 44, name: 'Front Raise',                   cat: 'Push' },
+    { id:110, name: 'Cable Front Raise',             cat: 'Push' },
+    { id:111, name: 'Rear Delt Dumbbell Fly',        cat: 'Pull' },
+    { id: 46, name: 'Rear Delt Cable Fly',           cat: 'Pull' },
+    { id:200, name: 'Reverse Pec Deck',              cat: 'Pull' },
+    { id: 48, name: 'Upright Row Barbell',           cat: 'Push' },
+    { id:112, name: 'Upright Row Dumbbell',          cat: 'Push' },
+    { id:113, name: 'Barbell Shrug',                 cat: 'Pull' },
+    { id:114, name: 'Dumbbell Shrug',                cat: 'Pull' },
+    // Biceps
+    { id: 19, name: 'Barbell Curl',                  cat: 'Pull' },
+    { id:115, name: 'EZ-Bar Curl',                   cat: 'Pull' },
+    { id:116, name: 'Alternating Dumbbell Curl',     cat: 'Pull' },
+    { id: 18, name: 'Hammer Curl',                   cat: 'Pull' },
+    { id: 62, name: 'Concentration Curl',            cat: 'Pull' },
+    { id: 17, name: 'Incline Dumbbell Curl',         cat: 'Pull' },
+    { id: 61, name: 'Cable Curl',                    cat: 'Pull' },
+    { id: 60, name: 'Preacher Curl Machine',         cat: 'Pull' },
+    { id:117, name: 'Preacher Curl EZ-Bar',          cat: 'Pull' },
+    { id: 64, name: 'Spider Curl',                   cat: 'Pull' },
+    { id:118, name: 'Zottman Curl',                  cat: 'Pull' },
+    // Triceps
+    { id: 10, name: 'Tricep Pushdown Straight Bar',  cat: 'Push' },
+    { id:119, name: 'Tricep Pushdown Rope',          cat: 'Push' },
+    { id: 49, name: 'Overhead Tricep Extension',     cat: 'Push' },
+    { id:120, name: 'Overhead Tricep Extension Cable',cat: 'Push' },
+    { id: 11, name: 'Skull Crusher EZ-Bar',          cat: 'Push' },
+    { id:121, name: 'Skull Crusher Dumbbell',        cat: 'Push' },
+    { id: 50, name: 'Close-Grip Bench Press',        cat: 'Push' },
+    { id:122, name: 'Tricep Dip Bench',              cat: 'Push' },
+    { id:123, name: 'Tricep Dip Parallel Bars',      cat: 'Push' },
+    { id:124, name: 'Tricep Kickback Dumbbell',      cat: 'Push' },
+    { id: 52, name: 'Cable Tricep Kickback',         cat: 'Push' },
+    // Forearms
+    { id:125, name: 'Wrist Curl',                    cat: 'Pull' },
+    { id:126, name: 'Reverse Wrist Curl',            cat: 'Pull' },
+    { id: 99, name: 'Farmers Carry',                 cat: 'Other' },
+    { id:127, name: 'Dead Hang',                     cat: 'Pull' },
+    // Quads
+    { id:  2, name: 'Barbell Back Squat',            cat: 'Legs' },
+    { id: 65, name: 'Barbell Front Squat',           cat: 'Legs' },
+    { id: 67, name: 'Goblet Squat',                  cat: 'Legs' },
+    { id: 21, name: 'Leg Press',                     cat: 'Legs' },
+    { id: 66, name: 'Hack Squat Machine',            cat: 'Legs' },
+    { id:128, name: 'Dumbbell Squat',                cat: 'Legs' },
+    { id: 25, name: 'Bulgarian Split Squat',         cat: 'Legs' },
+    { id: 69, name: 'Walking Lunge',                 cat: 'Legs' },
+    { id: 68, name: 'Reverse Lunge',                 cat: 'Legs' },
+    { id: 70, name: 'Step-Up',                       cat: 'Legs' },
+    { id: 23, name: 'Leg Extension',                 cat: 'Legs' },
+    { id:129, name: 'Wall Sit',                      cat: 'Legs' },
+    { id: 71, name: 'Sissy Squat',                   cat: 'Legs' },
+    // Hamstrings & Glutes
+    { id: 20, name: 'Romanian Deadlift',             cat: 'Legs' },
+    { id:130, name: 'Romanian Deadlift Dumbbell',    cat: 'Legs' },
+    { id:131, name: 'Stiff-Leg Deadlift',            cat: 'Legs' },
+    { id: 73, name: 'Sumo Deadlift',                 cat: 'Legs' },
+    { id: 22, name: 'Lying Leg Curl',                cat: 'Legs' },
+    { id:132, name: 'Seated Leg Curl',               cat: 'Legs' },
+    { id: 75, name: 'Nordic Hamstring Curl',         cat: 'Legs' },
+    { id: 26, name: 'Hip Thrust Barbell',            cat: 'Legs' },
+    { id:133, name: 'Hip Thrust Machine',            cat: 'Legs' },
+    { id: 72, name: 'Glute Bridge',                  cat: 'Legs' },
+    { id:134, name: 'Glute Bridge Barbell',          cat: 'Legs' },
+    { id: 76, name: 'Cable Kickback',                cat: 'Legs' },
+    { id:135, name: 'Donkey Kick',                   cat: 'Legs' },
+    { id:136, name: 'Abductor Machine',              cat: 'Legs' },
+    { id:137, name: 'Adductor Machine',              cat: 'Legs' },
+    { id:138, name: 'Clamshell',                     cat: 'Legs' },
+    // Calves
+    { id: 24, name: 'Standing Calf Raise',           cat: 'Legs' },
+    { id: 77, name: 'Seated Calf Raise',             cat: 'Legs' },
+    { id: 78, name: 'Leg Press Calf Raise',          cat: 'Legs' },
+    { id:139, name: 'Dumbbell Calf Raise',           cat: 'Legs' },
+    { id:140, name: 'Single-Leg Calf Raise',         cat: 'Legs' },
     // Core
-    { id: 27, name: 'Plank',                   cat: 'Core' },
-    { id: 28, name: 'Cable Crunch',            cat: 'Core' },
-    { id: 29, name: 'Hanging Leg Raise',       cat: 'Core' },
-    { id: 30, name: 'Ab Wheel Rollout',        cat: 'Core' },
-    { id: 31, name: 'Russian Twist',           cat: 'Core' },
+    { id: 79, name: 'Crunch',                        cat: 'Core' },
+    { id: 80, name: 'Bicycle Crunch',                cat: 'Core' },
+    { id:141, name: 'Reverse Crunch',                cat: 'Core' },
+    { id:142, name: 'Sit-Up',                        cat: 'Core' },
+    { id:143, name: 'Decline Sit-Up',                cat: 'Core' },
+    { id:144, name: 'Leg Raise Flat Bench',          cat: 'Core' },
+    { id: 29, name: 'Hanging Leg Raise',             cat: 'Core' },
+    { id:145, name: 'Hanging Knee Raise',            cat: 'Core' },
+    { id: 28, name: 'Cable Crunch',                  cat: 'Core' },
+    { id: 30, name: 'Ab Wheel Rollout',              cat: 'Core' },
+    { id: 27, name: 'Plank',                         cat: 'Core' },
+    { id: 82, name: 'Side Plank',                    cat: 'Core' },
+    { id: 88, name: 'Hollow Body Hold',              cat: 'Core' },
+    { id: 83, name: 'Dead Bug',                      cat: 'Core' },
+    { id: 87, name: 'V-Up',                          cat: 'Core' },
+    { id:146, name: 'Flutter Kick',                  cat: 'Core' },
+    { id:147, name: 'Scissor Kick',                  cat: 'Core' },
+    { id: 31, name: 'Russian Twist',                 cat: 'Core' },
+    { id:148, name: 'Oblique Crunch',                cat: 'Core' },
+    { id:149, name: 'Cable Woodchop',                cat: 'Core' },
+    { id: 85, name: 'Pallof Press',                  cat: 'Core' },
+    { id: 84, name: 'Dragon Flag',                   cat: 'Core' },
+    { id:183, name: 'L-Sit',                         cat: 'Core' },
+    { id:190, name: 'Mountain Climber',              cat: 'Core' },
+    // Full Body / Compound
+    { id: 94, name: 'Power Clean',                   cat: 'Other' },
+    { id:150, name: 'Clean and Press',               cat: 'Other' },
+    { id: 95, name: 'Hang Clean',                    cat: 'Other' },
+    { id:101, name: 'Snatch',                        cat: 'Other' },
+    { id: 96, name: 'Thruster Barbell',              cat: 'Other' },
+    { id:151, name: 'Thruster Dumbbell',             cat: 'Other' },
+    { id:152, name: 'Burpee',                        cat: 'Other' },
+    { id:153, name: 'Man Maker',                     cat: 'Other' },
+    { id:154, name: "Devil's Press",                 cat: 'Other' },
+    { id: 98, name: 'Turkish Get-Up',                cat: 'Other' },
+    // Kettlebell
+    { id: 97, name: 'Kettlebell Swing',              cat: 'Other' },
+    { id:155, name: 'Kettlebell Swing Single-Arm',   cat: 'Other' },
+    { id:156, name: 'Kettlebell Clean',              cat: 'Other' },
+    { id:157, name: 'Kettlebell Press',              cat: 'Other' },
+    { id:158, name: 'Kettlebell Snatch',             cat: 'Other' },
+    { id:159, name: 'Kettlebell Goblet Squat',       cat: 'Legs'  },
+    { id:160, name: 'Kettlebell Deadlift',           cat: 'Pull'  },
+    { id:161, name: 'Kettlebell Row',                cat: 'Pull'  },
+    { id:162, name: 'Kettlebell Windmill',           cat: 'Other' },
+    { id:163, name: 'Kettlebell Halo',               cat: 'Other' },
+    { id:164, name: 'Kettlebell Figure-8',           cat: 'Other' },
+    { id:165, name: 'Kettlebell Lunge',              cat: 'Legs'  },
+    // Resistance Band
+    { id:166, name: 'Band Pull-Apart',               cat: 'Pull'  },
+    { id:167, name: 'Banded Squat',                  cat: 'Legs'  },
+    { id:168, name: 'Banded Hip Thrust',             cat: 'Legs'  },
+    { id:169, name: 'Banded Lateral Walk',           cat: 'Legs'  },
+    { id:170, name: 'Banded Face Pull',              cat: 'Pull'  },
+    { id:171, name: 'Banded Push-Up',                cat: 'Push'  },
+    { id:172, name: 'Banded Curl',                   cat: 'Pull'  },
+    { id:173, name: 'Banded Tricep Pushdown',        cat: 'Push'  },
+    { id:174, name: 'Banded Deadlift',               cat: 'Pull'  },
     // Cardio
-    { id: 32, name: 'Running',                 cat: 'Cardio' },
-    { id: 33, name: 'Cycling',                 cat: 'Cardio' },
-    { id: 34, name: 'Rowing Machine',          cat: 'Cardio' },
-    { id: 35, name: 'Jump Rope',               cat: 'Cardio' },
-    { id: 36, name: 'Stairmaster',             cat: 'Cardio' },
+    { id: 32, name: 'Treadmill Run',                 cat: 'Cardio' },
+    { id:175, name: 'Treadmill Incline Walk',        cat: 'Cardio' },
+    { id: 33, name: 'Stationary Bike',               cat: 'Cardio' },
+    { id:176, name: 'Spin Bike',                     cat: 'Cardio' },
+    { id: 89, name: 'Elliptical',                    cat: 'Cardio' },
+    { id: 36, name: 'Stair Climber / StairMaster',  cat: 'Cardio' },
+    { id: 34, name: 'Rowing Machine',                cat: 'Cardio' },
+    { id:177, name: 'Ski Erg',                       cat: 'Cardio' },
+    { id: 90, name: 'Assault Bike',                  cat: 'Cardio' },
+    { id: 35, name: 'Jump Rope',                     cat: 'Cardio' },
+    // Calisthenics
+    { id:182, name: 'Muscle-Up',                     cat: 'Other' },
+    { id:184, name: 'Pike Push-Up',                  cat: 'Push'  },
+    { id:185, name: 'Archer Push-Up',                cat: 'Push'  },
+    { id:186, name: 'Pistol Squat',                  cat: 'Legs'  },
+    { id:187, name: 'Box Jump',                      cat: 'Other' },
+    { id:189, name: 'Jump Squat',                    cat: 'Legs'  },
+    { id:191, name: 'Bear Crawl',                    cat: 'Other' },
+    { id:192, name: 'Inchworm',                      cat: 'Other' },
+    { id:193, name: 'Superman Hold',                 cat: 'Pull'  },
+    { id:194, name: 'Glute-Ham Raise',               cat: 'Legs'  },
+    { id:195, name: 'Handstand Push-Up',             cat: 'Push'  },
+    { id:196, name: 'Nordic Curl',                   cat: 'Legs'  },
+    { id:198, name: 'Sled Push / Sled Pull',         cat: 'Other' },
+    { id:178, name: 'Cable Pull-Through',            cat: 'Legs'  },
   ],
   workouts: [],
   templates: [
-    { id: 1, name: 'Push Day', exerciseIds: [1, 7, 5, 8, 10] },
-    { id: 2, name: 'Pull Day', exerciseIds: [3, 14, 15, 13, 16, 17, 18] },
-    { id: 3, name: 'Leg Day',  exerciseIds: [2, 20, 21, 22, 24] },
+    { id: 1,  name: 'Push Day',          exerciseIds: [1, 37, 7, 5, 8, 9, 10, 119, 11, 49, 12] },
+    { id: 2,  name: 'Pull Day',          exerciseIds: [3, 4, 56, 6, 14, 15, 106, 16, 19, 18, 17] },
+    { id: 3,  name: 'Leg Day',           exerciseIds: [2, 65, 21, 25, 69, 20, 22, 26, 23, 24, 77] },
+    { id: 4,  name: 'Upper Body',        exerciseIds: [1, 7, 5, 8, 3, 14, 15, 19, 18, 49, 11] },
+    { id: 5,  name: 'Lower Body',        exerciseIds: [2, 20, 21, 26, 22, 23, 24, 77] },
+    { id: 6,  name: 'Full Body A',       exerciseIds: [1, 2, 3, 5, 22, 27] },
+    { id: 7,  name: 'Full Body B',       exerciseIds: [38, 20, 56, 8, 21, 28] },
+    { id: 8,  name: 'Chest & Triceps',   exerciseIds: [1, 7, 39, 40, 42, 10, 119, 11, 49, 12] },
+    { id: 9,  name: 'Back & Biceps',     exerciseIds: [3, 4, 6, 14, 15, 106, 16, 19, 18, 60, 117] },
+    { id: 10, name: 'Shoulders & Arms',  exerciseIds: [5, 8, 45, 9, 44, 19, 18, 10, 119, 49] },
+    { id: 11, name: 'Core',              exerciseIds: [27, 29, 30, 28, 31, 82, 141, 80, 85, 84] },
   ],
 };
 
@@ -705,11 +994,12 @@ function lsGet(key) {
 }
 function lsSet() {
   try {
-    localStorage.setItem('lt_exercises',   JSON.stringify(exercises));
-    localStorage.setItem('lt_workouts',    JSON.stringify(workouts));
-    localStorage.setItem('lt_templates',   JSON.stringify(templates));
-    localStorage.setItem('lt_runs',        JSON.stringify(runs));
-    localStorage.setItem('lt_stretchLogs', JSON.stringify(stretchLogs));
+    localStorage.setItem('lt_exercises',     JSON.stringify(exercises));
+    localStorage.setItem('lt_workouts',      JSON.stringify(workouts));
+    localStorage.setItem('lt_templates',     JSON.stringify(templates));
+    localStorage.setItem('lt_runs',          JSON.stringify(runs));
+    localStorage.setItem('lt_stretchLogs',   JSON.stringify(stretchLogs));
+    localStorage.setItem('lt_bodyWeightLog', JSON.stringify(bodyWeightLog));
   } catch(e) {}
 }
 
@@ -719,77 +1009,73 @@ async function persist() {
   lsSet();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
+    if (!currentSession) return;
     try {
       setStatus('saving');
-      await sbFetch('/rest/v1/lifttrack_data?id=eq.singleton', {
-        method: 'PATCH',
-        prefer: 'return=minimal',
-        body: JSON.stringify({
-          exercises,
-          workouts,
-          templates,
-          runs,
-          stretch_logs: stretchLogs,
-          updated_at: new Date().toISOString()
-        })
-      });
+      const userId = currentSession.user.id;
+      // Try to update first
+      const existing = await sbFetch('/rest/v1/lifttrack_data?user_id=eq.' + userId + '&select=user_id');
+      if (existing && existing.length > 0) {
+        await sbFetch('/rest/v1/lifttrack_data?user_id=eq.' + userId, {
+          method: 'PATCH',
+          prefer: 'return=minimal',
+          body: JSON.stringify({ exercises, workouts, templates, runs, stretch_logs: stretchLogs, body_weight_log: bodyWeightLog, updated_at: new Date().toISOString() })
+        });
+      } else {
+        await sbFetch('/rest/v1/lifttrack_data', {
+          method: 'POST',
+          prefer: 'return=minimal',
+          body: JSON.stringify({ user_id: userId, exercises, workouts, templates, runs, stretch_logs: stretchLogs })
+        });
+      }
       setStatus('synced');
     } catch(e) {
       console.warn('Supabase save failed:', e);
       setStatus('offline');
     }
-  }, 800); // debounce — waits 800ms after last change before saving
+  }, 800);
 }
 
-// persistAll is now just an alias for persist since everything is unified
 function persistAll() { persist(); }
 
 async function loadData() {
   setStatus('loading');
+  if (!currentSession) { setStatus('offline'); return; }
   try {
-    const rows = await sbFetch('/rest/v1/lifttrack_data?id=eq.singleton&select=*');
+    const userId = currentSession.user.id;
+    const rows = await sbFetch('/rest/v1/lifttrack_data?user_id=eq.' + userId + '&select=*');
     const data = rows?.[0];
     if (data) {
-      exercises   = data.exercises?.length   ? data.exercises   : DEFAULTS.exercises;
-      workouts    = data.workouts            ? data.workouts    : [];
-      templates   = data.templates?.length   ? data.templates   : DEFAULTS.templates;
-      runs        = data.runs               ? data.runs        : [];
-      stretchLogs = data.stretch_logs       ? data.stretch_logs : [];
-      // Also update localStorage as offline backup
+      exercises     = data.exercises?.length  ? data.exercises   : DEFAULTS.exercises;
+      workouts      = data.workouts           ? data.workouts    : [];
+      templates     = data.templates?.length  ? data.templates   : DEFAULTS.templates;
+      runs          = data.runs              ? data.runs        : [];
+      stretchLogs   = data.stretch_logs      ? data.stretch_logs : [];
+      bodyWeightLog = data.body_weight_log   ? data.body_weight_log : [];
       lsSet();
       setStatus('synced');
     } else {
-      // Row doesn't exist yet — insert it with defaults
+      // First time this user logs in — create their row with defaults
       await sbFetch('/rest/v1/lifttrack_data', {
         method: 'POST',
         prefer: 'return=minimal',
-        body: JSON.stringify({
-          id: 'singleton',
-          exercises: DEFAULTS.exercises,
-          workouts: [],
-          templates: DEFAULTS.templates,
-          runs: [],
-          stretch_logs: []
-        })
+        body: JSON.stringify({ user_id: userId, exercises: DEFAULTS.exercises, workouts: [], templates: DEFAULTS.templates, runs: [], stretch_logs: [], body_weight_log: [] })
       });
-      exercises   = DEFAULTS.exercises;
-      workouts    = [];
-      templates   = DEFAULTS.templates;
-      runs        = [];
-      stretchLogs = [];
+      exercises = DEFAULTS.exercises; workouts = []; templates = DEFAULTS.templates; runs = []; stretchLogs = []; bodyWeightLog = [];
       setStatus('synced');
     }
   } catch(e) {
-    // Supabase unreachable — fall back to localStorage
     console.warn('Supabase load failed, using localStorage:', e);
-    exercises   = lsGet('exercises')   ?? DEFAULTS.exercises;
-    workouts    = lsGet('workouts')    ?? [];
-    templates   = lsGet('templates')  ?? DEFAULTS.templates;
-    runs        = lsGet('runs')        ?? [];
-    stretchLogs = lsGet('stretchLogs') ?? [];
+    exercises     = lsGet('exercises')     ?? DEFAULTS.exercises;
+    workouts      = lsGet('workouts')      ?? [];
+    templates     = lsGet('templates')    ?? DEFAULTS.templates;
+    runs          = lsGet('runs')          ?? [];
+    stretchLogs   = lsGet('stretchLogs')  ?? [];
+    bodyWeightLog = lsGet('bodyWeightLog') ?? [];
     setStatus('offline');
   }
   migrateExercises();
+  migrateTemplates();
 }
 
 function setStatus(mode) {
@@ -810,11 +1096,20 @@ let exercises   = [];
 let workouts    = [];
 let runs        = [];
 let stretchLogs = [];
+let bodyWeightLog = []; // [{date, weight}]
 
 function migrateExercises() {
   let changed = false;
   for (const def of DEFAULTS.exercises) {
     if (!exercises.find(e => e.name === def.name)) { exercises.push(def); changed = true; }
+  }
+  if (changed) persist();
+}
+
+function migrateTemplates() {
+  let changed = false;
+  for (const def of DEFAULTS.templates) {
+    if (!templates.find(t => t.name === def.name)) { templates.push(def); changed = true; }
   }
   if (changed) persist();
 }
@@ -857,29 +1152,34 @@ function showPage(name) {
 
 // ── STATS ────────────────────────────────────────────
 function renderStats() {
-  const total = workouts.length;
+  // Count sessions by unique date (1 session per day regardless of how many exercises)
+  const allDates = [...new Set(workouts.map(w => w.date))];
+  const total = allDates.length;
+
   const today = new Date(); today.setHours(0,0,0,0);
   const weekAgo = new Date(today); weekAgo.setDate(today.getDate()-7);
-  const thisWeek = workouts.filter(w => new Date(w.date+'T12:00:00') >= weekAgo).length;
+  const thisWeek = allDates.filter(d => new Date(d+'T12:00:00') >= weekAgo).length;
 
   // Streak
-  const dates = [...new Set(workouts.map(w=>w.date))].sort().reverse();
+  const sortedDates = [...allDates].sort().reverse();
   let streak = 0, cur = new Date(today);
   for (let i = 0; i < 200; i++) {
     const key = cur.toISOString().slice(0,10);
-    if (dates.includes(key)) { streak++; cur.setDate(cur.getDate()-1); }
+    if (sortedDates.includes(key)) { streak++; cur.setDate(cur.getDate()-1); }
     else if (i === 0) { cur.setDate(cur.getDate()-1); }
     else break;
   }
 
-  // PRs count
+  // Body weight — most recent entry
+  const latestBW = bodyWeightLog.length ? bodyWeightLog[bodyWeightLog.length - 1].weight : null;
+
   const prs = computePRs();
   const g = document.getElementById('stat-grid');
   g.innerHTML = `
-    <div class="stat-card"><div class="stat-label">Total Workouts</div><div class="stat-value purple">${total}</div><div class="stat-sub">All time</div></div>
+    <div class="stat-card"><div class="stat-label">Total Sessions</div><div class="stat-value purple">${total}</div><div class="stat-sub">All time</div></div>
     <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value green">${thisWeek}</div><div class="stat-sub">sessions</div></div>
     <div class="stat-card"><div class="stat-label">Current Streak</div><div class="stat-value yellow">${streak}</div><div class="stat-sub">days</div></div>
-    <div class="stat-card"><div class="stat-label">PRs Tracked</div><div class="stat-value red">${prs.length}</div><div class="stat-sub">exercises</div></div>
+    <div class="stat-card"><div class="stat-label">Body Weight</div><div class="stat-value red">${latestBW ? latestBW + '<span style="font-size:1rem"> lbs</span>' : '–'}</div><div class="stat-sub">most recent</div></div>
   `;
 }
 
@@ -1000,13 +1300,65 @@ function chartOpts(unit) {
 }
 
 // ── DASHBOARD ────────────────────────────────────────
+let bwChart = null;
+
+function logBodyWeight() {
+  const val = parseFloat(document.getElementById('bw-input').value);
+  const date = document.getElementById('bw-date').value;
+  if (!val || !date) { alert('Please enter a weight and date.'); return; }
+  // Replace existing entry for same date or add new
+  const existing = bodyWeightLog.findIndex(e => e.date === date);
+  if (existing >= 0) bodyWeightLog[existing].weight = val;
+  else bodyWeightLog.push({ date, weight: val });
+  bodyWeightLog.sort((a,b) => a.date.localeCompare(b.date));
+  persist();
+  document.getElementById('bw-input').value = '';
+  renderBWChart();
+  renderStats();
+}
+
+function renderBWChart() {
+  const sorted = [...bodyWeightLog].sort((a,b) => a.date.localeCompare(b.date));
+  if (bwChart) bwChart.destroy();
+  const ctx = document.getElementById('bwChart')?.getContext('2d');
+  if (!ctx) return;
+  bwChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: sorted.map(e => fmtDate(e.date)),
+      datasets: [{
+        label: 'Body Weight (lbs)',
+        data: sorted.map(e => e.weight),
+        borderColor: '#ff6584',
+        backgroundColor: 'rgba(255,101,132,0.08)',
+        fill: true, tension: 0.35,
+        pointBackgroundColor: '#ff6584', pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor:'#1a1d27', titleColor:'#e8eaf0', bodyColor:'#7b7f96', borderColor:'#2a2e42', borderWidth:1, callbacks: { label: ctx => ctx.parsed.y + ' lbs' } } },
+      scales: {
+        x: { grid: { color:'#2a2e42' }, ticks: { color:'#7b7f96', maxTicksLimit: 10 }, title: { display: true, text: 'Date', color: '#7b7f96', font: { size: 10, family: 'Inter' } } },
+        y: { grid: { color:'#2a2e42' }, ticks: { color:'#7b7f96', callback: v => v + ' lb' }, title: { display: true, text: 'lbs', color: '#7b7f96', font: { size: 10, family: 'Inter' } } }
+      }
+    }
+  });
+}
+
 function renderDashboard() {
+  // Set today's date on body weight input
+  const today = new Date().toISOString().slice(0,10);
+  const bwDate = document.getElementById('bw-date');
+  if (bwDate && !bwDate.value) bwDate.value = today;
+
   renderStats();
   populateExSelect();
   renderWeightChart();
   renderVolumeChart();
   renderFrequency();
   renderPRs();
+  renderBWChart();
 }
 
 // ── LOG FORM ─────────────────────────────────────────
@@ -1160,14 +1512,27 @@ function addSessionSet(exId) {
   const row = document.createElement('div');
   row.className = 'session-set-row';
   row.id = `sset-${exId}-${n}`;
+  row.style.cssText = 'display:grid;grid-template-columns:36px 1fr 1fr auto 28px;gap:7px;align-items:center;';
   row.innerHTML = `
     <div class="set-num">${n}</div>
     <input type="number" placeholder="Reps" min="1" id="sreps-${exId}-${n}">
     <input type="number" placeholder="${weightPlaceholder || 'Weight'}" min="0" id="sweight-${exId}-${n}" value="${weightPlaceholder}">
-    <div class="lbs-label">lbs</div>
+    <label style="display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--muted);white-space:nowrap;cursor:pointer;">
+      <input type="checkbox" id="sbw-${exId}-${n}" onchange="toggleSessionBW(${exId},${n})" style="accent-color:var(--accent);cursor:pointer;"> BW
+    </label>
     <button class="btn-danger" onclick="removeSessionSet(${exId},${n})">×</button>
   `;
   container.appendChild(row);
+}
+
+function toggleSessionBW(exId, n) {
+  const isBW = document.getElementById(`sbw-${exId}-${n}`)?.checked;
+  const weightInput = document.getElementById(`sweight-${exId}-${n}`);
+  if (!weightInput) return;
+  weightInput.disabled = isBW;
+  weightInput.value = isBW ? '' : weightInput.value;
+  weightInput.placeholder = isBW ? 'Bodyweight' : 'Weight';
+  weightInput.style.opacity = isBW ? '0.35' : '1';
 }
 
 function removeSessionSet(exId, n) {
@@ -1188,8 +1553,9 @@ function saveSession() {
       const parts = row.id.split('-');
       const n = parts[parts.length - 1];
       const reps = +document.getElementById(`sreps-${exId}-${n}`)?.value || 0;
-      const weight = +document.getElementById(`sweight-${exId}-${n}`)?.value || 0;
-      if (reps > 0) sets.push({ reps, weight });
+      const isBW = document.getElementById(`sbw-${exId}-${n}`)?.checked || false;
+      const weight = isBW ? 0 : (+document.getElementById(`sweight-${exId}-${n}`)?.value || 0);
+      if (reps > 0) sets.push({ reps, weight, bodyweight: isBW });
     });
     if (sets.length > 0) {
       workouts.push({ date, exerciseId: exId, sets, sessionId, templateName: tmpl.name, templateEmoji: tmpl.emoji });
@@ -1229,14 +1595,26 @@ function addSet() {
   const row = document.createElement('div');
   row.className = 'set-row';
   row.id = 'set-row-' + n;
+  row.style.cssText = 'display:grid;grid-template-columns:32px 1fr 1fr auto 28px;gap:8px;align-items:center;';
   row.innerHTML = `
     <div class="set-num">${n}</div>
     <input type="number" placeholder="Reps" min="1" max="100" id="reps-${n}">
     <input type="number" placeholder="Weight" min="0" id="weight-${n}">
-    <div style="font-size:0.75rem;color:var(--muted)">lbs</div>
+    <label style="display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--muted);white-space:nowrap;cursor:pointer;">
+      <input type="checkbox" id="bw-${n}" onchange="toggleBWInput(${n})" style="accent-color:var(--accent);cursor:pointer;"> BW
+    </label>
     <button class="btn-danger" onclick="removeSet(${n})">×</button>
   `;
   document.getElementById('sets-container').appendChild(row);
+}
+
+function toggleBWInput(n) {
+  const isBW = document.getElementById('bw-'+n).checked;
+  const weightInput = document.getElementById('weight-'+n);
+  weightInput.disabled = isBW;
+  weightInput.value = isBW ? '' : weightInput.value;
+  weightInput.placeholder = isBW ? 'Bodyweight' : 'Weight';
+  weightInput.style.opacity = isBW ? '0.35' : '1';
 }
 
 function removeSet(n) {
@@ -1250,8 +1628,9 @@ function saveWorkout() {
   document.querySelectorAll('.set-row').forEach(row => {
     const id = row.id.replace('set-row-','');
     const reps = +document.getElementById('reps-'+id)?.value || 0;
-    const weight = +document.getElementById('weight-'+id)?.value || 0;
-    if (reps > 0) sets.push({ reps, weight });
+    const isBW = document.getElementById('bw-'+id)?.checked || false;
+    const weight = isBW ? 0 : (+document.getElementById('weight-'+id)?.value || 0);
+    if (reps > 0) sets.push({ reps, weight, bodyweight: isBW });
   });
   if (!date || !exId || sets.length === 0) { alert('Please fill in date, exercise, and at least one set with reps.'); return; }
   workouts.push({ date, exerciseId: exId, sets });
@@ -1286,12 +1665,13 @@ const CAT_META = {
   Legs:   { color: '#43e97b' },
   Core:   { color: '#f9d423' },
   Cardio: { color: '#ff9a3c' },
+  Other:  { color: '#a78bfa' },
 };
 
 function renderExercises() {
   const prs = computePRs();
   const grid = document.getElementById('exercise-grid');
-  const categories = ['Push', 'Pull', 'Legs', 'Core', 'Cardio'];
+  const categories = ['Push', 'Pull', 'Legs', 'Core', 'Cardio', 'Other'];
   grid.innerHTML = categories.map(cat => {
     const catExs = exercises.filter(e => e.cat === cat);
     if (!catExs.length) return '';
@@ -1799,21 +2179,136 @@ function renderStretchLog() {
 }
 
 
-// ── INIT ─────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadData();
+// ── EMAIL SUGGESTIONS ─────────────────────────────────
+const EMAIL_DOMAINS = ['@gmail.com','@yahoo.com','@outlook.com','@hotmail.com','@icloud.com','@me.com','@aol.com','@protonmail.com','@live.com','@msn.com'];
 
+function showEmailSuggestions(value) {
+  const el = document.getElementById('email-suggestions');
+  if (!el) return;
+  if (!value || value.includes('@')) {
+    // If they've typed past the @, suggest completions
+    const atIdx = value.indexOf('@');
+    if (atIdx === -1) { el.style.display = 'none'; return; }
+    const prefix = value.slice(0, atIdx);
+    const typed = value.slice(atIdx);
+    const matches = EMAIL_DOMAINS.filter(d => d.startsWith(typed) && d !== typed);
+    if (!matches.length) { el.style.display = 'none'; return; }
+    el.innerHTML = matches.map(d =>
+      `<div class="email-suggestion" onmousedown="selectEmail('${prefix + d}')">${prefix}<strong>${d}</strong></div>`
+    ).join('');
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function selectEmail(value) {
+  const input = document.getElementById('auth-email');
+  input.value = value;
+  hideEmailSuggestions();
+  document.getElementById('auth-password')?.focus();
+}
+
+function hideEmailSuggestions() {
+  setTimeout(() => {
+    const el = document.getElementById('email-suggestions');
+    if (el) el.style.display = 'none';
+  }, 150);
+}
+
+// ── AUTH UI ───────────────────────────────────────────
+let authMode = 'signin';
+
+function switchAuthTab(mode) {
+  authMode = mode;
+  document.getElementById('tab-signin').classList.toggle('active', mode === 'signin');
+  document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
+  document.getElementById('auth-btn').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('auth-error').textContent = '';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-error');
+  const btn = document.getElementById('auth-btn');
+
+  if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; return; }
+  if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+
+  btn.textContent = 'Please wait…';
+  btn.disabled = true;
+  errEl.textContent = '';
+
+  try {
+    let data;
+    if (authMode === 'signup') {
+      data = await signUp(email, password);
+      // After signup, sign in immediately
+      data = await signIn(email, password);
+    } else {
+      data = await signIn(email, password);
+    }
+    saveSession(data);
+    await launchApp();
+  } catch(e) {
+    errEl.textContent = e.message || 'Something went wrong. Please try again.';
+    btn.textContent = authMode === 'signin' ? 'Sign In' : 'Create Account';
+    btn.disabled = false;
+  }
+}
+
+// Allow pressing Enter in password field to submit
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('auth-password')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleAuth();
+  });
+  document.getElementById('auth-email')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('auth-password')?.focus();
+  });
+});
+
+function showAuthScreen() {
+  document.getElementById('auth-screen').classList.add('visible');
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+  document.getElementById('auth-error').textContent = '';
+  document.getElementById('auth-btn').textContent = 'Sign In';
+  document.getElementById('auth-btn').disabled = false;
+  switchAuthTab('signin');
+}
+
+function hideAuthScreen() {
+  document.getElementById('auth-screen').classList.remove('visible');
+}
+
+async function launchApp() {
+  hideAuthScreen();
+  // Show user email in nav
+  const email = currentSession?.user?.email || '';
+  const displayEl = document.getElementById('user-email-display');
+  if (displayEl) displayEl.textContent = email;
+
+  await loadData();
   renderDashboard();
   initLogForm();
 
-  // Set today's date on run form
   const today = new Date().toISOString().slice(0,10);
   if (document.getElementById('run-date')) document.getElementById('run-date').value = today;
-
-  // Live pace preview listeners
   ['run-distance','run-unit','run-hrs','run-mins','run-secs'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', updatePacePreview);
   });
+}
+
+// ── INIT ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  // Try to restore existing session silently
+  const restored = await restoreSession();
+  if (restored) {
+    await launchApp();
+  } else {
+    showAuthScreen();
+  }
 });
 </script>
 </body>
