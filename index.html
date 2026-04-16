@@ -517,7 +517,7 @@
         </div>
         <div id="session-exercises"></div>
         <div class="session-save-row">
-          <button class="btn" onclick="saveSession()">Save Full Session</button>
+          <button class="btn" onclick="saveWorkoutSession()">Save Full Session</button>
           <span class="success-msg" id="session-success-msg">✓ Session saved!</span>
         </div>
       </div>
@@ -1632,8 +1632,7 @@ function removeSessionSet(exId, n) {
   document.getElementById(`sset-${exId}-${n}`)?.remove();
 }
 
-function saveSession() {
-  const tmpl = templates.find(t => t.id === activeTemplateId);
+function saveWorkoutSession() {
   if (!tmpl) return;
   const date = document.getElementById('session-date').value;
   if (!date) { alert('Please pick a date.'); return; }
