@@ -30,7 +30,7 @@
 
   /* NAV */
   .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 32px; height: 56px; position: sticky; top: 0; z-index: 100; }
-  .logo { font-weight: 700; font-size: 0.95rem; color: var(--accent); letter-spacing: 0.3px; text-transform: uppercase; }
+  .logo { font-weight: 700; font-size: 0.95rem; color: var(--accent); letter-spacing: 0.3px; }
   #sync-status { font-size: 0.68rem; color: var(--muted); margin-left: auto; padding: 3px 10px; background: var(--surface2); border-radius: 20px; white-space: nowrap; letter-spacing: 0.3px; font-weight: 500; }
   .nav-tabs { display: flex; gap: 2px; }
   .nav-tab { background: none; border: none; color: var(--muted); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.15s; letter-spacing: 0.1px; font-family: 'Inter', system-ui, sans-serif; }
@@ -277,8 +277,8 @@
     .nav-tabs { order: 3; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 6px; gap: 2px; }
     .nav-tabs::-webkit-scrollbar { display: none; }
     .nav-tab { padding: 5px 10px; font-size: 0.72rem; white-space: nowrap; flex-shrink: 0; }
-    .user-badge { order: 2; font-size: 0.62rem; gap: 6px; }
-    .user-badge span { display: none; } /* hide email on mobile, too long */
+    .user-badge { order: 2; }
+    .user-badge span { display: none; }
 
     /* Pages */
     .page { padding: 12px; }
@@ -367,8 +367,14 @@
   .auth-tab { flex: 1; background: none; border: none; padding: 9px; font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; font-family: 'Inter', system-ui, sans-serif; transition: all 0.15s; }
   .auth-tab.active { background: var(--accent); color: #fff; }
   .auth-error { color: var(--accent2); font-size: 0.78rem; margin-bottom: 12px; min-height: 18px; text-align: center; }
-  .user-badge { font-size: 0.68rem; color: var(--muted); margin-left: auto; display: flex; align-items: center; gap: 10px; }
-  .user-badge span { color: var(--text); font-weight: 500; }
+  .user-badge { margin-left: auto; display: flex; align-items: center; gap: 8px; position: relative; }
+  .settings-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 1.1rem; line-height: 1; }
+  .settings-btn:hover { color: var(--text); background: var(--surface2); }
+  .settings-dropdown { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; min-width: 180px; z-index: 300; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .settings-dropdown.open { display: block; }
+  .settings-status { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.78rem; color: var(--muted); }
+  .settings-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 0.82rem; color: var(--text); cursor: pointer; transition: background 0.12s; background: none; border: none; width: 100%; text-align: left; font-family: 'Inter', system-ui, sans-serif; }
+  .settings-item:hover { background: var(--surface2); }
 
 </style>
 </head>
@@ -408,22 +414,69 @@
     <button class="nav-tab" onclick="showPage('history')">📅 History</button>
   </nav>
   <div class="user-badge">
-    <span id="user-email-display"></span>
-    <button class="btn-sm" onclick="signOut()">Sign Out</button>
-    <div id="sync-status"></div>
+    <button class="settings-btn" onclick="toggleSettings(event)" title="Settings">⚙️</button>
+    <div class="settings-dropdown" id="settings-dropdown">
+      <div class="settings-status">
+        <div id="sync-status"></div>
+      </div>
+      <button class="settings-item" onclick="signOut()">
+        <span>Sign Out</span>
+      </button>
+    </div>
   </div>
 </div>
 
 <!-- DASHBOARD -->
 <div id="page-dashboard" class="page active">
   <div class="stat-grid" id="stat-grid"></div>
-  <div class="chart-grid">
+
+  <!-- ROW 1: Activity Calendar — full width -->
+  <div class="chart-grid" style="margin-bottom:16px;">
+    <div class="chart-card full">
+      <div class="chart-title" id="freq-title">Activity</div>
+      <div style="display:flex;gap:2px;margin-bottom:6px;" id="freq-day-labels"></div>
+      <div class="freq-grid" id="freq-grid"></div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Protein Tracker + Body Weight -->
+  <div class="chart-grid" style="margin-bottom:16px;">
     <div class="chart-card">
-      <div class="chart-title">
-        Weight Progress
-        <select id="ex-select" onchange="renderWeightChart()"></select>
+      <div class="chart-title">Protein Tracker</div>
+      <div style="position:relative;z-index:2;">
+
+        <!-- Big progress display -->
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="font-size:2.2rem;font-weight:700;letter-spacing:-0.03em;color:var(--accent);" id="protein-consumed-big">0</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">g consumed <span id="protein-of-goal"></span></div>
+        </div>
+
+        <!-- Progress bar -->
+        <div style="background:var(--surface2);border-radius:20px;height:12px;overflow:hidden;margin-bottom:14px;cursor:pointer;" title="Progress">
+          <div id="protein-bar" style="height:100%;background:linear-gradient(90deg,var(--accent),#a78bfa);border-radius:20px;transition:width 0.5s cubic-bezier(.4,0,.2,1);width:0%;"></div>
+        </div>
+
+        <!-- Log row -->
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;">
+          <input type="number" id="protein-amount" placeholder="g" min="0" max="300"
+            style="width:64px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;text-align:center;">
+          <input type="text" id="protein-source" placeholder="Source (chicken, shake…)"
+            style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+          <button class="btn-sm" onclick="logProtein()" style="white-space:nowrap;">+ Add</button>
+        </div>
+
+        <!-- Goal row -->
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:12px;">
+          <span style="font-size:0.72rem;color:var(--muted);white-space:nowrap;">Daily goal:</span>
+          <input type="number" id="protein-goal" placeholder="e.g. 180" min="0" max="500"
+            style="width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:0.82rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+          <span style="font-size:0.72rem;color:var(--muted);">g</span>
+          <button class="btn-sm" onclick="setProteinGoal()">Set</button>
+        </div>
+
+        <!-- Today's entries -->
+        <div id="protein-log-list" style="max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
       </div>
-      <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Body Weight</div>
@@ -437,11 +490,9 @@
       </div>
       <div class="chart-wrap"><canvas id="bwChart"></canvas></div>
     </div>
-    <div class="chart-card full">
-      <div class="chart-title">Activity — Last 16 Weeks</div>
-      <div class="freq-grid" id="freq-grid"></div>
-    </div>
   </div>
+
+  <!-- ROW 3: Personal Records + Weight Progress -->
   <div class="chart-grid" style="margin-bottom:24px;">
     <div class="chart-card">
       <div class="chart-title">Personal Records</div>
@@ -451,34 +502,11 @@
       </table>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Protein Tracker</div>
-      <div style="position:relative;z-index:2;">
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
-          <div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;white-space:nowrap;">Daily Goal</div>
-          <input type="number" id="protein-goal" placeholder="e.g. 180" min="0" max="500"
-            style="width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
-          <span style="font-size:0.75rem;color:var(--muted);">g</span>
-          <button class="btn-sm" onclick="setProteinGoal()">Set</button>
-        </div>
-        <div style="margin-bottom:10px;">
-          <div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:6px;">Log Protein</div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input type="number" id="protein-amount" placeholder="Amount (g)" min="0" max="300"
-              style="width:100px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
-            <input type="text" id="protein-source" placeholder="Source (e.g. chicken)"
-              style="flex:1;min-width:90px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
-            <button class="btn-sm" onclick="logProtein()">Add</button>
-          </div>
-        </div>
-        <div style="background:var(--surface2);border-radius:8px;height:10px;overflow:hidden;margin-bottom:8px;">
-          <div id="protein-bar" style="height:100%;background:var(--accent);border-radius:8px;transition:width 0.4s;width:0%;"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted);margin-bottom:8px;">
-          <span id="protein-consumed-label">0g consumed</span>
-          <span id="protein-goal-label">Goal: –</span>
-        </div>
-        <div id="protein-log-list" style="max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
+      <div class="chart-title">
+        Weight Progress
+        <select id="ex-select" onchange="renderWeightChart()"></select>
       </div>
+      <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
     </div>
   </div>
 
@@ -490,14 +518,15 @@
 
     <!-- LEFT: TEMPLATES PANEL -->
     <div class="templates-panel">
-      <div class="panel-title">Session Templates</div>
 
       <div class="tmpl-card single-ex active" id="tmpl-single" onclick="selectTemplate(null)">
         <div class="tmpl-name">Single Exercise</div>
         <div class="tmpl-exlist">Log one exercise at a time</div>
       </div>
 
-      <hr class="tmpl-divider">
+      <div class="panel-title" style="margin-top:16px;">Session Templates</div>
+
+      <hr class="tmpl-divider" style="margin-top:6px;">
 
       <div id="tmpl-list"></div>
 
@@ -1356,7 +1385,15 @@ function migrateExercises() {
 function migrateTemplates() {
   let changed = false;
   for (const def of DEFAULTS.templates) {
-    if (!templates.find(t => t.name === def.name)) { templates.push(def); changed = true; }
+    const existing = templates.find(t => t.name === def.name);
+    if (!existing) {
+      templates.push(def);
+      changed = true;
+    } else if (existing.exerciseIds.length > 6) {
+      // Trim overstuffed templates back to the default 6
+      existing.exerciseIds = def.exerciseIds;
+      changed = true;
+    }
   }
   if (changed) persist();
 }
@@ -1522,17 +1559,70 @@ function renderVolumeChart() {
 // ── FREQUENCY ────────────────────────────────────────
 function renderFrequency() {
   const grid = document.getElementById('freq-grid');
+  const title = document.getElementById('freq-title');
+  const dayLabels = document.getElementById('freq-day-labels');
+
   const workoutDates = new Set(workouts.map(w => w.date));
-  const cells = [];
-  const today = new Date(); today.setHours(12,0,0,0);
-  const start = new Date(today); start.setDate(today.getDate() - 111); // ~16 weeks
-  for (let d = new Date(start); d <= today; d.setDate(d.getDate()+1)) {
-    const key = d.toISOString().slice(0,10);
-    const has = workoutDates.has(key) ? 'w4' : '';
-    cells.push(`<div class="freq-cell ${has}" title="${key}"></div>`);
+  const runDates = new Set((runs || []).map(r => r.date));
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const today = now.getDate();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfWeek = new Date(year, month, 1).getDay();
+
+  const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  if (title) {
+    title.textContent = monthName;
+    title.style.textAlign = 'center';
+    title.style.justifyContent = 'center';
   }
+
+  // Day-of-week labels — 7 equal columns
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  if (dayLabels) {
+    dayLabels.style.display = 'grid';
+    dayLabels.style.gridTemplateColumns = 'repeat(7, 1fr)';
+    dayLabels.style.gap = '4px';
+    dayLabels.style.marginBottom = '6px';
+    dayLabels.innerHTML = dayNames.map(d =>
+      `<div style="text-align:center;font-size:0.6rem;color:var(--muted);font-weight:600;">${d}</div>`
+    ).join('');
+  }
+
+  const cells = [];
+  // Empty spacers for days before the 1st
+  for (let i = 0; i < firstDayOfWeek; i++) {
+    cells.push(`<div style="height:28px;"></div>`);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const hasWorkout = workoutDates.has(dateStr);
+    const hasRun = runDates.has(dateStr);
+    const isToday = day === today;
+    const isFuture = day > today;
+
+    let bg = 'var(--surface2)';
+    let textColor = 'var(--muted)';
+    if (hasWorkout || hasRun) { bg = 'var(--accent)'; textColor = 'rgba(255,255,255,0.9)'; }
+    else if (isFuture) { bg = 'rgba(255,255,255,0.03)'; textColor = 'rgba(255,255,255,0.15)'; }
+
+    const border = isToday ? `box-shadow:0 0 0 2px var(--accent);` : '';
+
+    cells.push(`<div style="background:${bg};border-radius:4px;height:28px;display:flex;align-items:center;justify-content:center;${border}cursor:default;transition:background 0.2s;" title="${dateStr}">
+      <span style="font-size:0.68rem;font-weight:600;color:${textColor};line-height:1;">${day}</span>
+    </div>`);
+  }
+
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+  grid.style.gap = '3px';
+  grid.style.width = '100%';
   grid.innerHTML = cells.join('');
 }
+
 
 // ── CHART DEFAULTS ───────────────────────────────────
 function chartOpts(unit) {
@@ -1632,35 +1722,46 @@ function deleteProteinEntry(entryIdx) {
 }
 
 function renderProteinTracker() {
-  const goalEl = document.getElementById('protein-goal-input-display');
-  if (goalEl && proteinGoal) goalEl.value = proteinGoal;
+  // Always work off today's date — auto-resets each new day
+  const today = new Date().toISOString().slice(0,10);
   const goalInput = document.getElementById('protein-goal');
   if (goalInput && proteinGoal && !goalInput.value) goalInput.value = proteinGoal;
 
-  const dayLog = getTodayProtein();
+  const dayLog = proteinLog.find(p => p.date === today);
   const consumed = dayLog ? dayLog.entries.reduce((s,e) => s + e.amount, 0) : 0;
   const pct = proteinGoal > 0 ? Math.min(100, (consumed / proteinGoal) * 100) : 0;
 
+  // Big number
+  const bigNum = document.getElementById('protein-consumed-big');
+  if (bigNum) {
+    bigNum.textContent = consumed;
+    bigNum.style.color = pct >= 100 ? 'var(--green)' : 'var(--accent)';
+  }
+
+  // "of Xg" label
+  const ofGoal = document.getElementById('protein-of-goal');
+  if (ofGoal) ofGoal.textContent = proteinGoal ? `of ${proteinGoal}g (${Math.round(pct)}%)` : '';
+
+  // Progress bar
   const bar = document.getElementById('protein-bar');
   if (bar) {
     bar.style.width = pct + '%';
-    bar.style.background = pct >= 100 ? 'var(--green)' : 'var(--accent)';
+    bar.style.background = pct >= 100
+      ? 'linear-gradient(90deg,var(--green),#6ee7b7)'
+      : 'linear-gradient(90deg,var(--accent),#a78bfa)';
   }
-  const cl = document.getElementById('protein-consumed-label');
-  if (cl) cl.textContent = consumed + 'g consumed';
-  const gl = document.getElementById('protein-goal-label');
-  if (gl) gl.textContent = proteinGoal ? `Goal: ${proteinGoal}g (${Math.round(pct)}%)` : 'Goal: not set';
 
+  // Entry list
   const list = document.getElementById('protein-log-list');
   if (list) {
     if (!dayLog || !dayLog.entries.length) {
-      list.innerHTML = `<div style="font-size:0.75rem;color:var(--muted);padding:4px 0;">Nothing logged today.</div>`;
+      list.innerHTML = `<div style="font-size:0.75rem;color:var(--muted);padding:4px 0;text-align:center;">Nothing logged today</div>`;
     } else {
       list.innerHTML = dayLog.entries.map((e, i) => `
         <div class="protein-entry">
           <span style="font-weight:500;">${e.source}</span>
           <span style="display:flex;align-items:center;gap:8px;">
-            <span style="color:var(--accent);font-weight:600;">${e.amount}g</span>
+            <span style="color:var(--accent);font-weight:700;">${e.amount}g</span>
             <button class="protein-entry-del" onclick="deleteProteinEntry(${i})">×</button>
           </span>
         </div>`).join('');
@@ -2458,7 +2559,6 @@ function renderRunPage() {
 
 // ── STRETCH LOG ───────────────────────────────────────
 let stretchQueue = []; // [{name, secs}]
-let stretchPresets = []; // [{id, name, stretches:[{name,secs}]}]
 let stretchTimerState = { active: false, paused: false, currentIdx: 0, remaining: 0, interval: null, total: 0 };
 
 // ── STRETCH PRESETS ───────────────────────────────────
@@ -2733,6 +2833,16 @@ function renderStretchLog() {
 }
 
 
+// ── SETTINGS DROPDOWN ─────────────────────────────────
+function toggleSettings(e) {
+  e.stopPropagation();
+  document.getElementById('settings-dropdown').classList.toggle('open');
+}
+
+document.addEventListener('click', function() {
+  document.getElementById('settings-dropdown')?.classList.remove('open');
+});
+
 // ── EMAIL SUGGESTIONS ─────────────────────────────────
 const EMAIL_DOMAINS = ['@gmail.com','@yahoo.com','@outlook.com','@hotmail.com','@icloud.com','@me.com','@aol.com','@protonmail.com','@live.com','@msn.com'];
 
@@ -2847,9 +2957,6 @@ function hideAuthScreen() {
 
 async function launchApp() {
   hideAuthScreen();
-  const email = currentSession?.user?.email || '';
-  const displayEl = document.getElementById('user-email-display');
-  if (displayEl) displayEl.textContent = email;
 
   await loadData();
   renderDashboard();
