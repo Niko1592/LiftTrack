@@ -347,6 +347,16 @@
   .email-suggestion { padding: 9px 14px; font-size: 0.82rem; cursor: pointer; color: var(--text); font-family: 'Inter', system-ui, sans-serif; transition: background 0.12s; }
   .email-suggestion:hover, .email-suggestion:active { background: rgba(108,99,255,0.15); color: var(--accent); }
 
+  .ex-cat-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.1); }
+  .ex-dropdown-item { padding: 9px 14px; font-size: 0.82rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+  .ex-dropdown-item:last-child { border-bottom: none; }
+  .ex-dropdown-item:hover { background: rgba(108,99,255,0.1); color: var(--accent); }
+  .ex-dropdown-item.selected { background: rgba(108,99,255,0.15); color: var(--accent); font-weight: 600; }
+  .ex-dropdown-cat { font-size: 0.65rem; color: var(--muted); background: var(--surface); padding: 1px 7px; border-radius: 4px; font-weight: 600; letter-spacing: 0.3px; flex-shrink: 0; }
+  .protein-entry { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 0.78rem; }
+  .protein-entry-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; padding: 0 2px; }
+  .protein-entry-del:hover { color: var(--accent2); }
+
   /* AUTH SCREEN */
   .auth-screen { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 1000; align-items: center; justify-content: center; }
   .auth-screen.visible { display: flex; }
@@ -416,8 +426,16 @@
       <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Weekly Volume (lbs)</div>
-      <div class="chart-wrap"><canvas id="volumeChart"></canvas></div>
+      <div class="chart-title">Body Weight</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;position:relative;z-index:2;">
+        <input type="number" id="bw-input" placeholder="e.g. 185" min="50" max="500" step="0.1"
+          style="width:100px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+        <span style="font-size:0.75rem;color:var(--muted);">lbs</span>
+        <input type="date" id="bw-date"
+          style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px;font-size:0.82rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+        <button class="btn-sm" onclick="logBodyWeight()">Log</button>
+      </div>
+      <div class="chart-wrap"><canvas id="bwChart"></canvas></div>
     </div>
     <div class="chart-card full">
       <div class="chart-title">Activity — Last 16 Weeks</div>
@@ -433,19 +451,34 @@
       </table>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Weight Progress</div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;position:relative;z-index:2;">
-        <div style="flex:1;">
-          <div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;font-weight:600;">Today's Weight</div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input type="number" id="bw-input" placeholder="e.g. 185" min="50" max="500" step="0.1" style="width:110px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;position:relative;z-index:3;">
-            <span style="font-size:0.75rem;color:var(--muted);">lbs</span>
-            <input type="date" id="bw-date" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.82rem;outline:none;font-family:'Inter',system-ui,sans-serif;position:relative;z-index:3;">
-            <button class="btn-sm" onclick="logBodyWeight()" style="position:relative;z-index:3;">Log</button>
+      <div class="chart-title">Protein Tracker</div>
+      <div style="position:relative;z-index:2;">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+          <div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;white-space:nowrap;">Daily Goal</div>
+          <input type="number" id="protein-goal" placeholder="e.g. 180" min="0" max="500"
+            style="width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+          <span style="font-size:0.75rem;color:var(--muted);">g</span>
+          <button class="btn-sm" onclick="setProteinGoal()">Set</button>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:6px;">Log Protein</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="number" id="protein-amount" placeholder="Amount (g)" min="0" max="300"
+              style="width:100px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+            <input type="text" id="protein-source" placeholder="Source (e.g. chicken)"
+              style="flex:1;min-width:90px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+            <button class="btn-sm" onclick="logProtein()">Add</button>
           </div>
         </div>
+        <div style="background:var(--surface2);border-radius:8px;height:10px;overflow:hidden;margin-bottom:8px;">
+          <div id="protein-bar" style="height:100%;background:var(--accent);border-radius:8px;transition:width 0.4s;width:0%;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted);margin-bottom:8px;">
+          <span id="protein-consumed-label">0g consumed</span>
+          <span id="protein-goal-label">Goal: –</span>
+        </div>
+        <div id="protein-log-list" style="max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
       </div>
-      <div class="chart-wrap"><canvas id="bwChart"></canvas></div>
     </div>
   </div>
 
@@ -491,7 +524,23 @@
         </div>
         <div class="form-group">
           <label>Exercise</label>
-          <select id="log-exercise"></select>
+          <div style="position:relative;">
+            <input type="text" id="log-exercise-search" placeholder="Search or filter exercises…" autocomplete="off"
+              oninput="filterExerciseDropdown()"
+              onfocus="showExerciseDropdown()"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+            <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;" id="ex-cat-filters">
+              <button class="btn-sm ex-cat-btn active" data-cat="" onclick="setExCatFilter('')">All</button>
+              <button class="btn-sm ex-cat-btn" data-cat="Push" onclick="setExCatFilter('Push')">Push</button>
+              <button class="btn-sm ex-cat-btn" data-cat="Pull" onclick="setExCatFilter('Pull')">Pull</button>
+              <button class="btn-sm ex-cat-btn" data-cat="Legs" onclick="setExCatFilter('Legs')">Legs</button>
+              <button class="btn-sm ex-cat-btn" data-cat="Core" onclick="setExCatFilter('Core')">Core</button>
+              <button class="btn-sm ex-cat-btn" data-cat="Cardio" onclick="setExCatFilter('Cardio')">Cardio</button>
+              <button class="btn-sm ex-cat-btn" data-cat="Other" onclick="setExCatFilter('Other')">Other</button>
+            </div>
+            <div id="exercise-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;max-height:220px;overflow-y:auto;z-index:200;margin-top:4px;"></div>
+          </div>
+          <input type="hidden" id="log-exercise">
         </div>
         <div class="form-group">
           <label>Sets</label>
@@ -517,8 +566,18 @@
         </div>
         <div id="session-exercises"></div>
         <div class="session-save-row">
-          <button class="btn" onclick="saveWorkoutSession()">Save Full Session</button>
+          <button class="btn" onclick="saveWorkoutSession()">Save Session</button>
+          <button class="btn-sm" onclick="toggleSaveAsTemplate()" style="margin-left:4px;">Save as Template</button>
           <span class="success-msg" id="session-success-msg">✓ Session saved!</span>
+        </div>
+        <div id="save-as-tmpl-form" style="display:none;margin-top:12px;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;">
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;">Save Current Exercises as New Template</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="save-as-tmpl-name" placeholder="Template name…"
+              style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+            <button class="btn-sm" onclick="saveCurrentAsTemplate()">Save</button>
+            <button class="btn-sm" onclick="toggleSaveAsTemplate()">Cancel</button>
+          </div>
         </div>
       </div>
     </div>
@@ -600,67 +659,153 @@
 <!-- STRETCH -->
 <div id="page-stretch" class="page">
   <div class="stretch-layout">
-    <!-- LEFT: LIBRARY -->
-    <div class="stretch-library">
-      <div style="font-weight:700;font-size:0.82rem;letter-spacing:-0.01em;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);">Library</div>
-      <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">Select a category to expand, then click to add to queue.</div>
 
-      <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">
-          Hips &amp; Glutes <span class="acc-arrow">▼</span>
+    <!-- LEFT: LIBRARY + PRESETS -->
+    <div class="stretch-library">
+
+      <!-- PRESETS SECTION -->
+      <div style="font-weight:700;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:10px;">Stretch Routines</div>
+      <div id="stretch-preset-list"></div>
+      <button class="new-tmpl-toggle" onclick="toggleNewStretchPreset()" style="margin-bottom:14px;">+ Create Routine</button>
+      <div id="new-stretch-preset-form" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;">
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>Routine Name</label>
+          <input type="text" id="new-sp-name" placeholder="e.g. Post-Leg Day">
         </div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Pick stretches</div>
+        <div id="new-sp-checks" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:10px;"></div>
+        <button class="btn" style="width:100%;" onclick="saveStretchPreset()">Save Routine</button>
+      </div>
+
+      <hr class="tmpl-divider">
+      <div style="font-weight:700;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:10px;margin-top:4px;">Library</div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">Tap any stretch to add to queue.</div>
+
+      <!-- HIPS & GLUTES -->
+      <div class="stretch-accordion">
+        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Hips &amp; Glutes <span class="acc-arrow">▼</span></div>
         <div class="stretch-accordion-body">
           <div class="stretch-item" onclick="addToQueue('Hip Flexor Stretch',60)">Hip Flexor Stretch<span class="stretch-item-dur">60s</span></div>
           <div class="stretch-item" onclick="addToQueue('Pigeon Pose',90)">Pigeon Pose<span class="stretch-item-dur">90s</span></div>
           <div class="stretch-item" onclick="addToQueue('Figure-4 Stretch',45)">Figure-4 Stretch<span class="stretch-item-dur">45s</span></div>
           <div class="stretch-item" onclick="addToQueue('Seated Glute Stretch',45)">Seated Glute Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Low Lunge Hip Opener',60)">Low Lunge Hip Opener<span class="stretch-item-dur">60s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Deep Squat Hold',45)">Deep Squat Hold<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Supine Hip Rotation',30)">Supine Hip Rotation<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('90-90 Hip Stretch',60)">90-90 Hip Stretch<span class="stretch-item-dur">60s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Lateral Hip Flexor Stretch',45)">Lateral Hip Flexor Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Glute Kickback Stretch',30)">Glute Kickback Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Standing Hip Circle',30)">Standing Hip Circle<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Butterfly Stretch',45)">Butterfly Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Half-Pigeon Pose',90)">Half-Pigeon Pose<span class="stretch-item-dur">90s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Fire Log Pose',60)">Fire Log Pose<span class="stretch-item-dur">60s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Thread the Needle Glute',45)">Thread the Needle Glute<span class="stretch-item-dur">45s</span></div>
         </div>
       </div>
 
+      <!-- HAMSTRINGS & QUADS -->
       <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">
-          Hamstrings &amp; Quads <span class="acc-arrow">▼</span>
-        </div>
+        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Hamstrings &amp; Quads <span class="acc-arrow">▼</span></div>
         <div class="stretch-accordion-body">
           <div class="stretch-item" onclick="addToQueue('Standing Hamstring Stretch',45)">Standing Hamstring Stretch<span class="stretch-item-dur">45s</span></div>
           <div class="stretch-item" onclick="addToQueue('Seated Forward Fold',60)">Seated Forward Fold<span class="stretch-item-dur">60s</span></div>
           <div class="stretch-item" onclick="addToQueue('Quad Stretch',30)">Quad Stretch<span class="stretch-item-dur">30s</span></div>
           <div class="stretch-item" onclick="addToQueue('Couch Stretch',60)">Couch Stretch<span class="stretch-item-dur">60s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Lying Hamstring Stretch',45)">Lying Hamstring Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Doorway Hamstring Stretch',45)">Doorway Hamstring Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Standing Toe Touch',30)">Standing Toe Touch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Kneeling Quad Stretch',45)">Kneeling Quad Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Supine Hamstring Stretch',45)">Supine Hamstring Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Wide-Leg Forward Fold',60)">Wide-Leg Forward Fold<span class="stretch-item-dur">60s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Single-Leg Forward Fold',45)">Single-Leg Forward Fold<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Prone Quad Stretch',30)">Prone Quad Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Hurdler Stretch',45)">Hurdler Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Nordic Hamstring Lowering',45)">Nordic Hamstring Lowering<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Reclined Quad Stretch',30)">Reclined Quad Stretch<span class="stretch-item-dur">30s</span></div>
         </div>
       </div>
 
+      <!-- THORACIC & BACK -->
       <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">
-          Thoracic &amp; Back <span class="acc-arrow">▼</span>
-        </div>
+        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Thoracic &amp; Back <span class="acc-arrow">▼</span></div>
         <div class="stretch-accordion-body">
           <div class="stretch-item" onclick="addToQueue('Thoracic Rotation',30)">Thoracic Rotation<span class="stretch-item-dur">30s</span></div>
           <div class="stretch-item" onclick="addToQueue('Cat-Cow',45)">Cat-Cow<span class="stretch-item-dur">45s</span></div>
           <div class="stretch-item" onclick="addToQueue('Child\'s Pose',60)">Child's Pose<span class="stretch-item-dur">60s</span></div>
           <div class="stretch-item" onclick="addToQueue('Doorway Chest Stretch',30)">Doorway Chest Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Thread the Needle',45)">Thread the Needle<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Foam Roller Thoracic Extension',60)">Foam Roller T-Spine Extension<span class="stretch-item-dur">60s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Seated Spinal Twist',30)">Seated Spinal Twist<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Extended Puppy Pose',60)">Extended Puppy Pose<span class="stretch-item-dur">60s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Cobra Stretch',30)">Cobra Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Supine Spinal Twist',45)">Supine Spinal Twist<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Book Opener Stretch',30)">Book Opener Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Standing Backbend',20)">Standing Backbend<span class="stretch-item-dur">20s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Lat Stretch Overhead',30)">Lat Stretch Overhead<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Wall Chest Opener',30)">Wall Chest Opener<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Lower Back Knee Hug',45)">Lower Back Knee Hug<span class="stretch-item-dur">45s</span></div>
         </div>
       </div>
 
+      <!-- SHOULDERS & NECK -->
       <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">
-          Shoulders &amp; Neck <span class="acc-arrow">▼</span>
-        </div>
+        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Shoulders &amp; Neck <span class="acc-arrow">▼</span></div>
         <div class="stretch-accordion-body">
           <div class="stretch-item" onclick="addToQueue('Cross-Body Shoulder Stretch',30)">Cross-Body Shoulder Stretch<span class="stretch-item-dur">30s</span></div>
           <div class="stretch-item" onclick="addToQueue('Neck Side Stretch',20)">Neck Side Stretch<span class="stretch-item-dur">20s</span></div>
           <div class="stretch-item" onclick="addToQueue('Overhead Tricep Stretch',30)">Overhead Tricep Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Sleeper Stretch',45)">Sleeper Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Band Shoulder Stretch',30)">Band Shoulder Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Neck Forward Bend',20)">Neck Forward Bend<span class="stretch-item-dur">20s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Neck Rotation',20)">Neck Rotation<span class="stretch-item-dur">20s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Pec Minor Stretch',30)">Pec Minor Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Wall Angel',30)">Wall Angel<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Behind-Back Shoulder Stretch',30)">Behind-Back Shoulder Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Shoulder Pendulum',30)">Shoulder Pendulum<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Levator Scapulae Stretch',20)">Levator Scapulae Stretch<span class="stretch-item-dur">20s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Upper Trap Stretch',20)">Upper Trap Stretch<span class="stretch-item-dur">20s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Doorway Pec Stretch',30)">Doorway Pec Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Eagle Arms Stretch',30)">Eagle Arms Stretch<span class="stretch-item-dur">30s</span></div>
         </div>
       </div>
 
+      <!-- CALVES & ANKLES -->
       <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">
-          Calves &amp; Ankles <span class="acc-arrow">▼</span>
-        </div>
+        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Calves &amp; Ankles <span class="acc-arrow">▼</span></div>
         <div class="stretch-accordion-body">
           <div class="stretch-item" onclick="addToQueue('Standing Calf Stretch',45)">Standing Calf Stretch<span class="stretch-item-dur">45s</span></div>
           <div class="stretch-item" onclick="addToQueue('Ankle Circles',30)">Ankle Circles<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Soleus Stretch',45)">Soleus Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Downward Dog Calf Stretch',45)">Downward Dog Calf Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Seated Calf Stretch with Band',45)">Seated Calf Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Ankle Dorsiflexion Stretch',30)">Ankle Dorsiflexion Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Heel Drop Stretch',45)">Heel Drop Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Peroneal Stretch',30)">Peroneal Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Achilles Tendon Stretch',45)">Achilles Tendon Stretch<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Plantar Fascia Stretch',30)">Plantar Fascia Stretch<span class="stretch-item-dur">30s</span></div>
         </div>
       </div>
+
+      <!-- FULL BODY & MOBILITY -->
+      <div class="stretch-accordion">
+        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Full Body &amp; Mobility <span class="acc-arrow">▼</span></div>
+        <div class="stretch-accordion-body">
+          <div class="stretch-item" onclick="addToQueue('World\'s Greatest Stretch',60)">World's Greatest Stretch<span class="stretch-item-dur">60s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Downward Dog',45)">Downward Dog<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Sun Salutation Flow',90)">Sun Salutation Flow<span class="stretch-item-dur">90s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Standing Windmill',30)">Standing Windmill<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Inchworm',45)">Inchworm<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Hip 90-90 Flow',60)">Hip 90-90 Flow<span class="stretch-item-dur">60s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Bear Sit Rotation',30)">Bear Sit Rotation<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Deep Lunge with Rotation',45)">Deep Lunge with Rotation<span class="stretch-item-dur">45s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Yoga Flow',120)">Yoga Flow<span class="stretch-item-dur">120s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Turkish Get-Up Stretch',60)">Turkish Get-Up Stretch<span class="stretch-item-dur">60s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Scorpion Stretch',30)">Scorpion Stretch<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Standing Side Bend',30)">Standing Side Bend<span class="stretch-item-dur">30s</span></div>
+          <div class="stretch-item" onclick="addToQueue('Bridge Hold',45)">Bridge Hold<span class="stretch-item-dur">45s</span></div>
+        </div>
+      </div>
+
     </div>
 
     <!-- RIGHT: QUEUE + TIMER -->
@@ -668,10 +813,13 @@
       <div class="stretch-panel">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
           <div style="font-weight:700;font-size:0.82rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);">Queue</div>
-          <button class="btn-sm" onclick="clearStretchQueue()">Clear All</button>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-sm" onclick="saveQueueAsPreset()">Save as Routine</button>
+            <button class="btn-sm" onclick="clearStretchQueue()">Clear</button>
+          </div>
         </div>
 
-        <div id="stretch-queue-empty" style="color:var(--muted);font-size:0.82rem;padding:10px 0;">Add stretches from the library to get started.</div>
+        <div id="stretch-queue-empty" style="color:var(--muted);font-size:0.82rem;padding:10px 0;">Add stretches from the library or load a routine.</div>
         <div class="stretch-queue" id="stretch-queue"></div>
 
         <!-- TIMER -->
@@ -680,8 +828,7 @@
             <svg width="160" height="160" viewBox="0 0 160 160">
               <circle class="timer-ring-bg" cx="80" cy="80" r="70"/>
               <circle class="timer-ring-prog" id="timer-ring" cx="80" cy="80" r="70"
-                stroke-dasharray="439.8"
-                stroke-dashoffset="0"/>
+                stroke-dasharray="439.8" stroke-dashoffset="0"/>
             </svg>
             <div class="timer-number" id="timer-number">0</div>
           </div>
@@ -691,17 +838,13 @@
         <div class="stretch-controls" id="stretch-controls" style="display:none;">
           <button class="btn-sm" id="btn-pause-resume" onclick="togglePause()">Pause</button>
           <button class="btn-sm" onclick="skipStretch()">Skip</button>
-          <button class="btn" onclick="startQueue()" id="btn-start-queue">Start Queue</button>
-        </div>
-        <div style="text-align:center;margin-top:12px;">
-          <button class="btn" onclick="startQueue()" id="btn-start-queue-main" style="display:none;">Start Queue</button>
+          <button class="btn" onclick="startQueue()">Start Queue</button>
         </div>
         <div id="start-btn-wrap" style="text-align:center;margin-top:10px;">
-          <button class="btn" onclick="startQueue()" id="btn-start-initial">Start Queue</button>
+          <button class="btn" onclick="startQueue()">Start Queue</button>
         </div>
       </div>
 
-      <!-- LOG -->
       <div class="stretch-log-history" id="stretch-log-history" style="margin-top:16px;"></div>
     </div>
   </div>
@@ -1057,17 +1200,17 @@ const DEFAULTS = {
   ],
   workouts: [],
   templates: [
-    { id: 1,  name: 'Push Day',          exerciseIds: [1, 37, 7, 5, 8, 9, 10, 119, 11, 49, 12] },
-    { id: 2,  name: 'Pull Day',          exerciseIds: [3, 4, 56, 6, 14, 15, 106, 16, 19, 18, 17] },
-    { id: 3,  name: 'Leg Day',           exerciseIds: [2, 65, 21, 25, 69, 20, 22, 26, 23, 24, 77] },
-    { id: 4,  name: 'Upper Body',        exerciseIds: [1, 7, 5, 8, 3, 14, 15, 19, 18, 49, 11] },
-    { id: 5,  name: 'Lower Body',        exerciseIds: [2, 20, 21, 26, 22, 23, 24, 77] },
+    { id: 1,  name: 'Push Day',          exerciseIds: [1, 7, 5, 9, 10, 12] },
+    { id: 2,  name: 'Pull Day',          exerciseIds: [3, 4, 6, 14, 15, 19] },
+    { id: 3,  name: 'Leg Day',           exerciseIds: [2, 21, 25, 20, 22, 24] },
+    { id: 4,  name: 'Upper Body',        exerciseIds: [1, 5, 3, 14, 19, 11] },
+    { id: 5,  name: 'Lower Body',        exerciseIds: [2, 20, 26, 22, 23, 24] },
     { id: 6,  name: 'Full Body A',       exerciseIds: [1, 2, 3, 5, 22, 27] },
     { id: 7,  name: 'Full Body B',       exerciseIds: [38, 20, 56, 8, 21, 28] },
-    { id: 8,  name: 'Chest & Triceps',   exerciseIds: [1, 7, 39, 40, 42, 10, 119, 11, 49, 12] },
-    { id: 9,  name: 'Back & Biceps',     exerciseIds: [3, 4, 6, 14, 15, 106, 16, 19, 18, 60, 117] },
-    { id: 10, name: 'Shoulders & Arms',  exerciseIds: [5, 8, 45, 9, 44, 19, 18, 10, 119, 49] },
-    { id: 11, name: 'Core',              exerciseIds: [27, 29, 30, 28, 31, 82, 141, 80, 85, 84] },
+    { id: 8,  name: 'Chest & Triceps',   exerciseIds: [1, 7, 40, 42, 10, 11] },
+    { id: 9,  name: 'Back & Biceps',     exerciseIds: [3, 4, 6, 14, 19, 60] },
+    { id: 10, name: 'Shoulders & Arms',  exerciseIds: [5, 8, 9, 19, 10, 49] },
+    { id: 11, name: 'Core',              exerciseIds: [27, 29, 30, 31, 82, 84] },
   ],
 };
 
@@ -1082,7 +1225,9 @@ function lsSet() {
     localStorage.setItem('lt_templates',     JSON.stringify(templates));
     localStorage.setItem('lt_runs',          JSON.stringify(runs));
     localStorage.setItem('lt_stretchLogs',   JSON.stringify(stretchLogs));
-    localStorage.setItem('lt_bodyWeightLog', JSON.stringify(bodyWeightLog));
+    localStorage.setItem('lt_stretchPresets', JSON.stringify(stretchPresets));
+    localStorage.setItem('lt_proteinLog',    JSON.stringify(proteinLog));
+    localStorage.setItem('lt_proteinGoal',   JSON.stringify(proteinGoal));
   } catch(e) {}
 }
 
@@ -1102,7 +1247,7 @@ async function persist() {
         await sbFetch('/rest/v1/lifttrack_data?user_id=eq.' + userId, {
           method: 'PATCH',
           prefer: 'return=minimal',
-          body: JSON.stringify({ exercises, workouts, templates, runs, stretch_logs: stretchLogs, body_weight_log: bodyWeightLog, updated_at: new Date().toISOString() })
+          body: JSON.stringify({ exercises, workouts, templates, runs, stretch_logs: stretchLogs, body_weight_log: bodyWeightLog, protein_log: proteinLog, protein_goal: proteinGoal, stretch_presets: stretchPresets, updated_at: new Date().toISOString() })
         });
       } else {
         await sbFetch('/rest/v1/lifttrack_data', {
@@ -1135,6 +1280,8 @@ async function loadData() {
       runs          = data.runs              ? data.runs        : [];
       stretchLogs   = data.stretch_logs      ? data.stretch_logs : [];
       bodyWeightLog = data.body_weight_log   ? data.body_weight_log : [];
+      proteinLog    = data.protein_log       ? data.protein_log  : [];
+      stretchPresets = data.stretch_presets ? data.stretch_presets : [];
       lsSet();
       setStatus('synced');
     } else {
@@ -1142,9 +1289,9 @@ async function loadData() {
       await sbFetch('/rest/v1/lifttrack_data', {
         method: 'POST',
         prefer: 'return=minimal',
-        body: JSON.stringify({ user_id: userId, exercises: DEFAULTS.exercises, workouts: [], templates: DEFAULTS.templates, runs: [], stretch_logs: [], body_weight_log: [] })
+        body: JSON.stringify({ user_id: userId, exercises: DEFAULTS.exercises, workouts: [], templates: DEFAULTS.templates, runs: [], stretch_logs: [], body_weight_log: [], protein_log: [], protein_goal: 0 })
       });
-      exercises = DEFAULTS.exercises; workouts = []; templates = DEFAULTS.templates; runs = []; stretchLogs = []; bodyWeightLog = [];
+      exercises = DEFAULTS.exercises; workouts = []; templates = DEFAULTS.templates; runs = []; stretchLogs = []; bodyWeightLog = []; proteinLog = []; proteinGoal = 0;
       setStatus('synced');
     }
   } catch(e) {
@@ -1155,10 +1302,14 @@ async function loadData() {
     runs          = lsGet('runs')          ?? [];
     stretchLogs   = lsGet('stretchLogs')  ?? [];
     bodyWeightLog = lsGet('bodyWeightLog') ?? [];
+    proteinLog    = lsGet('proteinLog')    ?? [];
+    proteinGoal   = lsGet('proteinGoal')  ?? 0;
+    stretchPresets = lsGet('stretchPresets') ?? [];
     setStatus('offline');
   }
   migrateExercises();
   migrateTemplates();
+  migrateStretchPresets();
 }
 
 function setStatus(mode) {
@@ -1180,6 +1331,9 @@ let workouts    = [];
 let runs        = [];
 let stretchLogs = [];
 let bodyWeightLog = []; // [{date, weight}]
+let proteinLog    = []; // [{date, entries:[{amount,source}]}]
+let proteinGoal   = 0;
+let stretchPresets = [];
 
 function migrateExercises() {
   let changed = false;
@@ -1240,7 +1394,7 @@ function showPage(name) {
   if (name === 'exercises') renderExercises();
   if (name === 'log') renderTemplates();
   if (name === 'run') renderRunPage();
-  if (name === 'stretch') renderStretchLog();
+  if (name === 'stretch') { renderStretchLog(); renderStretchPresets(); }
 }
 
 // ── STATS ────────────────────────────────────────────
@@ -1439,8 +1593,82 @@ function renderBWChart() {
   });
 }
 
+// ── PROTEIN TRACKER ──────────────────────────────────
+
+function getTodayProtein() {
+  const today = new Date().toISOString().slice(0,10);
+  return proteinLog.find(p => p.date === today) || null;
+}
+
+function setProteinGoal() {
+  const val = parseInt(document.getElementById('protein-goal').value) || 0;
+  if (!val) return;
+  proteinGoal = val;
+  persist();
+  renderProteinTracker();
+}
+
+function logProtein() {
+  const amount = parseInt(document.getElementById('protein-amount').value) || 0;
+  const source = document.getElementById('protein-source').value.trim() || 'Food';
+  if (!amount) { alert('Enter a protein amount.'); return; }
+  const today = new Date().toISOString().slice(0,10);
+  let dayLog = proteinLog.find(p => p.date === today);
+  if (!dayLog) { dayLog = { date: today, entries: [] }; proteinLog.push(dayLog); }
+  dayLog.entries.push({ amount, source });
+  persist();
+  document.getElementById('protein-amount').value = '';
+  document.getElementById('protein-source').value = '';
+  renderProteinTracker();
+}
+
+function deleteProteinEntry(entryIdx) {
+  const today = new Date().toISOString().slice(0,10);
+  const dayLog = proteinLog.find(p => p.date === today);
+  if (!dayLog) return;
+  dayLog.entries.splice(entryIdx, 1);
+  persist();
+  renderProteinTracker();
+}
+
+function renderProteinTracker() {
+  const goalEl = document.getElementById('protein-goal-input-display');
+  if (goalEl && proteinGoal) goalEl.value = proteinGoal;
+  const goalInput = document.getElementById('protein-goal');
+  if (goalInput && proteinGoal && !goalInput.value) goalInput.value = proteinGoal;
+
+  const dayLog = getTodayProtein();
+  const consumed = dayLog ? dayLog.entries.reduce((s,e) => s + e.amount, 0) : 0;
+  const pct = proteinGoal > 0 ? Math.min(100, (consumed / proteinGoal) * 100) : 0;
+
+  const bar = document.getElementById('protein-bar');
+  if (bar) {
+    bar.style.width = pct + '%';
+    bar.style.background = pct >= 100 ? 'var(--green)' : 'var(--accent)';
+  }
+  const cl = document.getElementById('protein-consumed-label');
+  if (cl) cl.textContent = consumed + 'g consumed';
+  const gl = document.getElementById('protein-goal-label');
+  if (gl) gl.textContent = proteinGoal ? `Goal: ${proteinGoal}g (${Math.round(pct)}%)` : 'Goal: not set';
+
+  const list = document.getElementById('protein-log-list');
+  if (list) {
+    if (!dayLog || !dayLog.entries.length) {
+      list.innerHTML = `<div style="font-size:0.75rem;color:var(--muted);padding:4px 0;">Nothing logged today.</div>`;
+    } else {
+      list.innerHTML = dayLog.entries.map((e, i) => `
+        <div class="protein-entry">
+          <span style="font-weight:500;">${e.source}</span>
+          <span style="display:flex;align-items:center;gap:8px;">
+            <span style="color:var(--accent);font-weight:600;">${e.amount}g</span>
+            <button class="protein-entry-del" onclick="deleteProteinEntry(${i})">×</button>
+          </span>
+        </div>`).join('');
+    }
+  }
+}
+
 function renderDashboard() {
-  // Set today's date on body weight input
   const today = new Date().toISOString().slice(0,10);
   const bwDate = document.getElementById('bw-date');
   if (bwDate && !bwDate.value) bwDate.value = today;
@@ -1448,23 +1676,87 @@ function renderDashboard() {
   renderStats();
   populateExSelect();
   renderWeightChart();
-  renderVolumeChart();
   renderFrequency();
   renderPRs();
   renderBWChart();
+  renderProteinTracker();
 }
 
 // ── LOG FORM ─────────────────────────────────────────
+let selectedExerciseId = null;
+let exCatFilter = '';
+
 function initLogForm() {
   const today = new Date().toISOString().slice(0,10);
   document.getElementById('log-date').value = today;
   document.getElementById('session-date').value = today;
-  const sel = document.getElementById('log-exercise');
-  sel.innerHTML = exercises.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+  selectedExerciseId = exercises[0]?.id || null;
+  if (selectedExerciseId) {
+    document.getElementById('log-exercise').value = selectedExerciseId;
+    document.getElementById('log-exercise-search').value = exercises[0]?.name || '';
+  }
   setCount = 0;
   document.getElementById('sets-container').innerHTML = '';
   addSet(); addSet(); addSet();
   renderTemplates();
+}
+
+function setExCatFilter(cat) {
+  exCatFilter = cat;
+  document.querySelectorAll('.ex-cat-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
+  filterExerciseDropdown();
+  showExerciseDropdown();
+}
+
+function getFilteredExercises() {
+  const query = (document.getElementById('log-exercise-search')?.value || '').toLowerCase();
+  return [...exercises]
+    .filter(e => (!exCatFilter || e.cat === exCatFilter) && (!query || e.name.toLowerCase().includes(query)))
+    .sort((a,b) => a.name.localeCompare(b.name));
+}
+
+function showExerciseDropdown() {
+  filterExerciseDropdown();
+  document.getElementById('exercise-dropdown').style.display = 'block';
+}
+
+function hideExerciseDropdown() {
+  document.getElementById('exercise-dropdown').style.display = 'none';
+}
+
+// Close exercise dropdown when clicking anywhere outside it
+document.addEventListener('click', function(e) {
+  const search = document.getElementById('log-exercise-search');
+  const dropdown = document.getElementById('exercise-dropdown');
+  const catFilters = document.getElementById('ex-cat-filters');
+  if (!search || !dropdown) return;
+  if (!search.contains(e.target) && !dropdown.contains(e.target) && !catFilters?.contains(e.target)) {
+    dropdown.style.display = 'none';
+  }
+});
+
+function filterExerciseDropdown() {
+  const dropdown = document.getElementById('exercise-dropdown');
+  const filtered = getFilteredExercises();
+  if (!filtered.length) {
+    dropdown.innerHTML = `<div style="padding:10px 14px;font-size:0.82rem;color:var(--muted);">No exercises found</div>`;
+    return;
+  }
+  dropdown.innerHTML = filtered.map(e => `
+    <div class="ex-dropdown-item ${e.id === selectedExerciseId ? 'selected' : ''}"
+      onmousedown="selectExercise(${e.id}, '${e.name.replace(/'/g,"\\'")}')">
+      ${e.name}
+      <span class="ex-dropdown-cat">${e.cat}</span>
+    </div>`).join('');
+}
+
+function selectExercise(id, name) {
+  selectedExerciseId = id;
+  document.getElementById('log-exercise').value = id;
+  document.getElementById('log-exercise-search').value = name;
+  document.getElementById('exercise-dropdown').style.display = 'none';
 }
 
 // ── TEMPLATES PANEL ──────────────────────────────────
@@ -1633,6 +1925,7 @@ function removeSessionSet(exId, n) {
 }
 
 function saveWorkoutSession() {
+  const tmpl = templates.find(t => t.id === activeTemplateId);
   if (!tmpl) return;
   const date = document.getElementById('session-date').value;
   if (!date) { alert('Please pick a date.'); return; }
@@ -1649,18 +1942,47 @@ function saveWorkoutSession() {
       const weight = isBW ? 0 : (+document.getElementById(`sweight-${exId}-${n}`)?.value || 0);
       if (reps > 0) sets.push({ reps, weight, bodyweight: isBW });
     });
+    // Only save exercises where at least one set was filled in — skip the rest
     if (sets.length > 0) {
-      workouts.push({ date, exerciseId: exId, sets, sessionId, templateName: tmpl.name, templateEmoji: tmpl.emoji });
+      workouts.push({ date, exerciseId: exId, sets, sessionId, templateName: tmpl.name });
       saved++;
     }
   });
 
-  if (saved === 0) { alert('Fill in reps for at least one set.'); return; }
+  if (saved === 0) { alert('Fill in reps for at least one exercise.'); return; }
   persist();
   const msg = document.getElementById('session-success-msg');
   msg.style.display = 'inline';
   setTimeout(() => msg.style.display = 'none', 2500);
-  buildSessionForm(activeTemplateId); // reset form
+  buildSessionForm(activeTemplateId);
+}
+
+function toggleSaveAsTemplate() {
+  const form = document.getElementById('save-as-tmpl-form');
+  if (!form) return;
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form.style.display === 'block') {
+    document.getElementById('save-as-tmpl-name').focus();
+  }
+}
+
+function saveCurrentAsTemplate() {
+  const name = document.getElementById('save-as-tmpl-name').value.trim();
+  if (!name) { alert('Give your template a name.'); return; }
+  const tmpl = templates.find(t => t.id === activeTemplateId);
+  if (!tmpl) return;
+  // Collect the current exercise blocks that are visible
+  const exIds = [...document.querySelectorAll('[id^="session-block-"]')]
+    .map(el => +el.id.replace('session-block-', ''))
+    .filter(id => id);
+  if (!exIds.length) { alert('No exercises in current session.'); return; }
+  const newId = Math.max(0, ...templates.map(t => t.id)) + 1;
+  templates.push({ id: newId, name, exerciseIds: exIds });
+  persist();
+  document.getElementById('save-as-tmpl-name').value = '';
+  document.getElementById('save-as-tmpl-form').style.display = 'none';
+  renderTemplates();
+  alert(`Template "${name}" saved!`);
 }
 
 function toggleNewTmpl() {
@@ -1715,7 +2037,7 @@ function removeSet(n) {
 
 function saveWorkout() {
   const date = document.getElementById('log-date').value;
-  const exId = +document.getElementById('log-exercise').value;
+  const exId = selectedExerciseId || +document.getElementById('log-exercise').value;
   const sets = [];
   document.querySelectorAll('.set-row').forEach(row => {
     const id = row.id.replace('set-row-','');
@@ -1724,7 +2046,7 @@ function saveWorkout() {
     const weight = isBW ? 0 : (+document.getElementById('weight-'+id)?.value || 0);
     if (reps > 0) sets.push({ reps, weight, bodyweight: isBW });
   });
-  if (!date || !exId || sets.length === 0) { alert('Please fill in date, exercise, and at least one set with reps.'); return; }
+  if (!date || !exId || sets.length === 0) { alert('Please select an exercise and fill in at least one set with reps.'); return; }
   workouts.push({ date, exerciseId: exId, sets });
   persist();
   const msg = document.getElementById('success-msg');
@@ -2136,7 +2458,147 @@ function renderRunPage() {
 
 // ── STRETCH LOG ───────────────────────────────────────
 let stretchQueue = []; // [{name, secs}]
+let stretchPresets = []; // [{id, name, stretches:[{name,secs}]}]
 let stretchTimerState = { active: false, paused: false, currentIdx: 0, remaining: 0, interval: null, total: 0 };
+
+// ── STRETCH PRESETS ───────────────────────────────────
+const DEFAULT_STRETCH_PRESETS = [
+  { id: 1, name: 'Full Body Morning', stretches: [
+    {name:"Cat-Cow",secs:45},{name:"Child's Pose",secs:60},{name:"Downward Dog",secs:45},
+    {name:"Hip Flexor Stretch",secs:60},{name:"Standing Hamstring Stretch",secs:45},
+    {name:"Thoracic Rotation",secs:30},{name:"Neck Side Stretch",secs:20},{name:"Standing Calf Stretch",secs:45}
+  ]},
+  { id: 2, name: 'Post-Leg Day', stretches: [
+    {name:"Pigeon Pose",secs:90},{name:"Couch Stretch",secs:60},{name:"Seated Forward Fold",secs:60},
+    {name:"Figure-4 Stretch",secs:45},{name:"Low Lunge Hip Opener",secs:60},
+    {name:"Lying Hamstring Stretch",secs:45},{name:"Standing Calf Stretch",secs:45},{name:"Soleus Stretch",secs:45}
+  ]},
+  { id: 3, name: 'Post-Upper Body', stretches: [
+    {name:"Cross-Body Shoulder Stretch",secs:30},{name:"Doorway Chest Stretch",secs:30},
+    {name:"Overhead Tricep Stretch",secs:30},{name:"Sleeper Stretch",secs:45},
+    {name:"Neck Side Stretch",secs:20},{name:"Thread the Needle",secs:45},
+    {name:"Lat Stretch Overhead",secs:30},{name:"Eagle Arms Stretch",secs:30}
+  ]},
+  { id: 4, name: 'Hip Mobility', stretches: [
+    {name:"90-90 Hip Stretch",secs:60},{name:"Pigeon Pose",secs:90},{name:"Butterfly Stretch",secs:45},
+    {name:"Deep Squat Hold",secs:45},{name:"Hip Flexor Stretch",secs:60},
+    {name:"Lateral Hip Flexor Stretch",secs:45},{name:"Hip 90-90 Flow",secs:60}
+  ]},
+  { id: 5, name: 'Pre-Workout Warmup', stretches: [
+    {name:"Inchworm",secs:45},{name:"World's Greatest Stretch",secs:60},{name:"Hip Circles",secs:30},
+    {name:"Ankle Circles",secs:30},{name:"Standing Windmill",secs:30},{name:"Cat-Cow",secs:45}
+  ]},
+];
+
+function migrateStretchPresets() {
+  let changed = false;
+  for (const def of DEFAULT_STRETCH_PRESETS) {
+    if (!stretchPresets.find(p => p.name === def.name)) {
+      stretchPresets.push(def);
+      changed = true;
+    }
+  }
+  // Don't call persist here — it'll be called by the normal save cycle
+  // This avoids errors if the stretch_presets column doesn't exist yet
+}
+
+function renderStretchPresets() {
+  const list = document.getElementById('stretch-preset-list');
+  if (!list) return;
+  if (!stretchPresets.length) { list.innerHTML = ''; return; }
+  list.innerHTML = stretchPresets.map(p => {
+    const total = p.stretches.reduce((s,x) => s + x.secs, 0);
+    const mins = Math.floor(total/60), secs = total % 60;
+    const dur = mins > 0 ? `${mins}m ${secs > 0 ? secs+'s' : ''}` : `${secs}s`;
+    return `<div class="tmpl-card" style="margin-bottom:8px;">
+      <div class="tmpl-name" style="padding-right:80px;">${p.name}</div>
+      <div class="tmpl-exlist">${p.stretches.length} stretches · ${dur}</div>
+      <div class="tmpl-actions">
+        <button class="tmpl-action-btn" onclick="event.stopPropagation();loadStretchPreset(${p.id})" title="Load">▶</button>
+        <button class="tmpl-action-btn del" onclick="event.stopPropagation();deleteStretchPreset(${p.id})" title="Delete">×</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadStretchPreset(id) {
+  const preset = stretchPresets.find(p => p.id === id);
+  if (!preset) return;
+  stretchQueue = preset.stretches.map(s => ({...s}));
+  renderStretchQueue();
+  // scroll to queue
+  document.getElementById('stretch-queue')?.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function deleteStretchPreset(id) {
+  if (!confirm('Delete this routine?')) return;
+  stretchPresets = stretchPresets.filter(p => p.id !== id);
+  persist();
+  renderStretchPresets();
+}
+
+function toggleNewStretchPreset() {
+  const form = document.getElementById('new-stretch-preset-form');
+  if (!form) return;
+  const isOpen = form.style.display !== 'none';
+  form.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) populateStretchPresetChecks();
+}
+
+function populateStretchPresetChecks() {
+  // Collect all stretch names from the library
+  const allStretches = [
+    {name:"Hip Flexor Stretch",secs:60},{name:"Pigeon Pose",secs:90},{name:"Figure-4 Stretch",secs:45},
+    {name:"Seated Glute Stretch",secs:45},{name:"Low Lunge Hip Opener",secs:60},{name:"Deep Squat Hold",secs:45},
+    {name:"Supine Hip Rotation",secs:30},{name:"90-90 Hip Stretch",secs:60},{name:"Butterfly Stretch",secs:45},
+    {name:"Half-Pigeon Pose",secs:90},{name:"Standing Hamstring Stretch",secs:45},{name:"Seated Forward Fold",secs:60},
+    {name:"Quad Stretch",secs:30},{name:"Couch Stretch",secs:60},{name:"Lying Hamstring Stretch",secs:45},
+    {name:"Standing Toe Touch",secs:30},{name:"Kneeling Quad Stretch",secs:45},{name:"Wide-Leg Forward Fold",secs:60},
+    {name:"Thoracic Rotation",secs:30},{name:"Cat-Cow",secs:45},{name:"Child's Pose",secs:60},
+    {name:"Doorway Chest Stretch",secs:30},{name:"Thread the Needle",secs:45},{name:"Cobra Stretch",secs:30},
+    {name:"Supine Spinal Twist",secs:45},{name:"Lat Stretch Overhead",secs:30},{name:"Lower Back Knee Hug",secs:45},
+    {name:"Cross-Body Shoulder Stretch",secs:30},{name:"Neck Side Stretch",secs:20},{name:"Overhead Tricep Stretch",secs:30},
+    {name:"Sleeper Stretch",secs:45},{name:"Neck Rotation",secs:20},{name:"Wall Angel",secs:30},
+    {name:"Upper Trap Stretch",secs:20},{name:"Doorway Pec Stretch",secs:30},{name:"Eagle Arms Stretch",secs:30},
+    {name:"Standing Calf Stretch",secs:45},{name:"Ankle Circles",secs:30},{name:"Soleus Stretch",secs:45},
+    {name:"Downward Dog Calf Stretch",secs:45},{name:"Achilles Tendon Stretch",secs:45},
+    {name:"World's Greatest Stretch",secs:60},{name:"Downward Dog",secs:45},{name:"Inchworm",secs:45},
+    {name:"Deep Lunge with Rotation",secs:45},{name:"Standing Side Bend",secs:30},{name:"Bridge Hold",secs:45},
+  ];
+  const checks = document.getElementById('new-sp-checks');
+  if (!checks) return;
+  checks.innerHTML = allStretches.map((s,i) =>
+    `<label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;cursor:pointer;padding:3px 0;">
+      <input type="checkbox" data-name="${s.name}" data-secs="${s.secs}" style="accent-color:var(--accent);">
+      ${s.name} <span style="color:var(--muted);font-size:0.7rem;">${s.secs}s</span>
+    </label>`
+  ).join('');
+}
+
+function saveStretchPreset() {
+  const name = document.getElementById('new-sp-name').value.trim();
+  if (!name) { alert('Give your routine a name.'); return; }
+  const checked = [...document.querySelectorAll('#new-sp-checks input:checked')];
+  if (!checked.length) { alert('Select at least one stretch.'); return; }
+  const stretches = checked.map(c => ({ name: c.dataset.name, secs: +c.dataset.secs }));
+  const id = Math.max(0, ...stretchPresets.map(p => p.id)) + 1;
+  stretchPresets.push({ id, name, stretches });
+  persist();
+  document.getElementById('new-sp-name').value = '';
+  document.getElementById('new-stretch-preset-form').style.display = 'none';
+  renderStretchPresets();
+}
+
+function saveQueueAsPreset() {
+  if (!stretchQueue.length) { alert('Add stretches to your queue first.'); return; }
+  const name = prompt('Name this routine:');
+  if (!name) return;
+  const id = Math.max(0, ...stretchPresets.map(p => p.id)) + 1;
+  stretchPresets.push({ id, name, stretches: stretchQueue.map(s => ({...s})) });
+  persist();
+  renderStretchPresets();
+  alert(`Routine "${name}" saved!`);
+}
 
 function toggleAcc(header) {
   header.classList.toggle('open');
@@ -2350,14 +2812,23 @@ async function handleAuth() {
   }
 }
 
-// Allow pressing Enter in password field to submit
-document.addEventListener('DOMContentLoaded', () => {
+// ── INIT ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  // Wire up Enter key on auth form
   document.getElementById('auth-password')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') handleAuth();
   });
   document.getElementById('auth-email')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('auth-password')?.focus();
   });
+
+  // Try to restore existing session silently
+  const restored = await restoreSession();
+  if (restored) {
+    await launchApp();
+  } else {
+    showAuthScreen();
+  }
 });
 
 function showAuthScreen() {
@@ -2376,7 +2847,6 @@ function hideAuthScreen() {
 
 async function launchApp() {
   hideAuthScreen();
-  // Show user email in nav
   const email = currentSession?.user?.email || '';
   const displayEl = document.getElementById('user-email-display');
   if (displayEl) displayEl.textContent = email;
@@ -2391,17 +2861,6 @@ async function launchApp() {
     document.getElementById(id)?.addEventListener('input', updatePacePreview);
   });
 }
-
-// ── INIT ─────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-  // Try to restore existing session silently
-  const restored = await restoreSession();
-  if (restored) {
-    await launchApp();
-  } else {
-    showAuthScreen();
-  }
-});
 </script>
 </body>
 </html>
