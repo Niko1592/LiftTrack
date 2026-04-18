@@ -392,7 +392,7 @@
   .user-badge { margin-left: auto; display: flex; align-items: center; gap: 8px; position: relative; }
   .settings-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 1.1rem; line-height: 1; }
   .settings-btn:hover { color: var(--text); background: var(--surface2); }
-  .settings-dropdown { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; min-width: 180px; z-index: 300; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .settings-dropdown { display: none; position: fixed; top: 52px; right: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; min-width: 190px; z-index: 1000; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
   .settings-dropdown.open { display: block; }
   .settings-status { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.78rem; color: var(--muted); }
   .settings-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 0.82rem; color: var(--text); cursor: pointer; transition: background 0.12s; background: none; border: none; width: 100%; text-align: left; font-family: 'Inter', system-ui, sans-serif; }
@@ -621,6 +621,18 @@
           </div>
         </div>
         <div id="session-exercises"></div>
+
+        <!-- Add exercise to active session -->
+        <div style="margin-bottom:14px;">
+          <button class="btn-sm" onclick="toggleSessionAddEx()" style="width:100%;text-align:center;">+ Add Exercise to Session</button>
+          <div id="session-add-ex-form" style="display:none;margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;">
+            <input type="text" id="session-add-search" placeholder="Search exercise…" autocomplete="off"
+              oninput="filterSessionAddEx()"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;outline:none;font-family:'Inter',system-ui,sans-serif;margin-bottom:6px;">
+            <div id="session-add-results" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;"></div>
+          </div>
+        </div>
+
         <div class="session-save-row">
           <button class="btn" onclick="saveWorkoutSession()">Save Session</button>
           <button class="btn-sm" onclick="toggleSaveAsTemplate()" style="margin-left:4px;">Save as Template</button>
@@ -1904,12 +1916,23 @@ function renderTemplates() {
     </div>`;
   }).join('');
 
-  // populate checkboxes for new template form
+  // populate checkboxes for new template form — grouped by category
   const checks = document.getElementById('tmpl-ex-checks');
-  const exCheckHtml = exercises.map(e =>
-    `<label class="tmpl-ex-check"><input type="checkbox" value="${e.id}"> ${e.name} <span class="ex-cat" style="margin-left:4px">${e.cat}</span></label>`
-  ).join('');
-  checks.innerHTML = exCheckHtml;
+  const categories = ['Push', 'Pull', 'Legs', 'Core', 'Cardio', 'Other'];
+  checks.innerHTML = categories.map(cat => {
+    const catExs = exercises.filter(e => e.cat === cat);
+    if (!catExs.length) return '';
+    const catId = `new-cat-${cat}`;
+    const items = catExs.map(e =>
+      `<label class="tmpl-ex-check" style="padding:4px 8px;"><input type="checkbox" value="${e.id}"> ${e.name}</label>`
+    ).join('');
+    return `<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:4px;">
+      <div onclick="toggleEditCat('${catId}')" style="padding:8px 12px;background:var(--surface2);cursor:pointer;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center;">
+        ${cat} <span id="${catId}-arrow" style="font-size:0.6rem;transition:transform 0.2s;">▶</span>
+      </div>
+      <div id="${catId}" style="display:none;flex-direction:column;gap:2px;padding:6px 4px;">${items}</div>
+    </div>`;
+  }).join('');
 }
 
 let editingTemplateId = null;
@@ -1920,13 +1943,32 @@ function openEditTemplate(id) {
   editingTemplateId = id;
   document.getElementById('edit-tmpl-name').value = tmpl.name;
   const checks = document.getElementById('edit-tmpl-checks');
-  checks.innerHTML = exercises.map(e =>
-    `<label class="tmpl-ex-check">
-      <input type="checkbox" value="${e.id}" ${tmpl.exerciseIds.includes(e.id) ? 'checked' : ''}>
-      ${e.name} <span class="ex-cat" style="margin-left:4px">${e.cat}</span>
-    </label>`
-  ).join('');
+  const categories = ['Push', 'Pull', 'Legs', 'Core', 'Cardio', 'Other'];
+  checks.innerHTML = categories.map(cat => {
+    const catExs = exercises.filter(e => e.cat === cat);
+    if (!catExs.length) return '';
+    const catId = `edit-cat-${cat}`;
+    const items = catExs.map(e => `
+      <label class="tmpl-ex-check" style="padding:4px 8px;">
+        <input type="checkbox" value="${e.id}" ${tmpl.exerciseIds.includes(e.id) ? 'checked' : ''}>
+        ${e.name}
+      </label>`).join('');
+    return `<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:4px;">
+      <div onclick="toggleEditCat('${catId}')" style="padding:8px 12px;background:var(--surface2);cursor:pointer;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center;">
+        ${cat} <span id="${catId}-arrow" style="font-size:0.6rem;transition:transform 0.2s;">▶</span>
+      </div>
+      <div id="${catId}" style="display:none;flex-direction:column;gap:2px;padding:6px 4px;">${items}</div>
+    </div>`;
+  }).join('');
   document.getElementById('edit-modal').classList.add('open');
+}
+
+function toggleEditCat(catId) {
+  const body = document.getElementById(catId);
+  const arrow = document.getElementById(catId + '-arrow');
+  const isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'flex' : 'none';
+  arrow.style.transform = isHidden ? 'rotate(90deg)' : '';
 }
 
 function closeEditModal(event) {
@@ -2029,15 +2071,16 @@ function addSessionSet(exId) {
   const row = document.createElement('div');
   row.className = 'session-set-row';
   row.id = `sset-${exId}-${n}`;
-  row.style.cssText = 'display:grid;grid-template-columns:36px 1fr 1fr auto 28px;gap:7px;align-items:center;';
+  row.style.cssText = 'display:grid;grid-template-columns:28px 1fr 1fr 32px 28px;gap:5px;align-items:center;';
   row.innerHTML = `
-    <div class="set-num">${n}</div>
-    <input type="number" placeholder="Reps" min="1" id="sreps-${exId}-${n}">
-    <input type="number" placeholder="${weightPlaceholder || 'Weight'}" min="0" id="sweight-${exId}-${n}" value="${weightPlaceholder}">
-    <label style="display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--muted);white-space:nowrap;cursor:pointer;">
-      <input type="checkbox" id="sbw-${exId}-${n}" onchange="toggleSessionBW(${exId},${n})" style="accent-color:var(--accent);cursor:pointer;"> BW
+    <div class="set-num" style="font-size:0.72rem;text-align:center;color:var(--muted);font-weight:600;">${n}</div>
+    <input type="number" placeholder="Reps" min="1" id="sreps-${exId}-${n}" style="min-width:0;">
+    <input type="number" placeholder="${weightPlaceholder || 'lbs'}" min="0" id="sweight-${exId}-${n}" value="${weightPlaceholder}" style="min-width:0;">
+    <label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;">
+      <input type="checkbox" id="sbw-${exId}-${n}" onchange="toggleSessionBW(${exId},${n})" style="accent-color:var(--accent);cursor:pointer;width:14px;height:14px;">
+      <span style="font-size:0.55rem;color:var(--muted);line-height:1;">BW</span>
     </label>
-    <button class="btn-danger" onclick="removeSessionSet(${exId},${n})">×</button>
+    <button class="btn-danger" onclick="removeSessionSet(${exId},${n})" style="width:24px;height:24px;font-size:0.9rem;flex-shrink:0;">×</button>
   `;
   container.appendChild(row);
 }
@@ -2092,6 +2135,70 @@ function saveWorkoutSession() {
   msg.style.display = 'inline';
   setTimeout(() => msg.style.display = 'none', 2500);
   buildSessionForm(activeTemplateId);
+}
+
+function toggleSessionAddEx() {
+  const form = document.getElementById('session-add-ex-form');
+  const isHidden = form.style.display === 'none';
+  form.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    document.getElementById('session-add-search').value = '';
+    filterSessionAddEx();
+    document.getElementById('session-add-search').focus();
+  }
+}
+
+function filterSessionAddEx() {
+  const query = (document.getElementById('session-add-search').value || '').toLowerCase();
+  const results = document.getElementById('session-add-results');
+  const filtered = [...exercises]
+    .filter(e => !query || e.name.toLowerCase().includes(query))
+    .sort((a,b) => a.name.localeCompare(b.name))
+    .slice(0, 30);
+  results.innerHTML = filtered.map(e => `
+    <div onmousedown="addExToSession(${e.id})"
+      style="padding:8px 10px;border-radius:6px;cursor:pointer;font-size:0.82rem;display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);margin-bottom:2px;">
+      <span>${e.name}</span>
+      <span style="font-size:0.65rem;color:var(--muted);background:var(--surface2);padding:1px 7px;border-radius:4px;">${e.cat}</span>
+    </div>`).join('');
+}
+
+function addExToSession(exId) {
+  // Don't add if already in session
+  if (document.getElementById(`session-block-${exId}`)) {
+    document.getElementById('session-add-ex-form').style.display = 'none';
+    return;
+  }
+  const ex = getExById(exId);
+  if (!ex) return;
+  sessionSetCounters[exId] = 0;
+  const lastWeight = getLastWeight(exId);
+  const hint = lastWeight !== null ? `Last: ${lastWeight > 0 ? lastWeight + ' lbs' : 'BW'}` : '';
+  const block = document.createElement('div');
+  block.className = 'session-ex-block';
+  block.id = `session-block-${exId}`;
+  block.innerHTML = `
+    <div class="session-ex-header" onclick="toggleSessionBlock(${exId})">
+      <div class="session-ex-name">${ex.name}</div>
+      <span class="ex-cat">${ex.cat}</span>
+      ${hint ? `<div class="session-ex-hint">${hint}</div>` : ''}
+      <span class="session-ex-toggle">▼</span>
+    </div>
+    <div class="session-ex-body">
+      <div class="session-sets" id="session-sets-${exId}"></div>
+      <div style="margin-top:10px">
+        <button class="btn-sm" onclick="addSessionSet(${exId})">+ Set</button>
+      </div>
+    </div>`;
+  document.getElementById('session-exercises').appendChild(block);
+  addSessionSet(exId);
+  addSessionSet(exId);
+  addSessionSet(exId);
+  // Hide the picker
+  document.getElementById('session-add-ex-form').style.display = 'none';
+  document.getElementById('session-add-search').value = '';
+  // Scroll to new block
+  block.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function toggleSaveAsTemplate() {
