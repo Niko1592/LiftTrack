@@ -573,7 +573,11 @@
     <!-- RIGHT: SINGLE EXERCISE FORM (default) -->
     <div id="log-single-panel">
       <div class="form-card">
-        <h2>Log a Workout</h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h2 style="margin:0;">Log a Workout</h2>
+          <button class="btn-sm" onclick="document.getElementById('csv-import-input').click();" title="Import CSV">Import CSV</button>
+          <input type="file" id="csv-import-input" accept=".csv" style="display:none;" onchange="handleCSVImport(event)">
+        </div>
         <div class="form-group">
           <label>Date</label>
           <input type="date" id="log-date">
@@ -614,7 +618,13 @@
     <div id="log-session-panel" style="display:none">
       <div class="session-form">
         <div class="session-header">
-          <div class="session-title" id="session-title">Push Day</div>
+          <input type="text" id="session-title" value="Push Day"
+            style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:8px;font-size:0.95rem;font-weight:700;outline:none;font-family:'Inter',system-ui,sans-serif;letter-spacing:-0.01em;min-width:0;"
+            placeholder="Session name…"
+            onfocus="this.style.borderColor='var(--accent)'"
+            onblur="this.style.borderColor='var(--border)'"
+          >
+          <button class="btn-sm" onclick="document.getElementById('csv-import-input').click();" title="Import CSV" style="flex-shrink:0;">Import CSV</button>
           <div class="session-date-wrap">
             <label>Date</label>
             <input type="date" id="session-date">
@@ -2022,7 +2032,7 @@ function selectTemplate(id) {
 function buildSessionForm(tmplId) {
   const tmpl = templates.find(t => t.id === tmplId);
   if (!tmpl) return;
-  document.getElementById('session-title').textContent = tmpl.name;
+  document.getElementById('session-title').value = tmpl.name;
   sessionSetCounters = {};
 
   const container = document.getElementById('session-exercises');
@@ -2105,16 +2115,23 @@ function removeSessionSet(exId, n) {
 }
 
 function saveWorkoutSession() {
-  const tmpl = templates.find(t => t.id === activeTemplateId);
-  if (!tmpl) return;
   const date = document.getElementById('session-date').value;
   if (!date) { alert('Please pick a date.'); return; }
 
+  // Collect ALL exercise blocks currently visible on screen (handles CSV imports + added exercises)
+  const allBlocks = [...document.querySelectorAll('[id^="session-block-"]')];
+  if (!allBlocks.length) { alert('No exercises in session.'); return; }
+
+  const tmpl = templates.find(t => t.id === activeTemplateId);
   const sessionId = Date.now().toString(36);
+  const sessionName = document.getElementById('session-title')?.value?.trim() || tmpl?.name || 'Session';
   let saved = 0;
-  tmpl.exerciseIds.forEach(exId => {
+
+  allBlocks.forEach(block => {
+    const exId = +block.id.replace('session-block-', '');
+    if (!exId) return;
     const sets = [];
-    document.querySelectorAll(`[id^="sset-${exId}-"]`).forEach(row => {
+    block.querySelectorAll('.session-set-row').forEach(row => {
       const parts = row.id.split('-');
       const n = parts[parts.length - 1];
       const reps = +document.getElementById(`sreps-${exId}-${n}`)?.value || 0;
@@ -2122,9 +2139,8 @@ function saveWorkoutSession() {
       const weight = isBW ? 0 : (+document.getElementById(`sweight-${exId}-${n}`)?.value || 0);
       if (reps > 0) sets.push({ reps, weight, bodyweight: isBW });
     });
-    // Only save exercises where at least one set was filled in — skip the rest
     if (sets.length > 0) {
-      workouts.push({ date, exerciseId: exId, sets, sessionId, templateName: tmpl.name });
+      workouts.push({ date, exerciseId: exId, sets, sessionId, templateName: sessionName });
       saved++;
     }
   });
@@ -2132,9 +2148,151 @@ function saveWorkoutSession() {
   if (saved === 0) { alert('Fill in reps for at least one exercise.'); return; }
   persist();
   const msg = document.getElementById('session-success-msg');
-  msg.style.display = 'inline';
-  setTimeout(() => msg.style.display = 'none', 2500);
-  buildSessionForm(activeTemplateId);
+  if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
+  if (activeTemplateId) buildSessionForm(activeTemplateId);
+}
+
+// ── CSV IMPORT ────────────────────────────────────────
+function handleCSVImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result;
+      const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
+      if (!lines.length) { alert('CSV is empty.'); return; }
+
+      // Detect header row
+      const firstLine = lines[0].toLowerCase();
+      const hasHeader = firstLine.includes('exercise') || firstLine.includes('name');
+      const dataLines = hasHeader ? lines.slice(1) : lines;
+
+      if (!dataLines.length) { alert('No data rows found in CSV.'); return; }
+
+      // Parse rows — format: exercise, sets, reps, weight
+      // Also supports: exercise, reps, weight (single set per row)
+      const parsed = [];
+      for (const line of dataLines) {
+        const cols = line.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+        if (cols.length < 2) continue;
+        const exName = cols[0];
+        if (!exName) continue;
+
+        // Find matching exercise (fuzzy — case insensitive partial match)
+        let ex = exercises.find(e => e.name.toLowerCase() === exName.toLowerCase());
+        if (!ex) ex = exercises.find(e => e.name.toLowerCase().includes(exName.toLowerCase()));
+        if (!ex) ex = exercises.find(e => exName.toLowerCase().includes(e.name.toLowerCase().split(' ')[0]));
+
+        let sets = 3, reps = 0, weight = 0;
+        if (cols.length >= 4) {
+          // format: exercise, sets, reps, weight
+          sets   = parseInt(cols[1]) || 3;
+          reps   = parseInt(cols[2]) || 0;
+          weight = parseFloat(cols[3]) || 0;
+        } else if (cols.length === 3) {
+          // format: exercise, reps, weight
+          sets   = 1;
+          reps   = parseInt(cols[1]) || 0;
+          weight = parseFloat(cols[2]) || 0;
+        } else if (cols.length === 2) {
+          // format: exercise, reps
+          sets = 1;
+          reps = parseInt(cols[1]) || 0;
+        }
+
+        parsed.push({ ex, exName, sets, reps, weight });
+      }
+
+      if (!parsed.length) { alert('Could not parse any exercises from the CSV.'); return; }
+
+      // Check if session panel is active
+      const isSession = document.getElementById('log-session-panel').style.display !== 'none';
+
+      if (isSession) {
+        // Add to existing session form
+        for (const row of parsed) {
+          if (!row.ex) continue;
+          if (!document.getElementById(`session-block-${row.ex.id}`)) {
+            addExToSession(row.ex.id);
+          }
+          // Fill in the set values
+          const setEls = document.querySelectorAll(`#session-sets-${row.ex.id} .session-set-row`);
+          setEls.forEach(setRow => {
+            const parts = setRow.id.split('-');
+            const n = parts[parts.length-1];
+            const repsEl = document.getElementById(`sreps-${row.ex.id}-${n}`);
+            const weightEl = document.getElementById(`sweight-${row.ex.id}-${n}`);
+            if (repsEl && !repsEl.value) repsEl.value = row.reps || '';
+            if (weightEl && !weightEl.value) weightEl.value = row.weight || '';
+          });
+        }
+      } else {
+        // No active template — populate the session panel so user can review before saving
+        const container = document.getElementById('session-exercises');
+        document.getElementById('log-single-panel').style.display = 'none';
+        document.getElementById('log-session-panel').style.display = '';
+        document.getElementById('session-title').value = file.name.replace('.csv','');
+        const today = new Date().toISOString().slice(0,10);
+        document.getElementById('session-date').value = today;
+        container.innerHTML = '';
+        sessionSetCounters = {};
+        activeTemplateId = null;
+
+        for (const row of parsed) {
+          if (!row.ex) {
+            const warn = document.createElement('div');
+            warn.style.cssText = 'padding:10px 14px;background:rgba(255,101,132,0.1);border:1px solid var(--accent2);border-radius:8px;font-size:0.82rem;color:var(--accent2);margin-bottom:10px;';
+            warn.textContent = `"${row.exName}" not found — skipped.`;
+            container.appendChild(warn);
+            continue;
+          }
+          // Build the block manually (same as addExToSession but with pre-filled values)
+          if (document.getElementById(`session-block-${row.ex.id}`)) continue;
+          sessionSetCounters[row.ex.id] = 0;
+          const block = document.createElement('div');
+          block.className = 'session-ex-block';
+          block.id = `session-block-${row.ex.id}`;
+          const lastWeight = getLastWeight(row.ex.id);
+          const hint = lastWeight !== null ? `Last: ${lastWeight > 0 ? lastWeight + ' lbs' : 'BW'}` : '';
+          block.innerHTML = `
+            <div class="session-ex-header" onclick="toggleSessionBlock(${row.ex.id})">
+              <div class="session-ex-name">${row.ex.name}</div>
+              <span class="ex-cat">${row.ex.cat}</span>
+              ${hint ? `<div class="session-ex-hint">${hint}</div>` : ''}
+              <span class="session-ex-toggle">▼</span>
+            </div>
+            <div class="session-ex-body">
+              <div class="session-sets" id="session-sets-${row.ex.id}"></div>
+              <div style="margin-top:10px">
+                <button class="btn-sm" onclick="addSessionSet(${row.ex.id})">+ Set</button>
+              </div>
+            </div>`;
+          container.appendChild(block);
+          // Add sets with pre-filled values
+          for (let s = 0; s < row.sets; s++) {
+            addSessionSet(row.ex.id);
+            const n = sessionSetCounters[row.ex.id];
+            const repsEl = document.getElementById(`sreps-${row.ex.id}-${n}`);
+            const weightEl = document.getElementById(`sweight-${row.ex.id}-${n}`);
+            if (repsEl && row.reps) repsEl.value = row.reps;
+            if (weightEl && row.weight) weightEl.value = row.weight;
+          }
+        }
+      }
+
+      // Reset file input so same file can be re-imported
+      event.target.value = '';
+
+      // Show success
+      const msg = document.getElementById('session-success-msg') || document.getElementById('success-msg');
+      if (msg) { msg.textContent = '✓ CSV imported!'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; msg.textContent = msg.id === 'session-success-msg' ? '✓ Session saved!' : '✓ Saved!'; }, 3000); }
+
+    } catch(err) {
+      alert('Could not read CSV: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
 }
 
 function toggleSessionAddEx() {
