@@ -24,6 +24,92 @@
     --border: #2a2e42;
     --radius: 12px;
   }
+
+  /* ── THEMES ── */
+  [data-theme="light"] {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface2: #eef0f5;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --green: #16a34a;
+    --yellow: #d97706;
+    --text: #111827;
+    --muted: #6b7280;
+    --border: #d1d5db;
+  }
+  [data-theme="rose"] {
+    --bg: #1a0f14;
+    --surface: #271420;
+    --surface2: #321a28;
+    --accent: #f43f5e;
+    --accent2: #fb923c;
+    --green: #34d399;
+    --yellow: #fbbf24;
+    --text: #fce7f3;
+    --muted: #9d7a8a;
+    --border: #4a2035;
+  }
+  [data-theme="ocean"] {
+    --bg: #0a1628;
+    --surface: #0f2040;
+    --surface2: #162a52;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --green: #34d399;
+    --yellow: #fbbf24;
+    --text: #e0f2fe;
+    --muted: #64748b;
+    --border: #1e3a5f;
+  }
+  [data-theme="forest"] {
+    --bg: #0d1a0f;
+    --surface: #132416;
+    --surface2: #1a2e1d;
+    --accent: #4ade80;
+    --accent2: #86efac;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --text: #dcfce7;
+    --muted: #6b7280;
+    --border: #1f3d24;
+  }
+  [data-theme="sunset"] {
+    --bg: #1a0f00;
+    --surface: #271800;
+    --surface2: #3d2400;
+    --accent: #f97316;
+    --accent2: #fb7185;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --text: #fff7ed;
+    --muted: #92400e;
+    --border: #451a00;
+  }
+  [data-theme="lavender"] {
+    --bg: #f5f3ff;
+    --surface: #ffffff;
+    --surface2: #ede9fe;
+    --accent: #7c3aed;
+    --accent2: #ec4899;
+    --green: #16a34a;
+    --yellow: #d97706;
+    --text: #1e1b4b;
+    --muted: #6d28d9;
+    --border: #ddd6fe;
+  }
+  [data-theme="midnight"] {
+    --bg: #000000;
+    --surface: #0a0a0a;
+    --surface2: #141414;
+    --accent: #ffffff;
+    --accent2: #a3a3a3;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --text: #f5f5f5;
+    --muted: #525252;
+    --border: #262626;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
   h2 { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
@@ -390,7 +476,13 @@
   .auth-tab.active { background: var(--accent); color: #fff; }
   .auth-error { color: var(--accent2); font-size: 0.78rem; margin-bottom: 12px; min-height: 18px; text-align: center; }
   .user-badge { margin-left: auto; display: flex; align-items: center; gap: 8px; position: relative; }
-  .settings-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 1.1rem; line-height: 1; }
+  .settings-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+  .settings-section-label { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; padding: 8px 14px 4px; }
+  .theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 8px 14px 12px; }
+  .theme-swatch { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; position: relative; }
+  .theme-swatch:hover { transform: scale(1.1); }
+  .theme-swatch.active { border-color: var(--text); }
+  .theme-swatch span { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; color: var(--muted); white-space: nowrap; font-weight: 500; } cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 1.1rem; line-height: 1; }
   .settings-btn:hover { color: var(--text); background: var(--surface2); }
   .settings-dropdown { display: none; position: fixed; top: 52px; right: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; min-width: 190px; z-index: 1000; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
   .settings-dropdown.open { display: block; }
@@ -442,6 +534,19 @@
       <div class="settings-status">
         <div id="sync-status"></div>
       </div>
+      <hr class="settings-divider">
+      <div class="settings-section-label">Theme</div>
+      <div class="theme-grid">
+        <div class="theme-swatch active" data-theme="dark" onclick="setTheme('dark')" style="background:linear-gradient(135deg,#0f1117,#6c63ff);" title="Dark"><span>Dark</span></div>
+        <div class="theme-swatch" data-theme="light" onclick="setTheme('light')" style="background:linear-gradient(135deg,#f4f5f7,#6c63ff);" title="Light"><span>Light</span></div>
+        <div class="theme-swatch" data-theme="rose" onclick="setTheme('rose')" style="background:linear-gradient(135deg,#1a0f14,#f43f5e);" title="Rose"><span>Rose</span></div>
+        <div class="theme-swatch" data-theme="ocean" onclick="setTheme('ocean')" style="background:linear-gradient(135deg,#0a1628,#38bdf8);" title="Ocean"><span>Ocean</span></div>
+        <div class="theme-swatch" data-theme="forest" onclick="setTheme('forest')" style="background:linear-gradient(135deg,#0d1a0f,#4ade80);" title="Forest"><span>Forest</span></div>
+        <div class="theme-swatch" data-theme="sunset" onclick="setTheme('sunset')" style="background:linear-gradient(135deg,#1a0f00,#f97316);" title="Sunset"><span>Sunset</span></div>
+        <div class="theme-swatch" data-theme="lavender" onclick="setTheme('lavender')" style="background:linear-gradient(135deg,#f5f3ff,#7c3aed);" title="Lavender"><span>Lavender</span></div>
+        <div class="theme-swatch" data-theme="midnight" onclick="setTheme('midnight')" style="background:linear-gradient(135deg,#000,#fff);" title="Midnight"><span>Midnight</span></div>
+      </div>
+      <hr class="settings-divider">
       <button class="settings-item" onclick="signOut()">
         <span>Sign Out</span>
       </button>
@@ -3164,6 +3269,26 @@ function renderStretchLog() {
 }
 
 
+// ── THEME ─────────────────────────────────────────────
+function setTheme(theme) {
+  const el = document.documentElement;
+  if (theme === 'dark') {
+    el.removeAttribute('data-theme');
+  } else {
+    el.setAttribute('data-theme', theme);
+  }
+  localStorage.setItem('lt_theme', theme);
+  // Update active swatch
+  document.querySelectorAll('.theme-swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.theme === theme);
+  });
+}
+
+function loadSavedTheme() {
+  const saved = localStorage.getItem('lt_theme') || 'dark';
+  setTheme(saved);
+}
+
 // ── SETTINGS DROPDOWN ─────────────────────────────────
 function toggleSettings(e) {
   e.stopPropagation();
@@ -3255,6 +3380,7 @@ async function handleAuth() {
 
 // ── INIT ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  loadSavedTheme();
   // Wire up Enter key on auth form
   document.getElementById('auth-password')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') handleAuth();
