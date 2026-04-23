@@ -110,6 +110,79 @@
     --muted: #525252;
     --border: #262626;
   }
+
+  /* ── PRIMARY PALETTES (surface + text) ── */
+  /* Primary sets background / surface / text / muted / border.
+     Secondary sets --accent (and --accent2 as a complementary tint). */
+  [data-primary="white"] {
+    --bg: #f8f9fb;
+    --surface: #ffffff;
+    --surface2: #eef0f4;
+    --text: #111827;
+    --muted: #6b7280;
+    --border: #d1d5db;
+    --green: #16a34a;
+    --yellow: #d97706;
+  }
+  [data-primary="beige"] {
+    --bg: #f5efe4;
+    --surface: #fbf6ec;
+    --surface2: #eadfc9;
+    --text: #3a2e1f;
+    --muted: #8a7555;
+    --border: #d9c9a8;
+    --green: #4d7c2c;
+    --yellow: #a65f17;
+  }
+  [data-primary="dark-aqua"] {
+    --bg: #06181c;
+    --surface: #0c242b;
+    --surface2: #123039;
+    --text: #d5f1f6;
+    --muted: #6d8e96;
+    --border: #1c3d47;
+    --green: #34d399;
+    --yellow: #fbbf24;
+  }
+  [data-primary="slate"] {
+    --bg: #151922;
+    --surface: #1d2230;
+    --surface2: #262c3d;
+    --text: #e5e9f2;
+    --muted: #8089a0;
+    --border: #323a52;
+    --green: #43e97b;
+    --yellow: #f9d423;
+  }
+  [data-primary="dark-green"] {
+    --bg: #0b1a10;
+    --surface: #112418;
+    --surface2: #183022;
+    --text: #d7efda;
+    --muted: #6d8a76;
+    --border: #1f3b2a;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+  }
+  [data-primary="maroon"] {
+    --bg: #1a0a0e;
+    --surface: #261217;
+    --surface2: #341a21;
+    --text: #f1dde2;
+    --muted: #9a7880;
+    --border: #4a222c;
+    --green: #34d399;
+    --yellow: #fbbf24;
+  }
+
+  /* ── SECONDARY PALETTES (accent only) ── */
+  [data-secondary="red"]             { --accent: #ef4444; --accent2: #f97316; }
+  [data-secondary="electric-purple"] { --accent: #a855f7; --accent2: #ec4899; }
+  [data-secondary="light-blue"]      { --accent: #38bdf8; --accent2: #818cf8; }
+  [data-secondary="lime"]            { --accent: #84cc16; --accent2: #22c55e; }
+  [data-secondary="vibrant-orange"]  { --accent: #f97316; --accent2: #f59e0b; }
+  [data-secondary="hot-pink"]        { --accent: #ec4899; --accent2: #f43f5e; }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
   h2 { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
@@ -359,6 +432,77 @@
   .stretch-log-name { color: var(--text); font-weight: 500; }
   .stretch-log-meta { color: var(--muted); font-size: 0.72rem; }
 
+  /* ── LIVE WORKOUT TAKEOVER ───────────────────────── */
+  .live-overlay { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 1000; flex-direction: column; overflow-y: auto; }
+  .live-overlay.open { display: flex; }
+  .live-topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .live-session-name { font-size: 0.95rem; font-weight: 700; letter-spacing: -0.01em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .live-progress-badge { background: var(--surface2); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; color: var(--muted); letter-spacing: 0.3px; white-space: nowrap; }
+  .live-exit-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Inter', system-ui, sans-serif; }
+  .live-exit-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .live-content { flex: 1; padding: 24px 20px 120px; max-width: 700px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+  .live-ex-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+  .live-ex-name { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; flex: 1; min-width: 0; }
+  .live-ex-cat { font-size: 0.7rem; color: var(--accent); background: rgba(108,99,255,0.12); padding: 4px 10px; border-radius: 6px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; }
+  .live-last-hint { font-size: 0.82rem; color: var(--muted); margin-bottom: 16px; font-weight: 500; }
+  .live-last-hint strong { color: var(--text); font-weight: 600; }
+  .live-tip-box { background: rgba(249,212,35,0.08); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 12px 14px; margin-bottom: 20px; font-size: 0.85rem; color: var(--text); line-height: 1.5; }
+  .live-tip-label { font-size: 0.65rem; color: var(--yellow); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+
+  /* Main set card — the current set is the hero */
+  .live-set-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .live-set-card-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+  .live-set-current-label { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.01em; color: var(--accent); }
+  .live-set-progress { font-size: 0.78rem; color: var(--muted); font-weight: 600; letter-spacing: 0.3px; }
+  .live-set-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .live-set-input-group { display: flex; flex-direction: column; gap: 6px; }
+  .live-set-input-group label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.7px; }
+  .live-set-input-group input { background: var(--surface2); border: 2px solid var(--border); color: var(--text); padding: 18px 14px; border-radius: 12px; font-size: 2rem; font-weight: 700; outline: none; text-align: center; font-family: 'Inter', system-ui, sans-serif; letter-spacing: -0.02em; width: 100%; }
+  .live-set-input-group input:focus { border-color: var(--accent); }
+  .live-set-input-group input:disabled { opacity: 0.4; background: var(--surface); }
+  .live-bw-toggle { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text); padding: 10px 0; cursor: pointer; user-select: none; font-weight: 500; }
+  .live-bw-toggle input { accent-color: var(--accent); width: 18px; height: 18px; cursor: pointer; }
+  .live-complete-btn { width: 100%; background: var(--accent); color: #fff; border: none; padding: 18px; border-radius: 12px; font-size: 1.05rem; font-weight: 700; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; letter-spacing: 0.4px; margin-top: 8px; transition: all 0.15s; }
+  .live-complete-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .live-complete-btn:active { transform: translateY(0); }
+
+  /* Completed-sets strip — compact row of pills */
+  .live-done-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; min-height: 4px; }
+  .live-done-pill { background: rgba(67,233,123,0.1); border: 1px solid rgba(67,233,123,0.3); color: var(--green); font-size: 0.72rem; font-weight: 600; padding: 5px 10px; border-radius: 20px; letter-spacing: 0.2px; cursor: pointer; transition: all 0.15s; }
+  .live-done-pill:hover { background: rgba(67,233,123,0.2); }
+  .live-done-pill.skipped { background: var(--surface2); border-color: var(--border); color: var(--muted); text-decoration: line-through; }
+  .live-done-pill.skipped:hover { background: var(--surface); }
+
+  .live-actions-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .live-actions-bar select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; font-weight: 500; flex: 1; min-width: 120px; }
+  .live-mini-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; letter-spacing: 0.2px; }
+  .live-mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .live-mini-btn.danger:hover { border-color: var(--accent2); color: var(--accent2); }
+  .live-bottom-bar { position: sticky; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 8px; align-items: center; z-index: 10; margin-top: auto; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); }
+  .live-nav-btn { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 11px 8px; border-radius: 10px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; letter-spacing: 0.2px; }
+  .live-nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .live-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .live-finish-btn { background: var(--green); color: #062a11; border: none; padding: 11px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; letter-spacing: 0.3px; flex: 1.3; }
+  .live-finish-btn:hover { opacity: 0.9; }
+  .live-ex-pills { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; margin: -4px 0 14px; scrollbar-width: thin; }
+  .live-ex-pill { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 6px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.15s; letter-spacing: 0.2px; }
+  .live-ex-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .live-ex-pill.current { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .live-ex-pill.done { background: rgba(67,233,123,0.15); color: var(--green); border-color: rgba(67,233,123,0.3); }
+  .live-ex-pill.skipped { opacity: 0.5; text-decoration: line-through; }
+
+  @media (max-width: 600px) {
+    .live-ex-name { font-size: 1.35rem; }
+    .live-content { padding: 18px 14px 110px; }
+    .live-topbar { padding: 12px 14px; }
+    .live-set-card { padding: 18px; }
+    .live-set-input-group input { font-size: 1.7rem; padding: 15px 10px; }
+    .live-set-current-label { font-size: 1.15rem; }
+    .live-complete-btn { padding: 15px; font-size: 0.98rem; }
+    .live-bottom-bar { padding: 10px 10px; gap: 6px; }
+    .live-nav-btn, .live-finish-btn { padding: 10px 6px; font-size: 0.76rem; }
+  }
+
   @media (max-width: 860px) {
     .log-layout { grid-template-columns: 1fr; }
   }
@@ -482,9 +626,21 @@
   .theme-swatch { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; position: relative; }
   .theme-swatch:hover { transform: scale(1.1); }
   .theme-swatch.active { border-color: var(--text); }
-  .theme-swatch span { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; color: var(--muted); white-space: nowrap; font-weight: 500; } cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 1.1rem; line-height: 1; }
+  .theme-swatch span { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; color: var(--muted); white-space: nowrap; font-weight: 500; }
+  /* Secondary swatches — simpler round accent dots */
+  .color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 8px 14px 22px; }
+  .color-swatch { width: 100%; aspect-ratio: 1; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; position: relative; }
+  .color-swatch:hover { transform: scale(1.15); }
+  .color-swatch.active { border-color: var(--text); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
+  .color-swatch span { position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); font-size: 0.5rem; color: var(--muted); white-space: nowrap; font-weight: 500; }
+  .primary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 8px 14px 22px; }
+  .primary-swatch { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; position: relative; }
+  .primary-swatch:hover { transform: scale(1.08); }
+  .primary-swatch.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
+  .primary-swatch span { position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); font-size: 0.55rem; color: var(--muted); white-space: nowrap; font-weight: 500; }
+  .settings-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 1.1rem; line-height: 1; }
   .settings-btn:hover { color: var(--text); background: var(--surface2); }
-  .settings-dropdown { display: none; position: fixed; top: 52px; right: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; min-width: 190px; z-index: 1000; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+  .settings-dropdown { display: none; position: fixed; top: 52px; right: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; min-width: 240px; z-index: 1000; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
   .settings-dropdown.open { display: block; }
   .settings-status { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.78rem; color: var(--muted); }
   .settings-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 0.82rem; color: var(--text); cursor: pointer; transition: background 0.12s; background: none; border: none; width: 100%; text-align: left; font-family: 'Inter', system-ui, sans-serif; }
@@ -535,16 +691,23 @@
         <div id="sync-status"></div>
       </div>
       <hr class="settings-divider">
-      <div class="settings-section-label">Theme</div>
-      <div class="theme-grid">
-        <div class="theme-swatch active" data-theme="dark" onclick="setTheme('dark')" style="background:linear-gradient(135deg,#0f1117,#6c63ff);" title="Dark"><span>Dark</span></div>
-        <div class="theme-swatch" data-theme="light" onclick="setTheme('light')" style="background:linear-gradient(135deg,#f4f5f7,#6c63ff);" title="Light"><span>Light</span></div>
-        <div class="theme-swatch" data-theme="rose" onclick="setTheme('rose')" style="background:linear-gradient(135deg,#1a0f14,#f43f5e);" title="Rose"><span>Rose</span></div>
-        <div class="theme-swatch" data-theme="ocean" onclick="setTheme('ocean')" style="background:linear-gradient(135deg,#0a1628,#38bdf8);" title="Ocean"><span>Ocean</span></div>
-        <div class="theme-swatch" data-theme="forest" onclick="setTheme('forest')" style="background:linear-gradient(135deg,#0d1a0f,#4ade80);" title="Forest"><span>Forest</span></div>
-        <div class="theme-swatch" data-theme="sunset" onclick="setTheme('sunset')" style="background:linear-gradient(135deg,#1a0f00,#f97316);" title="Sunset"><span>Sunset</span></div>
-        <div class="theme-swatch" data-theme="lavender" onclick="setTheme('lavender')" style="background:linear-gradient(135deg,#f5f3ff,#7c3aed);" title="Lavender"><span>Lavender</span></div>
-        <div class="theme-swatch" data-theme="midnight" onclick="setTheme('midnight')" style="background:linear-gradient(135deg,#000,#fff);" title="Midnight"><span>Midnight</span></div>
+      <div class="settings-section-label">Primary</div>
+      <div class="primary-grid">
+        <div class="primary-swatch" data-primary="white"      onclick="setPrimary('white')"      style="background:linear-gradient(135deg,#ffffff,#eef0f4);"   title="White"><span>White</span></div>
+        <div class="primary-swatch" data-primary="beige"      onclick="setPrimary('beige')"      style="background:linear-gradient(135deg,#fbf6ec,#eadfc9);"   title="Beige"><span>Beige</span></div>
+        <div class="primary-swatch" data-primary="dark-aqua"  onclick="setPrimary('dark-aqua')"  style="background:linear-gradient(135deg,#0c242b,#123039);"   title="Dark Aqua"><span>Dark Aqua</span></div>
+        <div class="primary-swatch" data-primary="slate"      onclick="setPrimary('slate')"      style="background:linear-gradient(135deg,#1d2230,#262c3d);"   title="Slate"><span>Slate</span></div>
+        <div class="primary-swatch" data-primary="dark-green" onclick="setPrimary('dark-green')" style="background:linear-gradient(135deg,#112418,#183022);"   title="Dark Green"><span>Dark Green</span></div>
+        <div class="primary-swatch" data-primary="maroon"     onclick="setPrimary('maroon')"     style="background:linear-gradient(135deg,#261217,#341a21);"   title="Maroon"><span>Maroon</span></div>
+      </div>
+      <div class="settings-section-label">Secondary</div>
+      <div class="color-grid">
+        <div class="color-swatch" data-secondary="red"             onclick="setSecondary('red')"             style="background:#ef4444;" title="Red"><span>Red</span></div>
+        <div class="color-swatch" data-secondary="electric-purple" onclick="setSecondary('electric-purple')" style="background:#a855f7;" title="Electric Purple"><span>Purple</span></div>
+        <div class="color-swatch" data-secondary="light-blue"      onclick="setSecondary('light-blue')"      style="background:#38bdf8;" title="Light Blue"><span>Blue</span></div>
+        <div class="color-swatch" data-secondary="lime"            onclick="setSecondary('lime')"            style="background:#84cc16;" title="Lime"><span>Lime</span></div>
+        <div class="color-swatch" data-secondary="vibrant-orange"  onclick="setSecondary('vibrant-orange')"  style="background:#f97316;" title="Vibrant Orange"><span>Orange</span></div>
+        <div class="color-swatch" data-secondary="hot-pink"        onclick="setSecondary('hot-pink')"        style="background:#ec4899;" title="Hot Pink"><span>Pink</span></div>
       </div>
       <hr class="settings-divider">
       <button class="settings-item" onclick="signOut()">
@@ -633,6 +796,7 @@
       <div class="chart-title" id="freq-title">Activity</div>
       <div style="display:flex;gap:2px;margin-bottom:6px;" id="freq-day-labels"></div>
       <div class="freq-grid" id="freq-grid"></div>
+      <div id="freq-hint" style="display:none;text-align:center;font-size:0.7rem;color:var(--muted);margin-top:10px;font-style:italic;">Tap a highlighted day to see details</div>
     </div>
   </div>
 
@@ -747,8 +911,9 @@
     <!-- RIGHT: SINGLE EXERCISE FORM (default) -->
     <div id="log-single-panel">
       <div class="form-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-          <h2 style="margin:0;">Log a Workout</h2>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+          <h2 style="margin:0;flex:1;min-width:0;">Log a Workout</h2>
+          <button class="btn" onclick="startLiveFromSingle()" style="padding:8px 14px;font-size:0.82rem;white-space:nowrap;">▶ Start Live</button>
           <button class="btn-sm" onclick="showCsvModal()" title="Import CSV">Import CSV</button>
           <input type="file" id="csv-import-input" accept=".csv" style="display:none;" onchange="handleCSVImport(event)">
         </div>
@@ -804,6 +969,7 @@
             <input type="date" id="session-date">
           </div>
         </div>
+        <button class="btn" onclick="startLiveFromSession()" style="width:100%;margin-bottom:16px;padding:12px;font-size:0.9rem;">▶ Start Live Workout</button>
         <div id="session-exercises"></div>
 
         <!-- Add exercise to active session -->
@@ -1157,6 +1323,67 @@
       <button class="btn-sm" onclick="closeEditModal()">Cancel</button>
       <button class="btn" onclick="saveEditTemplate()">Save Changes</button>
     </div>
+  </div>
+</div>
+
+<!-- ── LIVE WORKOUT TAKEOVER ───────────────────────── -->
+<div class="live-overlay" id="live-overlay">
+  <div class="live-topbar">
+    <div class="live-session-name" id="live-session-name">Live Workout</div>
+    <div class="live-progress-badge" id="live-progress-badge">1 / 1</div>
+    <button class="live-exit-btn" onclick="exitLiveMode()" title="Exit Live mode">✕</button>
+  </div>
+  <div class="live-content">
+    <div class="live-ex-pills" id="live-ex-pills"></div>
+    <div class="live-ex-header">
+      <div class="live-ex-name" id="live-ex-name">Exercise</div>
+      <span class="live-ex-cat" id="live-ex-cat">Push</span>
+    </div>
+    <div class="live-last-hint" id="live-last-hint"></div>
+    <div class="live-tip-box" id="live-tip-box">
+      <div class="live-tip-label">Form Cue</div>
+      <div id="live-tip-text">Focus on controlled reps and full range of motion.</div>
+    </div>
+
+    <!-- CURRENT SET — the main focus -->
+    <div class="live-set-card" id="live-set-card">
+      <div class="live-set-card-header">
+        <div class="live-set-current-label" id="live-set-current-label">Set 1</div>
+        <div class="live-set-progress" id="live-set-progress">1 of 3</div>
+      </div>
+      <div class="live-set-inputs">
+        <div class="live-set-input-group">
+          <label for="live-weight-input">Weight (lbs)</label>
+          <input type="number" inputmode="decimal" id="live-weight-input" placeholder="0" autocomplete="off">
+        </div>
+        <div class="live-set-input-group">
+          <label for="live-reps-input">Reps</label>
+          <input type="number" inputmode="numeric" id="live-reps-input" placeholder="0" autocomplete="off">
+        </div>
+      </div>
+      <label class="live-bw-toggle">
+        <input type="checkbox" id="live-bw-checkbox" onchange="liveToggleBWCurrent(this.checked)">
+        <span>Bodyweight only</span>
+      </label>
+      <button class="live-complete-btn" id="live-complete-btn" onclick="liveCompleteSet()">Complete Set ✓</button>
+    </div>
+
+    <div class="live-done-strip" id="live-done-strip"></div>
+
+    <div class="live-actions-bar">
+      <button class="live-mini-btn" onclick="liveAddSet()">+ Extra Set</button>
+      <select id="live-jump-select" onchange="liveJumpTo(this.value)">
+        <option value="">Jump to exercise…</option>
+      </select>
+      <button class="live-mini-btn" onclick="liveAddExercise()">+ Exercise</button>
+      <button class="live-mini-btn danger" onclick="liveDropCurrent()">Drop</button>
+    </div>
+  </div>
+  <div class="live-bottom-bar">
+    <button class="live-nav-btn" id="live-prev-btn" onclick="liveGoPrevSet()">← Prev Set</button>
+    <button class="live-nav-btn" id="live-skip-btn" onclick="liveSkipCurrentSet()">Skip Set</button>
+    <button class="live-nav-btn" id="live-skip-ex-btn" onclick="liveSkipExercise()">Skip Exercise</button>
+    <button class="live-finish-btn" id="live-finish-btn" onclick="liveFinish()">Finish ✓</button>
   </div>
 </div>
 
@@ -1814,6 +2041,13 @@ function renderFrequency() {
     ).join('');
   }
 
+  // Hint line — always shown when there's activity to click on
+  const hintEl = document.getElementById('freq-hint');
+  const hasAnyActivity = workoutDates.size > 0 || runDates.size > 0;
+  if (hintEl) {
+    hintEl.style.display = hasAnyActivity ? 'block' : 'none';
+  }
+
   const cells = [];
   // Empty spacers for days before the 1st
   for (let i = 0; i < firstDayOfWeek; i++) {
@@ -1829,13 +2063,14 @@ function renderFrequency() {
 
     let bg = 'var(--surface2)';
     let textColor = 'var(--muted)';
-    if (hasWorkout || hasRun) { bg = 'var(--accent)'; textColor = 'rgba(255,255,255,0.9)'; }
-    else if (isFuture) { bg = 'rgba(255,255,255,0.03)'; textColor = 'rgba(255,255,255,0.15)'; }
+    if (hasWorkout || hasRun) { bg = 'var(--accent)'; textColor = '#fff'; }
+    else if (isFuture) { bg = 'var(--surface2)'; textColor = 'var(--muted)'; }
 
     const border = isToday ? `box-shadow:0 0 0 2px var(--accent);` : '';
 
-    const clickable = (hasWorkout || hasRun) ? `onclick="showDayModal('${dateStr}')" style="cursor:pointer;"` : '';
-    cells.push(`<div ${clickable} style="background:${bg};border-radius:4px;height:28px;display:flex;align-items:center;justify-content:center;${border}transition:background 0.2s,transform 0.1s;" title="${dateStr}${hasWorkout||hasRun?' — click to view':''}">
+    const clickable = (hasWorkout || hasRun) ? `onclick="showDayModal('${dateStr}')"` : '';
+    const cursor = (hasWorkout || hasRun) ? 'cursor:pointer;' : '';
+    cells.push(`<div ${clickable} style="background:${bg};border-radius:4px;height:28px;display:flex;align-items:center;justify-content:center;${border}${cursor}transition:background 0.2s,transform 0.1s;" title="${dateStr}${hasWorkout||hasRun?' — click to view':''}">
       <span style="font-size:0.68rem;font-weight:600;color:${textColor};line-height:1;">${day}</span>
     </div>`);
   }
@@ -3520,24 +3755,631 @@ function repeatSolo(idx) {
   });
 }
 
-// ── THEME ─────────────────────────────────────────────
-function setTheme(theme) {
-  const el = document.documentElement;
-  if (theme === 'dark') {
-    el.removeAttribute('data-theme');
-  } else {
-    el.setAttribute('data-theme', theme);
+// ── LIVE WORKOUT MODE ─────────────────────────────────
+// liveSession shape:
+// {
+//   sessionId, sessionName, templateId, date,
+//   plan: [{
+//     exId,
+//     status: 'pending'|'done'|'skipped',         // whole-exercise status
+//     plannedCount: number,                        // how many sets were planned
+//     setResults: [{                               // one entry per set (includes extras)
+//       status: 'pending'|'done'|'skipped',
+//       reps, weight, bodyweight
+//     }]
+//   }],
+//   currentIdx,          // which exercise
+//   currentSetIdx        // which set within that exercise
+// }
+let liveSession = null;
+
+// Form cues: keyword-matched against exercise name (lowercased).
+// Order matters — more specific keywords first.
+const LIVE_FORM_CUES = [
+  // Compound barbell
+  { match: ['deadlift'],        tip: 'Bar over mid-foot. Brace hard, hinge at hips, drag the bar up the shins. Lock out with glutes, not lower back.' },
+  { match: ['rack pull'],       tip: 'Set pins just below the knee. Brace, drive through the floor, lock out tall — no hyperextension.' },
+  { match: ['squat'],           tip: 'Brace core, chest up, knees track over toes. Break parallel with controlled descent; drive through mid-foot.' },
+  { match: ['bench press'],     tip: 'Shoulder blades pinned, feet planted. Bar to lower chest, elbows tucked ~45°. Controlled descent, powerful press.' },
+  { match: ['overhead press', 'shoulder press', 'arnold press'], tip: 'Glutes and core tight — no leaning back. Press straight up, finish with biceps by the ears.' },
+  { match: ['row'],             tip: 'Hinge forward, chest up. Pull the bar to the lower sternum, drive elbows back. Squeeze lats at the top.' },
+  { match: ['pull-up', 'chin-up'], tip: 'Start from a dead hang. Drive elbows down, chest toward the bar. Control the descent — no kipping.' },
+  { match: ['lat pulldown'],    tip: 'Slight lean back. Pull the bar to the upper chest by driving elbows down. Control the return fully.' },
+  { match: ['face pull'],       tip: 'High elbows. Pull the rope to your eyes, externally rotate at the end. Light weight, pause and squeeze.' },
+
+  // Isolation — chest
+  { match: ['fly', 'flye', 'pec deck'], tip: 'Slight bend in the elbows, lock that angle. Feel the stretch, squeeze the chest at the top. No bouncing.' },
+  { match: ['cable crossover'], tip: 'Soft bend in elbows. Think of wrapping your arms around a tree. Squeeze and control the eccentric.' },
+
+  // Isolation — shoulders
+  { match: ['lateral raise'],   tip: 'Slight bend in the elbows. Lead with the elbows up to shoulder height — not the hands. Pause at the top.' },
+  { match: ['front raise'],     tip: 'Strict form — no swinging. Raise to shoulder height, control back down. Keep the core braced.' },
+  { match: ['rear delt', 'reverse pec'], tip: 'Lead with elbows wide. Squeeze rear delts at the end range. Feel it in the upper back, not traps.' },
+  { match: ['shrug'],           tip: 'Straight up, not rolled. Hold the top briefly. Full stretch at the bottom — no partial reps.' },
+  { match: ['upright row'],     tip: 'Elbows lead, bar to mid-chest. Stop if you feel shoulder impingement — don\'t go too high.' },
+
+  // Biceps
+  { match: ['hammer curl'],     tip: 'Neutral grip (thumbs up). Elbows pinned to sides. Control the eccentric — 2 seconds down.' },
+  { match: ['preacher curl'],   tip: 'Armpit jammed against the pad. Full stretch at the bottom, squeeze at the top. No swinging.' },
+  { match: ['spider curl'],     tip: 'Arms hanging straight down over the pad. Isolate the biceps — no shoulder movement.' },
+  { match: ['zottman'],         tip: 'Curl up with supinated grip, rotate at the top, lower with a pronated grip. Control the negative.' },
+  { match: ['curl'],            tip: 'Elbows pinned to sides. No body english. Squeeze at the top, full stretch at the bottom.' },
+
+  // Triceps
+  { match: ['skull crusher'],   tip: 'Elbows fixed, pointing up. Lower the bar past the forehead for full stretch. Press back to lockout.' },
+  { match: ['overhead tricep', 'tricep extension'], tip: 'Keep elbows tucked in — don\'t flare. Full stretch behind the head, lock out at the top.' },
+  { match: ['tricep pushdown'], tip: 'Elbows pinned to sides. Keep the torso upright. Lock out fully at the bottom, control the return.' },
+  { match: ['tricep kickback'], tip: 'Upper arm parallel to the floor, locked in place. Extend from the elbow only. Pause at full extension.' },
+  { match: ['close-grip bench'],tip: 'Grip shoulder-width — don\'t go too narrow. Elbows tucked, bar to lower chest. Drive through the triceps.' },
+  { match: ['dip'],             tip: 'Slight forward lean for chest, upright for triceps. Lower under control, press through the palms.' },
+
+  // Legs
+  { match: ['leg press'],       tip: 'Feet shoulder-width, mid-platform. Full range — don\'t cut it short. Never lock the knees at the top.' },
+  { match: ['lunge'],           tip: 'Long step, torso upright. Back knee tracks toward the floor. Drive through the front heel to return.' },
+  { match: ['split squat'],     tip: 'Stable stance, torso upright. Drop straight down — back knee just above the floor. Drive up through the front foot.' },
+  { match: ['romanian deadlift', 'rdl'], tip: 'Hinge at the hips, soft knee bend. Bar travels down the thighs. Feel the hamstring stretch, drive hips forward.' },
+  { match: ['leg extension'],   tip: 'Control the eccentric. Squeeze the quads hard at the top — 1 second hold. Don\'t swing the weight up.' },
+  { match: ['leg curl', 'hamstring curl'], tip: 'Fully contract at the top, controlled stretch at the bottom. Keep hips pressed into the pad.' },
+  { match: ['calf raise'],      tip: 'Full stretch at the bottom, explosive up, pause at the top. Slow negatives — 2-3 seconds down.' },
+  { match: ['hip thrust', 'glute bridge'], tip: 'Chin tucked, ribs down. Drive through the heels, squeeze the glutes hard at the top.' },
+
+  // Core
+  { match: ['plank'],           tip: 'Straight line from head to heels. Brace the core, tuck the pelvis, breathe. Quality over time.' },
+  { match: ['crunch', 'sit-up', 'situp'], tip: 'Curl the spine — don\'t just lift. Exhale on the way up, slow eccentric. No pulling on the neck.' },
+  { match: ['leg raise'],       tip: 'Lower back pressed into the floor/pad. Control the descent — no swinging. Exhale as you lift.' },
+  { match: ['russian twist'],   tip: 'Lean back ~45°, feet off the floor if possible. Rotate from the core, not the arms. Controlled tempo.' },
+  { match: ['hanging'],         tip: 'Grip tight, core braced. Lift the knees with control — no momentum. Lower slowly.' },
+  { match: ['wood chop', 'cable twist'], tip: 'Rotate from the core, not the arms. Keep hips square, pivot the back foot. Controlled both ways.' },
+
+  // Push-ups
+  { match: ['push-up', 'pushup'], tip: 'Plank-tight body. Elbows ~45° from the torso. Chest to the floor, full lockout at the top.' },
+
+  // Cardio
+  { match: ['run', 'jog', 'sprint'], tip: 'Land under your center of mass. Quick cadence (~170-180). Relaxed shoulders, arms driving forward.' },
+  { match: ['rowing', 'row erg'], tip: 'Legs, then back, then arms. Reverse on the return: arms, back, legs. Power through the legs.' },
+  { match: ['bike', 'cycling'], tip: 'Steady cadence. Push through the whole pedal stroke. Keep the core engaged.' },
+
+  // Carries / other
+  { match: ['farmer'],          tip: 'Tall posture, shoulders packed down. Quick, short steps. Crush the handles — grip is the point.' },
+  { match: ['dead hang'],       tip: 'Full hang, shoulders active (not fully loose). Breathe. Drop off before grip fails completely.' },
+  { match: ['wrist curl'],      tip: 'Forearms pinned to the bench. Full range at the wrist. Light weight, high reps.' },
+];
+
+// Category fallback cues
+const LIVE_CAT_CUES = {
+  Push:   'Brace the core, control the eccentric, full range of motion. Press with intent.',
+  Pull:   'Lead with the elbows. Squeeze at peak contraction, control the return.',
+  Legs:   'Full depth, drive through the heels. Brace the core on every rep.',
+  Core:   'Slow, controlled reps. Breathe through the effort — no holding your breath.',
+  Cardio: 'Steady rhythm, stay relaxed. Pace yourself to finish strong.',
+  Other:  'Quality over quantity. Focus on the movement pattern.',
+};
+
+function getLiveTip(ex) {
+  if (!ex) return LIVE_CAT_CUES.Other;
+  const name = ex.name.toLowerCase();
+  for (const cue of LIVE_FORM_CUES) {
+    if (cue.match.some(kw => name.includes(kw))) return cue.tip;
   }
-  localStorage.setItem('lt_theme', theme);
-  // Update active swatch
-  document.querySelectorAll('.theme-swatch').forEach(s => {
-    s.classList.toggle('active', s.dataset.theme === theme);
+  return LIVE_CAT_CUES[ex.cat] || LIVE_CAT_CUES.Other;
+}
+
+function startLiveFromSingle() {
+  const exId = selectedExerciseId || +document.getElementById('log-exercise').value;
+  if (!exId) { alert('Please select an exercise first.'); return; }
+  const date = document.getElementById('log-date').value || new Date().toISOString().slice(0,10);
+
+  // Pull any sets the user has already entered on the form — seed values, but nothing is "done" yet
+  const seedSets = [];
+  document.querySelectorAll('.set-row').forEach(row => {
+    const id = row.id.replace('set-row-','');
+    const reps = +document.getElementById('reps-'+id)?.value || 0;
+    const isBW = document.getElementById('bw-'+id)?.checked || false;
+    const weight = isBW ? 0 : (+document.getElementById('weight-'+id)?.value || 0);
+    seedSets.push({ status: 'pending', reps, weight, bodyweight: isBW });
+  });
+  const planned = seedSets.length || 3;
+  const setResults = seedSets.length ? seedSets : Array.from({length: 3}, () => ({ status: 'pending', reps: 0, weight: 0, bodyweight: false }));
+
+  liveSession = {
+    sessionId: Date.now().toString(36),
+    sessionName: getExById(exId)?.name || 'Live Workout',
+    templateId: null,
+    date,
+    plan: [{ exId, status: 'pending', plannedCount: planned, setResults }],
+    currentIdx: 0,
+    currentSetIdx: 0,
+  };
+  openLiveMode();
+}
+
+function startLiveFromSession() {
+  const tmpl = templates.find(t => t.id === activeTemplateId);
+  const date = document.getElementById('session-date').value || new Date().toISOString().slice(0,10);
+  const sessionName = document.getElementById('session-title')?.value?.trim() || tmpl?.name || 'Live Workout';
+
+  // Collect exercises currently in session form (includes user-added ones)
+  const blocks = [...document.querySelectorAll('[id^="session-block-"]')];
+  if (!blocks.length) { alert('No exercises in session.'); return; }
+
+  const plan = blocks.map(block => {
+    const exId = +block.id.replace('session-block-', '');
+    // Pull pre-entered sets (as seeds) from the session form
+    const seedSets = [];
+    block.querySelectorAll('.session-set-row').forEach(row => {
+      const parts = row.id.split('-');
+      const n = parts[parts.length - 1];
+      const reps = +document.getElementById(`sreps-${exId}-${n}`)?.value || 0;
+      const isBW = document.getElementById(`sbw-${exId}-${n}`)?.checked || false;
+      const weight = isBW ? 0 : (+document.getElementById(`sweight-${exId}-${n}`)?.value || 0);
+      seedSets.push({ status: 'pending', reps, weight, bodyweight: isBW });
+    });
+    const planned = seedSets.length || 3;
+    const setResults = seedSets.length ? seedSets : Array.from({length: 3}, () => ({ status: 'pending', reps: 0, weight: 0, bodyweight: false }));
+    return { exId, status: 'pending', plannedCount: planned, setResults };
+  }).filter(p => p.exId);
+
+  liveSession = {
+    sessionId: Date.now().toString(36),
+    sessionName,
+    templateId: activeTemplateId,
+    date,
+    plan,
+    currentIdx: 0,
+    currentSetIdx: 0,
+  };
+  openLiveMode();
+}
+
+function openLiveMode() {
+  document.getElementById('live-overlay').classList.add('open');
+  renderLiveMode();
+}
+
+function exitLiveMode() {
+  // Check if any set has been completed
+  const hasDone = liveSession?.plan?.some(p => p.setResults.some(s => s.status === 'done'));
+  if (hasDone) {
+    if (!confirm('Exit Live mode? Completed sets will be lost. (Use "Finish" to save your workout.)')) return;
+  }
+  document.getElementById('live-overlay').classList.remove('open');
+  liveSession = null;
+}
+
+// Helper: find the next pending set across the whole plan, starting from (exIdx, setIdx)
+// Returns {exIdx, setIdx} or null if nothing pending remains.
+function findNextPending(fromExIdx, fromSetIdx) {
+  const { plan } = liveSession;
+  // Try remaining sets on the current exercise first
+  const currEx = plan[fromExIdx];
+  if (currEx && currEx.status !== 'skipped') {
+    for (let i = fromSetIdx; i < currEx.setResults.length; i++) {
+      if (currEx.setResults[i].status === 'pending') return { exIdx: fromExIdx, setIdx: i };
+    }
+  }
+  // Then scan subsequent exercises
+  for (let ei = fromExIdx + 1; ei < plan.length; ei++) {
+    if (plan[ei].status === 'skipped') continue;
+    for (let si = 0; si < plan[ei].setResults.length; si++) {
+      if (plan[ei].setResults[si].status === 'pending') return { exIdx: ei, setIdx: si };
+    }
+  }
+  // Wrap: also check earlier exercises for anything still pending (user may have jumped around)
+  for (let ei = 0; ei < fromExIdx; ei++) {
+    if (plan[ei].status === 'skipped') continue;
+    for (let si = 0; si < plan[ei].setResults.length; si++) {
+      if (plan[ei].setResults[si].status === 'pending') return { exIdx: ei, setIdx: si };
+    }
+  }
+  return null;
+}
+
+// Helper: if all sets on an exercise are done/skipped, mark the exercise status accordingly.
+function updateExerciseStatus(exIdx) {
+  const ex = liveSession.plan[exIdx];
+  if (!ex) return;
+  if (ex.status === 'skipped') return; // user manually skipped whole exercise
+  const allResolved = ex.setResults.every(s => s.status === 'done' || s.status === 'skipped');
+  const anyDone = ex.setResults.some(s => s.status === 'done');
+  if (allResolved) ex.status = anyDone ? 'done' : 'skipped';
+}
+
+function renderLiveMode() {
+  if (!liveSession) return;
+  const { plan, currentIdx, currentSetIdx, sessionName } = liveSession;
+  const current = plan[currentIdx];
+  if (!current) return;
+  const ex = getExById(current.exId);
+  if (!ex) return;
+
+  // Top bar
+  document.getElementById('live-session-name').textContent = sessionName;
+  document.getElementById('live-progress-badge').textContent = `${currentIdx + 1} / ${plan.length}`;
+
+  // Exercise pills — jump by exercise
+  const pillsEl = document.getElementById('live-ex-pills');
+  pillsEl.innerHTML = plan.map((p, i) => {
+    const pex = getExById(p.exId);
+    if (!pex) return '';
+    const cls = i === currentIdx ? 'current' : p.status === 'done' ? 'done' : p.status === 'skipped' ? 'skipped' : '';
+    return `<div class="live-ex-pill ${cls}" onclick="liveJumpToExercise(${i})">${pex.name}</div>`;
+  }).join('');
+
+  // Exercise header
+  document.getElementById('live-ex-name').textContent = ex.name;
+  document.getElementById('live-ex-cat').textContent = ex.cat;
+
+  // Last-time hint
+  const hintEl = document.getElementById('live-last-hint');
+  const last = getLastWeight(current.exId);
+  if (last !== null) {
+    hintEl.innerHTML = `Last time: <strong>${last > 0 ? last + ' lbs' : 'Bodyweight'}</strong>`;
+    hintEl.style.display = '';
+  } else {
+    hintEl.textContent = '';
+    hintEl.style.display = 'none';
+  }
+
+  // Form cue
+  document.getElementById('live-tip-text').textContent = getLiveTip(ex);
+
+  // Completed-sets strip
+  renderLiveDoneStrip();
+
+  // Current set card
+  renderLiveCurrentSet();
+
+  // Jump select
+  const jumpSel = document.getElementById('live-jump-select');
+  jumpSel.innerHTML = '<option value="">Jump to exercise…</option>' + plan.map((p, i) => {
+    const pex = getExById(p.exId);
+    if (!pex) return '';
+    const marker = p.status === 'done' ? '✓ ' : p.status === 'skipped' ? '↷ ' : '';
+    return `<option value="${i}" ${i === currentIdx ? 'selected' : ''}>${marker}${pex.name}</option>`;
+  }).join('');
+
+  // Prev button — enabled if there's any done/skipped set before the current position
+  document.getElementById('live-prev-btn').disabled = !findPrevResolvedSet();
+}
+
+function renderLiveDoneStrip() {
+  const { plan, currentIdx, currentSetIdx } = liveSession;
+  const current = plan[currentIdx];
+  const strip = document.getElementById('live-done-strip');
+  // Show previous sets for the current exercise
+  const html = current.setResults.map((s, i) => {
+    if (i === currentSetIdx) return ''; // skip the current (active) set
+    if (s.status === 'pending') return ''; // skip future untouched sets
+    if (s.status === 'skipped') {
+      return `<div class="live-done-pill skipped" onclick="liveReopenSet(${i})" title="Skipped — click to reopen">Set ${i+1}: skipped</div>`;
+    }
+    const w = s.bodyweight ? 'BW' : (s.weight + ' lb');
+    return `<div class="live-done-pill" onclick="liveReopenSet(${i})" title="Click to edit">Set ${i+1}: ${s.reps} × ${w}</div>`;
+  }).join('');
+  strip.innerHTML = html;
+}
+
+function renderLiveCurrentSet() {
+  const { plan, currentIdx, currentSetIdx } = liveSession;
+  const current = plan[currentIdx];
+  const set = current.setResults[currentSetIdx];
+  if (!set) return;
+
+  // Label: "Set 3" (and "extra set" if beyond planned count)
+  const setNum = currentSetIdx + 1;
+  const isExtra = currentSetIdx >= current.plannedCount;
+  document.getElementById('live-set-current-label').textContent = isExtra ? `Set ${setNum} (Extra)` : `Set ${setNum}`;
+
+  // Progress: "2 of 3"
+  const totalShown = Math.max(current.plannedCount, current.setResults.length);
+  document.getElementById('live-set-progress').textContent = `${setNum} of ${totalShown}`;
+
+  // Pre-fill: if this set has saved values use them, otherwise seed from last done set on this exercise
+  const weightInput = document.getElementById('live-weight-input');
+  const repsInput = document.getElementById('live-reps-input');
+  const bwCheck = document.getElementById('live-bw-checkbox');
+
+  let weight = set.weight, reps = set.reps, bw = set.bodyweight;
+  if (set.status === 'pending' && !reps && !weight && !bw) {
+    // Seed from the most recent done set on this exercise
+    const prevDone = [...current.setResults.slice(0, currentSetIdx)].reverse().find(s => s.status === 'done');
+    if (prevDone) {
+      weight = prevDone.weight; reps = prevDone.reps; bw = prevDone.bodyweight;
+    } else {
+      // Or fall back to last known weight from history
+      const last = getLastWeight(current.exId);
+      if (last !== null && last > 0) weight = last;
+    }
+  }
+
+  bwCheck.checked = !!bw;
+  weightInput.value = bw ? '' : (weight || '');
+  weightInput.disabled = !!bw;
+  repsInput.value = reps || '';
+
+  // Autofocus reps on mobile-friendly flow (but let user tap weight if needed)
+  setTimeout(() => {
+    if (!bw && !weight) weightInput.focus();
+    else repsInput.focus();
+  }, 50);
+}
+
+function liveToggleBWCurrent(checked) {
+  const weightInput = document.getElementById('live-weight-input');
+  weightInput.disabled = checked;
+  if (checked) weightInput.value = '';
+}
+
+function liveCompleteSet() {
+  const { plan, currentIdx, currentSetIdx } = liveSession;
+  const current = plan[currentIdx];
+  const set = current.setResults[currentSetIdx];
+
+  const bw = document.getElementById('live-bw-checkbox').checked;
+  const weight = bw ? 0 : (+document.getElementById('live-weight-input').value || 0);
+  const reps = +document.getElementById('live-reps-input').value || 0;
+
+  if (reps <= 0) {
+    // Gentle nudge, but don't block — allow zero-rep = skip flow via Skip button
+    document.getElementById('live-reps-input').focus();
+    alert('Enter the rep count for this set (or tap "Skip Set").');
+    return;
+  }
+
+  set.reps = reps;
+  set.weight = weight;
+  set.bodyweight = bw;
+  set.status = 'done';
+
+  advanceAfterSet();
+}
+
+function liveSkipCurrentSet() {
+  const { plan, currentIdx, currentSetIdx } = liveSession;
+  const set = plan[currentIdx].setResults[currentSetIdx];
+  set.status = 'skipped';
+  advanceAfterSet();
+}
+
+function advanceAfterSet() {
+  const { plan, currentIdx, currentSetIdx } = liveSession;
+  const current = plan[currentIdx];
+
+  // Update exercise status if all sets resolved
+  updateExerciseStatus(currentIdx);
+
+  // Try next set on same exercise
+  const nextOnSame = findNextPending(currentIdx, currentSetIdx + 1);
+  if (nextOnSame && nextOnSame.exIdx === currentIdx) {
+    liveSession.currentSetIdx = nextOnSame.setIdx;
+    renderLiveMode();
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Otherwise find next pending anywhere
+  const next = findNextPending(currentIdx + 1, 0);
+  if (next) {
+    liveSession.currentIdx = next.exIdx;
+    liveSession.currentSetIdx = next.setIdx;
+    renderLiveMode();
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Everything done — prompt to finish
+  if (confirm('All planned sets complete! Finish and save your workout?')) {
+    liveFinish();
+  } else {
+    // Stay on current but re-render so UI reflects latest status
+    renderLiveMode();
+  }
+}
+
+function liveAddSet() {
+  const current = liveSession.plan[liveSession.currentIdx];
+  current.setResults.push({ status: 'pending', reps: 0, weight: 0, bodyweight: false });
+  // If the user is past the last set, jump into the new one
+  if (liveSession.currentSetIdx >= current.setResults.length - 1) {
+    liveSession.currentSetIdx = current.setResults.length - 1;
+  }
+  // Also un-done the exercise if it was marked done
+  current.status = 'pending';
+  renderLiveMode();
+}
+
+function findPrevResolvedSet() {
+  const { plan, currentIdx, currentSetIdx } = liveSession;
+  // Look backward on current exercise
+  for (let i = currentSetIdx - 1; i >= 0; i--) {
+    if (plan[currentIdx].setResults[i].status !== 'pending') return { exIdx: currentIdx, setIdx: i };
+  }
+  // Look backward through earlier exercises
+  for (let ei = currentIdx - 1; ei >= 0; ei--) {
+    for (let si = plan[ei].setResults.length - 1; si >= 0; si--) {
+      if (plan[ei].setResults[si].status !== 'pending') return { exIdx: ei, setIdx: si };
+    }
+  }
+  return null;
+}
+
+function liveGoPrevSet() {
+  const prev = findPrevResolvedSet();
+  if (!prev) return;
+  // Re-open that set for editing — mark it pending again so the user can adjust
+  const set = liveSession.plan[prev.exIdx].setResults[prev.setIdx];
+  set.status = 'pending';
+  // Also un-done the exercise
+  liveSession.plan[prev.exIdx].status = 'pending';
+  liveSession.currentIdx = prev.exIdx;
+  liveSession.currentSetIdx = prev.setIdx;
+  renderLiveMode();
+  window.scrollTo(0, 0);
+}
+
+function liveReopenSet(setIdx) {
+  // Mark set pending and jump to it
+  const ex = liveSession.plan[liveSession.currentIdx];
+  ex.setResults[setIdx].status = 'pending';
+  ex.status = 'pending';
+  liveSession.currentSetIdx = setIdx;
+  renderLiveMode();
+  window.scrollTo(0, 0);
+}
+
+function liveSkipExercise() {
+  const current = liveSession.plan[liveSession.currentIdx];
+  // Mark all remaining pending sets as skipped and the exercise itself as skipped
+  current.setResults.forEach(s => { if (s.status === 'pending') s.status = 'skipped'; });
+  current.status = 'skipped';
+
+  // Advance
+  const next = findNextPending(liveSession.currentIdx + 1, 0);
+  if (next) {
+    liveSession.currentIdx = next.exIdx;
+    liveSession.currentSetIdx = next.setIdx;
+    renderLiveMode();
+    window.scrollTo(0, 0);
+  } else {
+    if (confirm('All exercises resolved. Finish and save?')) {
+      liveFinish();
+    } else {
+      renderLiveMode();
+    }
+  }
+}
+
+function liveJumpToExercise(idx) {
+  if (idx < 0 || idx >= liveSession.plan.length) return;
+  const target = liveSession.plan[idx];
+  // Jump to first pending set, or set 0 if all resolved
+  let setIdx = target.setResults.findIndex(s => s.status === 'pending');
+  if (setIdx === -1) setIdx = 0;
+  liveSession.currentIdx = idx;
+  liveSession.currentSetIdx = setIdx;
+  renderLiveMode();
+  window.scrollTo(0, 0);
+}
+
+function liveJumpTo(idxRaw) {
+  if (idxRaw === '' || idxRaw === null || idxRaw === undefined) return;
+  liveJumpToExercise(+idxRaw);
+  // Reset select
+  document.getElementById('live-jump-select').value = '';
+}
+
+function liveDropCurrent() {
+  if (liveSession.plan.length <= 1) {
+    alert('Can\'t drop the only exercise. Use Exit instead.');
+    return;
+  }
+  if (!confirm('Drop this exercise from the workout?')) return;
+  liveSession.plan.splice(liveSession.currentIdx, 1);
+  if (liveSession.currentIdx >= liveSession.plan.length) {
+    liveSession.currentIdx = liveSession.plan.length - 1;
+  }
+  liveSession.currentSetIdx = 0;
+  // Jump to first pending spot if available
+  const next = findNextPending(liveSession.currentIdx, 0);
+  if (next) {
+    liveSession.currentIdx = next.exIdx;
+    liveSession.currentSetIdx = next.setIdx;
+  }
+  renderLiveMode();
+}
+
+function liveAddExercise() {
+  const planIds = new Set(liveSession.plan.map(p => p.exId));
+  const available = exercises.filter(e => !planIds.has(e.id));
+  const list = available.length ? available : exercises;
+  const name = prompt('Add exercise — type name or part of name:\n\n' + list.slice(0, 30).map(e => `• ${e.name}`).join('\n') + (list.length > 30 ? `\n… and ${list.length - 30} more` : ''));
+  if (!name) return;
+  const match = exercises.find(e => e.name.toLowerCase() === name.toLowerCase()) ||
+                exercises.find(e => e.name.toLowerCase().includes(name.toLowerCase()));
+  if (!match) { alert('No exercise found matching "' + name + '".'); return; }
+  liveSession.plan.push({
+    exId: match.id,
+    status: 'pending',
+    plannedCount: 3,
+    setResults: Array.from({length: 3}, () => ({ status: 'pending', reps: 0, weight: 0, bodyweight: false })),
+  });
+  liveSession.currentIdx = liveSession.plan.length - 1;
+  liveSession.currentSetIdx = 0;
+  renderLiveMode();
+  window.scrollTo(0, 0);
+}
+
+function liveFinish() {
+  const { sessionId, sessionName, date, plan, templateId } = liveSession;
+
+  const isSession = plan.length > 1 || templateId !== null;
+  let saved = 0;
+  plan.forEach(p => {
+    const doneSets = p.setResults.filter(s => s.status === 'done' && s.reps > 0);
+    if (doneSets.length === 0) return;
+    const entry = {
+      date,
+      exerciseId: p.exId,
+      sets: doneSets.map(s => ({ reps: s.reps, weight: s.weight, bodyweight: s.bodyweight })),
+    };
+    if (isSession) {
+      entry.sessionId = sessionId;
+      entry.templateName = sessionName;
+    }
+    workouts.push(entry);
+    saved++;
+  });
+
+  if (saved === 0) {
+    if (!confirm('No sets logged. Exit anyway?')) return;
+  } else {
+    persist();
+  }
+
+  document.getElementById('live-overlay').classList.remove('open');
+  liveSession = null;
+
+  if (saved > 0) {
+    if (typeof renderDashboard === 'function') renderDashboard();
+    setTimeout(() => {
+      showPage('history');
+    }, 100);
+  }
+}
+
+// ── THEME (PRIMARY + SECONDARY) ───────────────────────
+const DEFAULT_PRIMARY   = 'slate';
+const DEFAULT_SECONDARY = 'electric-purple';
+
+function setPrimary(primary) {
+  document.documentElement.setAttribute('data-primary', primary);
+  localStorage.setItem('lt_primary', primary);
+  document.querySelectorAll('.primary-swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.primary === primary);
+  });
+}
+
+function setSecondary(secondary) {
+  document.documentElement.setAttribute('data-secondary', secondary);
+  localStorage.setItem('lt_secondary', secondary);
+  document.querySelectorAll('.color-swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.secondary === secondary);
   });
 }
 
 function loadSavedTheme() {
-  const saved = localStorage.getItem('lt_theme') || 'dark';
-  setTheme(saved);
+  // Clear any legacy single-theme attribute — Primary/Secondary is the new system
+  document.documentElement.removeAttribute('data-theme');
+  const primary   = localStorage.getItem('lt_primary')   || DEFAULT_PRIMARY;
+  const secondary = localStorage.getItem('lt_secondary') || DEFAULT_SECONDARY;
+  setPrimary(primary);
+  setSecondary(secondary);
+}
+
+// Backward compat: anything old that still calls setTheme() won't crash.
+function setTheme(theme) {
+  // Legacy single-theme call — ignore and fall back to primary/secondary.
+  loadSavedTheme();
 }
 
 // ── SETTINGS DROPDOWN ─────────────────────────────────
@@ -3546,8 +4388,13 @@ function toggleSettings(e) {
   document.getElementById('settings-dropdown').classList.toggle('open');
 }
 
-document.addEventListener('click', function() {
-  document.getElementById('settings-dropdown')?.classList.remove('open');
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('settings-dropdown');
+  if (!dropdown) return;
+  // Only close if the click happened outside the dropdown itself
+  if (!dropdown.contains(e.target)) {
+    dropdown.classList.remove('open');
+  }
 });
 
 // ── EMAIL SUGGESTIONS ─────────────────────────────────
