@@ -554,6 +554,75 @@
   </div>
 </div>
 
+<!-- WELCOME MODAL -->
+<div id="welcome-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;padding:32px 28px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+    <div style="font-size:2rem;text-align:center;margin-bottom:12px;">💪</div>
+    <h2 style="text-align:center;font-size:1.3rem;font-weight:700;margin-bottom:8px;">Welcome to LiftTrack</h2>
+    <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-bottom:24px;">Here's a quick overview of what you can do:</p>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:1.2rem;flex-shrink:0;">📊</span>
+        <div><div style="font-weight:600;font-size:0.85rem;">Dashboard</div><div style="font-size:0.75rem;color:var(--muted);">Track your activity, body weight, protein, and personal records.</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:1.2rem;flex-shrink:0;">💪</span>
+        <div><div style="font-weight:600;font-size:0.85rem;">Log Workout</div><div style="font-size:0.75rem;color:var(--muted);">Use session templates or log a single exercise. Import CSV files for quick entry.</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:1.2rem;flex-shrink:0;">🏃</span>
+        <div><div style="font-weight:600;font-size:0.85rem;">Run & Stretch</div><div style="font-size:0.75rem;color:var(--muted);">Log runs with pace tracking. Build stretch queues with a built-in timer.</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:1.2rem;flex-shrink:0;">📅</span>
+        <div><div style="font-weight:600;font-size:0.85rem;">History</div><div style="font-size:0.75rem;color:var(--muted);">Browse past sessions, repeat workouts, and track your progress over time.</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:1.2rem;flex-shrink:0;">⚙️</span>
+        <div><div style="font-weight:600;font-size:0.85rem;">Settings</div><div style="font-size:0.75rem;color:var(--muted);">Switch themes and sign out from the gear icon in the top right.</div></div>
+      </div>
+    </div>
+    <button class="btn" style="width:100%;" onclick="closeWelcome()">Let's Go 🚀</button>
+  </div>
+</div>
+
+<!-- CALENDAR DAY MODAL -->
+<div id="cal-day-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeDayModal()">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:460px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);">
+      <div id="cal-day-title" style="font-weight:700;font-size:1rem;"></div>
+      <button onclick="closeDayModal()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="cal-day-body" style="padding:16px 20px;"></div>
+  </div>
+</div>
+
+<!-- CSV FORMAT MODAL -->
+<div id="csv-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeCsvModal()">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);">
+      <div style="font-weight:700;font-size:1rem;">CSV Format</div>
+      <button onclick="closeCsvModal()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div style="padding:20px;">
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;">Your CSV file should have the following columns. The header row is optional.</p>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:monospace;font-size:0.8rem;color:var(--text);margin-bottom:16px;line-height:1.8;">
+        exercise,sets,reps,weight<br>
+        Barbell Bench Press,4,8,185<br>
+        Incline Dumbbell Press,3,10,65<br>
+        Lateral Raise,3,15,20
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-bottom:20px;">
+        <div style="margin-bottom:4px;">• <strong>exercise</strong> — must match an exercise name in the app</div>
+        <div style="margin-bottom:4px;">• <strong>sets</strong> — number of sets (optional, defaults to 3)</div>
+        <div style="margin-bottom:4px;">• <strong>reps</strong> — reps per set</div>
+        <div>• <strong>weight</strong> — weight in lbs (use 0 for bodyweight)</div>
+      </div>
+      <button class="btn" style="width:100%;" onclick="confirmCsvUpload()">Choose File</button>
+    </div>
+  </div>
+</div>
+
 <!-- DASHBOARD -->
 <div id="page-dashboard" class="page active">
   <div class="stat-grid" id="stat-grid"></div>
@@ -680,7 +749,7 @@
       <div class="form-card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
           <h2 style="margin:0;">Log a Workout</h2>
-          <button class="btn-sm" onclick="document.getElementById('csv-import-input').click();" title="Import CSV">Import CSV</button>
+          <button class="btn-sm" onclick="showCsvModal()" title="Import CSV">Import CSV</button>
           <input type="file" id="csv-import-input" accept=".csv" style="display:none;" onchange="handleCSVImport(event)">
         </div>
         <div class="form-group">
@@ -729,7 +798,7 @@
             onfocus="this.style.borderColor='var(--accent)'"
             onblur="this.style.borderColor='var(--border)'"
           >
-          <button class="btn-sm" onclick="document.getElementById('csv-import-input').click();" title="Import CSV" style="flex-shrink:0;">Import CSV</button>
+          <button class="btn-sm" onclick="showCsvModal()" title="Import CSV" style="flex-shrink:0;">Import CSV</button>
           <div class="session-date-wrap">
             <label>Date</label>
             <input type="date" id="session-date">
@@ -1765,7 +1834,8 @@ function renderFrequency() {
 
     const border = isToday ? `box-shadow:0 0 0 2px var(--accent);` : '';
 
-    cells.push(`<div style="background:${bg};border-radius:4px;height:28px;display:flex;align-items:center;justify-content:center;${border}cursor:default;transition:background 0.2s;" title="${dateStr}">
+    const clickable = (hasWorkout || hasRun) ? `onclick="showDayModal('${dateStr}')" style="cursor:pointer;"` : '';
+    cells.push(`<div ${clickable} style="background:${bg};border-radius:4px;height:28px;display:flex;align-items:center;justify-content:center;${border}transition:background 0.2s,transform 0.1s;" title="${dateStr}${hasWorkout||hasRun?' — click to view':''}">
       <span style="font-size:0.68rem;font-weight:600;color:${textColor};line-height:1;">${day}</span>
     </div>`);
   }
@@ -2822,6 +2892,7 @@ function renderSessionHistoryCard({ sid, date, entries }) {
       </div>
       <div class="history-session-meta">
         ${totalVol > 0 ? `<span class="history-session-vol">${totalVol.toLocaleString()} lbs</span>` : ''}
+        <button class="btn-sm" onclick="repeatSession('${sid}')" title="Repeat this workout" style="font-size:0.7rem;padding:4px 8px;">↺ Repeat</button>
         <button class="history-delete" onclick="deleteSession('${sid}')" title="Delete session">×</button>
       </div>
     </div>
@@ -2838,7 +2909,10 @@ function renderSoloHistoryCard({ w, i }) {
       <div class="history-ex">${ex?.name ?? 'Unknown'} <span class="ex-cat">${ex?.cat??''}</span></div>
       <div class="history-sets">${setStr}</div>
     </div>
-    <button class="history-delete" onclick="deleteWorkout(${i})" title="Delete">×</button>
+    <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;">
+      <button class="btn-sm" onclick="repeatSolo(${i})" style="font-size:0.7rem;padding:4px 8px;">↺</button>
+      <button class="history-delete" onclick="deleteWorkout(${i})" title="Delete">×</button>
+    </div>
   </div>`;
 }
 
@@ -3269,6 +3343,183 @@ function renderStretchLog() {
 }
 
 
+// ── WELCOME ───────────────────────────────────────────
+function showWelcome() {
+  const modal = document.getElementById('welcome-modal');
+  modal.style.display = 'flex';
+}
+function closeWelcome() {
+  document.getElementById('welcome-modal').style.display = 'none';
+  localStorage.setItem('lt_welcomed', '1');
+}
+
+// ── CSV FORMAT MODAL ──────────────────────────────────
+function showCsvModal() {
+  document.getElementById('csv-modal').style.display = 'flex';
+}
+function closeCsvModal() {
+  document.getElementById('csv-modal').style.display = 'none';
+}
+function confirmCsvUpload() {
+  closeCsvModal();
+  document.getElementById('csv-import-input').click();
+}
+
+// ── CALENDAR DAY MODAL ────────────────────────────────
+function showDayModal(dateStr) {
+  const modal = document.getElementById('cal-day-modal');
+  const title = document.getElementById('cal-day-title');
+  const body = document.getElementById('cal-day-body');
+
+  const d = new Date(dateStr + 'T12:00:00');
+  title.textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+  const dayWorkouts = workouts.filter(w => w.date === dateStr);
+  const dayRuns = (runs || []).filter(r => r.date === dateStr);
+
+  let html = '';
+
+  if (dayWorkouts.length) {
+    // Group by session
+    const sessionMap = {};
+    const solo = [];
+    dayWorkouts.forEach(w => {
+      if (w.sessionId) {
+        if (!sessionMap[w.sessionId]) sessionMap[w.sessionId] = [];
+        sessionMap[w.sessionId].push(w);
+      } else solo.push(w);
+    });
+
+    for (const [sid, entries] of Object.entries(sessionMap)) {
+      const name = entries[0].templateName || 'Session';
+      const vol = entries.reduce((s,w) => s + volumeOfWorkout(w), 0);
+      html += `<div style="margin-bottom:14px;">
+        <div style="font-weight:700;font-size:0.88rem;margin-bottom:6px;display:flex;justify-content:space-between;">
+          <span>${name}</span>
+          ${vol > 0 ? `<span style="color:var(--green);font-size:0.75rem;">${vol.toLocaleString()} lbs</span>` : ''}
+        </div>`;
+      entries.forEach(w => {
+        const ex = getExById(w.exerciseId);
+        const sets = w.sets.map(s => s.bodyweight ? `${s.reps} BW` : `${s.reps}×${s.weight}lb`).join(' · ');
+        html += `<div style="font-size:0.78rem;padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+          <span style="font-weight:500;">${ex?.name || 'Unknown'}</span>
+          <span style="color:var(--muted);">${sets}</span>
+        </div>`;
+      });
+      html += `<button class="btn-sm" onclick="repeatSession('${sid}');closeDayModal();" style="margin-top:8px;width:100%;text-align:center;">↺ Repeat this session</button></div>`;
+    }
+
+    solo.forEach(w => {
+      const ex = getExById(w.exerciseId);
+      const sets = w.sets.map(s => s.bodyweight ? `${s.reps} BW` : `${s.reps}×${s.weight}lb`).join(' · ');
+      html += `<div style="margin-bottom:10px;font-size:0.82rem;">
+        <div style="font-weight:600;">${ex?.name || 'Unknown'}</div>
+        <div style="color:var(--muted);">${sets}</div>
+      </div>`;
+    });
+  }
+
+  if (dayRuns.length) {
+    dayRuns.forEach(r => {
+      html += `<div style="margin-bottom:10px;padding:10px;background:var(--surface2);border-radius:8px;">
+        <div style="font-weight:600;font-size:0.85rem;">🏃 ${r.distance} ${r.unit}</div>
+        <div style="font-size:0.75rem;color:var(--muted);">${r.pace || ''} ${r.notes ? '· ' + r.notes : ''}</div>
+      </div>`;
+    });
+  }
+
+  if (!html) html = `<div style="color:var(--muted);font-size:0.82rem;">Nothing logged on this day.</div>`;
+  body.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+function closeDayModal() {
+  document.getElementById('cal-day-modal').style.display = 'none';
+}
+
+// ── REPEAT WORKOUT ────────────────────────────────────
+function repeatSession(sid) {
+  const entries = workouts.filter(w => w.sessionId === sid);
+  if (!entries.length) return;
+
+  showPage('log');
+  document.getElementById('log-single-panel').style.display = 'none';
+  document.getElementById('log-session-panel').style.display = '';
+
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('session-date').value = today;
+  document.getElementById('session-title').value = entries[0].templateName || 'Repeated Session';
+
+  const container = document.getElementById('session-exercises');
+  container.innerHTML = '';
+  sessionSetCounters = {};
+  activeTemplateId = null;
+
+  entries.forEach(w => {
+    if (document.getElementById(`session-block-${w.exerciseId}`)) return;
+    const ex = getExById(w.exerciseId);
+    if (!ex) return;
+    sessionSetCounters[w.exerciseId] = 0;
+    const block = document.createElement('div');
+    block.className = 'session-ex-block';
+    block.id = `session-block-${w.exerciseId}`;
+    const lastWeight = getLastWeight(w.exerciseId);
+    const hint = lastWeight !== null ? `Last: ${lastWeight > 0 ? lastWeight + ' lbs' : 'BW'}` : '';
+    block.innerHTML = `
+      <div class="session-ex-header" onclick="toggleSessionBlock(${w.exerciseId})">
+        <div class="session-ex-name">${ex.name}</div>
+        <span class="ex-cat">${ex.cat}</span>
+        ${hint ? `<div class="session-ex-hint">${hint}</div>` : ''}
+        <span class="session-ex-toggle">▼</span>
+      </div>
+      <div class="session-ex-body">
+        <div class="session-sets" id="session-sets-${w.exerciseId}"></div>
+        <div style="margin-top:10px"><button class="btn-sm" onclick="addSessionSet(${w.exerciseId})">+ Set</button></div>
+      </div>`;
+    container.appendChild(block);
+    // Pre-fill with previous session's sets
+    w.sets.forEach((s, idx) => {
+      addSessionSet(w.exerciseId);
+      const n = sessionSetCounters[w.exerciseId];
+      const repsEl = document.getElementById(`sreps-${w.exerciseId}-${n}`);
+      const weightEl = document.getElementById(`sweight-${w.exerciseId}-${n}`);
+      const bwEl = document.getElementById(`sbw-${w.exerciseId}-${n}`);
+      if (repsEl) repsEl.value = s.reps;
+      if (s.bodyweight && bwEl) { bwEl.checked = true; toggleSessionBW(w.exerciseId, n); }
+      else if (weightEl) weightEl.value = s.weight;
+    });
+  });
+
+  // Scroll to top of log form
+  document.getElementById('log-session-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function repeatSolo(idx) {
+  const w = workouts[idx];
+  if (!w) return;
+  showPage('log');
+  selectedExerciseId = w.exerciseId;
+  const ex = getExById(w.exerciseId);
+  if (ex) {
+    document.getElementById('log-exercise').value = ex.id;
+    document.getElementById('log-exercise-search').value = ex.name;
+  }
+  document.getElementById('log-date').value = new Date().toISOString().slice(0,10);
+  setCount = 0;
+  document.getElementById('sets-container').innerHTML = '';
+  w.sets.forEach(s => {
+    addSet();
+    const n = setCount;
+    document.getElementById(`reps-${n}`).value = s.reps;
+    if (s.bodyweight) {
+      document.getElementById(`bw-${n}`).checked = true;
+      toggleBWInput(n);
+    } else {
+      document.getElementById(`weight-${n}`).value = s.weight;
+    }
+  });
+}
+
 // ── THEME ─────────────────────────────────────────────
 function setTheme(theme) {
   const el = document.documentElement;
@@ -3424,6 +3675,11 @@ async function launchApp() {
   ['run-distance','run-unit','run-hrs','run-mins','run-secs'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', updatePacePreview);
   });
+
+  // Show welcome modal for first-time users
+  if (!localStorage.getItem('lt_welcomed') && workouts.length === 0) {
+    setTimeout(showWelcome, 600);
+  }
 }
 </script>
 </body>
