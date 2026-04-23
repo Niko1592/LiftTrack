@@ -218,6 +218,50 @@
   .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
   .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
   .chart-card.full { grid-column: 1 / -1; }
+
+  /* Dashboard layout — panels flow in a 2-col grid, .full spans both */
+  .dash-header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; }
+  .dash-header-label { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .dash-customize-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; letter-spacing: 0.2px; }
+  .dash-customize-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .dashboard-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .dash-panel { min-width: 0; }
+  .dash-panel.full, .chart-card.full { grid-column: 1 / -1; }
+
+  /* New-panel inner styles */
+  .wk-stat { text-align: center; background: var(--surface2); border-radius: 10px; padding: 12px 8px; min-width: 0; }
+  .wk-stat-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; margin-bottom: 4px; }
+  .wk-stat-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); line-height: 1.1; overflow-wrap: anywhere; }
+  .wk-stat-unit { font-size: 0.6rem; color: var(--muted); margin-top: 2px; font-weight: 500; }
+  .muscle-row { display: grid; grid-template-columns: 56px 1fr 42px; gap: 10px; align-items: center; font-size: 0.78rem; }
+  .muscle-row-label { color: var(--text); font-weight: 600; }
+  .muscle-row-bar { background: var(--surface2); border-radius: 20px; height: 10px; overflow: hidden; }
+  .muscle-row-fill { height: 100%; border-radius: 20px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+  .muscle-row-count { font-size: 0.72rem; color: var(--muted); text-align: right; font-weight: 500; }
+  .recent-pr-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--surface2); border-radius: 8px; font-size: 0.82rem; }
+  .recent-pr-name { flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .recent-pr-val { color: var(--yellow); font-weight: 700; font-size: 0.8rem; white-space: nowrap; }
+  .recent-pr-date { font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
+  .no-data-msg { text-align: center; padding: 20px 10px; font-size: 0.78rem; color: var(--muted); font-style: italic; }
+
+  /* Customize modal rows */
+  .cust-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; transition: all 0.15s; cursor: grab; user-select: none; }
+  .cust-row:active { cursor: grabbing; }
+  .cust-row.dragging { opacity: 0.5; }
+  .cust-row.drag-over { border-color: var(--accent); background: var(--surface); transform: scale(1.02); }
+  .cust-grip { color: var(--muted); font-size: 1.1rem; line-height: 1; cursor: grab; letter-spacing: -2px; flex-shrink: 0; }
+  .cust-name { flex: 1; font-size: 0.85rem; font-weight: 600; color: var(--text); }
+  .cust-move-btns { display: flex; gap: 2px; }
+  .cust-move-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; padding: 4px 6px; border-radius: 4px; line-height: 1; }
+  .cust-move-btn:hover { background: var(--surface); color: var(--accent); }
+  .cust-move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  /* Toggle switch */
+  .cust-toggle { position: relative; width: 38px; height: 22px; flex-shrink: 0; cursor: pointer; }
+  .cust-toggle input { opacity: 0; width: 0; height: 0; }
+  .cust-toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 22px; transition: all 0.2s; }
+  .cust-toggle-slider::before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: all 0.2s; }
+  .cust-toggle input:checked + .cust-toggle-slider { background: var(--accent); }
+  .cust-toggle input:checked + .cust-toggle-slider::before { transform: translateX(16px); }
   .chart-title { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
   .chart-title select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; }
   .chart-wrap { position: relative; height: 220px; }
@@ -507,8 +551,8 @@
     .log-layout { grid-template-columns: 1fr; }
   }
   @media (max-width: 700px) {
-    .chart-grid { grid-template-columns: 1fr; }
-    .chart-card.full { grid-column: 1; }
+    .chart-grid, .dashboard-panels { grid-template-columns: 1fr; }
+    .chart-card.full, .dash-panel.full { grid-column: 1; }
   }
 
   /* ── GLOBAL MOBILE FIXES ── */
@@ -540,8 +584,8 @@
     .stat-value { font-size: 1.5rem; }
 
     /* Chart grid — single column */
-    .chart-grid { grid-template-columns: 1fr; gap: 12px; }
-    .chart-card.full { grid-column: 1; }
+    .chart-grid, .dashboard-panels { grid-template-columns: 1fr; gap: 12px; }
+    .chart-card.full, .dash-panel.full { grid-column: 1; }
     .chart-wrap { height: 180px; }
 
     /* Log layout */
@@ -760,6 +804,22 @@
   </div>
 </div>
 
+<!-- CUSTOMIZE DASHBOARD MODAL -->
+<div id="customize-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeCustomizeModal()">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:460px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);">
+      <div style="font-weight:700;font-size:1rem;">Customize Dashboard</div>
+      <button onclick="closeCustomizeModal()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div style="padding:16px 20px 8px;font-size:0.75rem;color:var(--muted);">Drag to reorder. Toggle to show or hide.</div>
+    <div id="customize-list" style="padding:0 16px 10px;overflow-y:auto;flex:1;"></div>
+    <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:space-between;align-items:center;">
+      <button class="btn-sm" onclick="resetDashboardLayout()" style="color:var(--muted);">Reset</button>
+      <button class="btn" onclick="closeCustomizeModal()" style="padding:8px 18px;">Done</button>
+    </div>
+  </div>
+</div>
+
 <!-- CSV FORMAT MODAL -->
 <div id="csv-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeCsvModal()">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
@@ -790,19 +850,27 @@
 <div id="page-dashboard" class="page active">
   <div class="stat-grid" id="stat-grid"></div>
 
-  <!-- ROW 1: Activity Calendar — full width -->
-  <div class="chart-grid" style="margin-bottom:16px;">
-    <div class="chart-card full">
+  <!-- Dashboard header: customize control -->
+  <div class="dash-header-bar">
+    <div class="dash-header-label">Your Dashboard</div>
+    <button class="dash-customize-btn" onclick="openCustomizeModal()" title="Customize panels">
+      <span style="font-size:0.9rem;">⚙</span> Customize
+    </button>
+  </div>
+
+  <!-- All panels live here. Order + visibility controlled by user config. -->
+  <div id="dashboard-panels" class="dashboard-panels">
+
+    <!-- Activity Calendar -->
+    <div class="chart-card full dash-panel" data-panel-id="calendar">
       <div class="chart-title" id="freq-title">Activity</div>
       <div style="display:flex;gap:2px;margin-bottom:6px;" id="freq-day-labels"></div>
       <div class="freq-grid" id="freq-grid"></div>
       <div id="freq-hint" style="display:none;text-align:center;font-size:0.7rem;color:var(--muted);margin-top:10px;font-style:italic;">Tap a highlighted day to see details</div>
     </div>
-  </div>
 
-  <!-- ROW 2: Protein Tracker + Body Weight -->
-  <div class="chart-grid" style="margin-bottom:16px;">
-    <div class="chart-card">
+    <!-- Protein Tracker -->
+    <div class="chart-card dash-panel" data-panel-id="protein">
       <div class="chart-title">Protein Tracker</div>
       <div style="position:relative;z-index:2;">
 
@@ -839,7 +907,9 @@
         <div id="protein-log-list" style="max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
       </div>
     </div>
-    <div class="chart-card">
+
+    <!-- Body Weight -->
+    <div class="chart-card dash-panel" data-panel-id="bodyweight">
       <div class="chart-title">Body Weight</div>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;position:relative;z-index:2;">
         <input type="number" id="bw-input" placeholder="e.g. 185" min="50" max="500" step="0.1"
@@ -851,24 +921,89 @@
       </div>
       <div class="chart-wrap"><canvas id="bwChart"></canvas></div>
     </div>
-  </div>
 
-  <!-- ROW 3: Personal Records + Weight Progress -->
-  <div class="chart-grid" style="margin-bottom:24px;">
-    <div class="chart-card">
+    <!-- Personal Records -->
+    <div class="chart-card dash-panel" data-panel-id="prs">
       <div class="chart-title">Personal Records</div>
       <table class="pr-table" id="pr-table">
         <thead><tr><th>Exercise</th><th>PR Weight</th><th>Reps</th><th>Date</th></tr></thead>
         <tbody id="pr-tbody"></tbody>
       </table>
     </div>
-    <div class="chart-card">
+
+    <!-- Weight Progress -->
+    <div class="chart-card dash-panel" data-panel-id="weight-progress">
       <div class="chart-title">
         Weight Progress
         <select id="ex-select" onchange="renderWeightChart()"></select>
       </div>
       <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
     </div>
+
+    <!-- NEW: This Week -->
+    <div class="chart-card dash-panel" data-panel-id="week-summary" style="display:none;">
+      <div class="chart-title">This Week</div>
+      <div id="week-summary-body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;">
+        <div class="wk-stat">
+          <div class="wk-stat-label">Workouts</div>
+          <div class="wk-stat-value" id="wk-workouts">0</div>
+        </div>
+        <div class="wk-stat">
+          <div class="wk-stat-label">Sets</div>
+          <div class="wk-stat-value" id="wk-sets">0</div>
+        </div>
+        <div class="wk-stat">
+          <div class="wk-stat-label">Volume</div>
+          <div class="wk-stat-value" id="wk-volume">0</div>
+          <div class="wk-stat-unit">lbs</div>
+        </div>
+      </div>
+      <div id="wk-compare" style="margin-top:14px;font-size:0.72rem;color:var(--muted);text-align:center;"></div>
+    </div>
+
+    <!-- NEW: Muscle Group Balance -->
+    <div class="chart-card dash-panel" data-panel-id="muscle-balance" style="display:none;">
+      <div class="chart-title">Muscle Group Balance <span style="font-size:0.6rem;color:var(--muted);font-weight:500;margin-left:4px;text-transform:none;letter-spacing:0;">(last 30 days)</span></div>
+      <div id="muscle-balance-body" style="display:flex;flex-direction:column;gap:10px;margin-top:8px;"></div>
+    </div>
+
+    <!-- NEW: Recent PRs -->
+    <div class="chart-card dash-panel" data-panel-id="recent-prs" style="display:none;">
+      <div class="chart-title">Recent PRs</div>
+      <div id="recent-prs-body" style="display:flex;flex-direction:column;gap:8px;margin-top:6px;"></div>
+    </div>
+
+    <!-- NEW: Lifetime Stats -->
+    <div class="chart-card dash-panel" data-panel-id="lifetime-stats" style="display:none;">
+      <div class="chart-title">Lifetime Stats</div>
+      <div id="lifetime-body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;">
+        <div class="wk-stat">
+          <div class="wk-stat-label">Workouts</div>
+          <div class="wk-stat-value" id="lt-workouts">0</div>
+        </div>
+        <div class="wk-stat">
+          <div class="wk-stat-label">Sets</div>
+          <div class="wk-stat-value" id="lt-sets">0</div>
+        </div>
+        <div class="wk-stat">
+          <div class="wk-stat-label">Volume</div>
+          <div class="wk-stat-value" id="lt-volume">0</div>
+          <div class="wk-stat-unit">lbs</div>
+        </div>
+      </div>
+      <div id="lt-since" style="margin-top:14px;font-size:0.72rem;color:var(--muted);text-align:center;"></div>
+    </div>
+
+    <!-- NEW: Rest Day -->
+    <div class="chart-card dash-panel" data-panel-id="rest-day" style="display:none;">
+      <div class="chart-title">Rest Days</div>
+      <div id="rest-day-body" style="text-align:center;padding:12px 0 4px;">
+        <div style="font-size:2.4rem;font-weight:700;letter-spacing:-0.03em;color:var(--accent);line-height:1.1;" id="rest-day-number">0</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:4px;" id="rest-day-label">days since last workout</div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:12px;" id="rest-day-context"></div>
+      </div>
+    </div>
+
   </div>
 
 </div>
@@ -2240,6 +2375,340 @@ function renderDashboard() {
   renderPRs();
   renderBWChart();
   renderProteinTracker();
+  // New panels
+  renderWeekSummary();
+  renderMuscleBalance();
+  renderRecentPRs();
+  renderLifetimeStats();
+  renderRestDay();
+  // Apply user's chosen order + visibility
+  applyDashboardLayout();
+}
+
+// ── DASHBOARD CUSTOMIZATION ───────────────────────────
+// All available panels with metadata. Order here = default order.
+const DASH_PANELS = [
+  { id: 'calendar',         label: 'Activity Calendar',    full: true,  defaultOn: true  },
+  { id: 'week-summary',     label: 'This Week',            full: false, defaultOn: true  },
+  { id: 'rest-day',         label: 'Rest Day Indicator',   full: false, defaultOn: true  },
+  { id: 'protein',          label: 'Protein Tracker',      full: false, defaultOn: true  },
+  { id: 'bodyweight',       label: 'Body Weight',          full: false, defaultOn: true  },
+  { id: 'muscle-balance',   label: 'Muscle Group Balance', full: false, defaultOn: false },
+  { id: 'recent-prs',       label: 'Recent PRs',           full: false, defaultOn: false },
+  { id: 'prs',              label: 'Personal Records',     full: false, defaultOn: true  },
+  { id: 'weight-progress',  label: 'Weight Progress',      full: false, defaultOn: true  },
+  { id: 'lifetime-stats',   label: 'Lifetime Stats',       full: false, defaultOn: false },
+];
+
+function loadDashConfig() {
+  try {
+    const raw = localStorage.getItem('lt_dashboard_panels');
+    if (!raw) return defaultDashConfig();
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return defaultDashConfig();
+    // Merge: keep stored order + enabled, but ensure any new panels we've added since are appended.
+    const known = new Set(parsed.map(p => p.id));
+    const merged = parsed.filter(p => DASH_PANELS.find(d => d.id === p.id)); // drop unknowns
+    for (const p of DASH_PANELS) {
+      if (!known.has(p.id)) merged.push({ id: p.id, enabled: p.defaultOn });
+    }
+    return merged;
+  } catch { return defaultDashConfig(); }
+}
+
+function defaultDashConfig() {
+  return DASH_PANELS.map(p => ({ id: p.id, enabled: p.defaultOn }));
+}
+
+function saveDashConfig(config) {
+  localStorage.setItem('lt_dashboard_panels', JSON.stringify(config));
+}
+
+function applyDashboardLayout() {
+  const container = document.getElementById('dashboard-panels');
+  if (!container) return;
+  const config = loadDashConfig();
+  config.forEach(cfg => {
+    const panel = container.querySelector(`[data-panel-id="${cfg.id}"]`);
+    if (!panel) return;
+    const meta = DASH_PANELS.find(p => p.id === cfg.id);
+    panel.classList.toggle('full', !!(meta && meta.full));
+    panel.style.display = cfg.enabled ? '' : 'none';
+    container.appendChild(panel); // re-append in configured order
+  });
+}
+
+// ── CUSTOMIZE MODAL ────────────────────────────────────
+let customizeDraft = null;
+
+function openCustomizeModal() {
+  customizeDraft = loadDashConfig();
+  renderCustomizeList();
+  document.getElementById('customize-modal').style.display = 'flex';
+}
+
+function closeCustomizeModal() {
+  document.getElementById('customize-modal').style.display = 'none';
+  customizeDraft = null;
+}
+
+function renderCustomizeList() {
+  const list = document.getElementById('customize-list');
+  list.innerHTML = customizeDraft.map((cfg, i) => {
+    const meta = DASH_PANELS.find(p => p.id === cfg.id);
+    if (!meta) return '';
+    return `<div class="cust-row" draggable="true" data-idx="${i}"
+      ondragstart="custDragStart(event, ${i})"
+      ondragover="custDragOver(event, ${i})"
+      ondragleave="custDragLeave(event)"
+      ondrop="custDrop(event, ${i})"
+      ondragend="custDragEnd(event)">
+      <span class="cust-grip" title="Drag to reorder">⋮⋮</span>
+      <div class="cust-name">${meta.label}</div>
+      <div class="cust-move-btns">
+        <button class="cust-move-btn" onclick="custMove(${i},-1)" ${i === 0 ? 'disabled' : ''} title="Move up">↑</button>
+        <button class="cust-move-btn" onclick="custMove(${i},1)" ${i === customizeDraft.length - 1 ? 'disabled' : ''} title="Move down">↓</button>
+      </div>
+      <label class="cust-toggle" onclick="event.stopPropagation()">
+        <input type="checkbox" ${cfg.enabled ? 'checked' : ''} onchange="custToggle(${i}, this.checked)">
+        <span class="cust-toggle-slider"></span>
+      </label>
+    </div>`;
+  }).join('');
+}
+
+function custToggle(idx, enabled) {
+  customizeDraft[idx].enabled = enabled;
+  saveDashConfig(customizeDraft);
+  applyDashboardLayout();
+}
+
+function custMove(idx, delta) {
+  const newIdx = idx + delta;
+  if (newIdx < 0 || newIdx >= customizeDraft.length) return;
+  const [moved] = customizeDraft.splice(idx, 1);
+  customizeDraft.splice(newIdx, 0, moved);
+  saveDashConfig(customizeDraft);
+  renderCustomizeList();
+  applyDashboardLayout();
+}
+
+let custDragIdx = null;
+
+function custDragStart(e, idx) {
+  custDragIdx = idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  try { e.dataTransfer.setData('text/plain', String(idx)); } catch {}
+}
+
+function custDragOver(e, idx) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if (custDragIdx === null || custDragIdx === idx) return;
+  e.currentTarget.classList.add('drag-over');
+}
+
+function custDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function custDrop(e, idx) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (custDragIdx === null || custDragIdx === idx) return;
+  const [moved] = customizeDraft.splice(custDragIdx, 1);
+  const target = custDragIdx < idx ? idx - 1 : idx;
+  customizeDraft.splice(target, 0, moved);
+  custDragIdx = null;
+  saveDashConfig(customizeDraft);
+  renderCustomizeList();
+  applyDashboardLayout();
+}
+
+function custDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.cust-row.drag-over').forEach(r => r.classList.remove('drag-over'));
+  custDragIdx = null;
+}
+
+function resetDashboardLayout() {
+  if (!confirm('Reset dashboard to the default layout?')) return;
+  const def = defaultDashConfig();
+  saveDashConfig(def);
+  customizeDraft = def;
+  renderCustomizeList();
+  applyDashboardLayout();
+}
+
+// ── NEW PANEL RENDERERS ───────────────────────────────
+
+function getWeekRange() {
+  // Rolling 7-day window ending today
+  const now = new Date();
+  const end = now.toISOString().slice(0,10);
+  const startDate = new Date(now);
+  startDate.setDate(startDate.getDate() - 6);
+  const start = startDate.toISOString().slice(0,10);
+  return { start, end };
+}
+
+function renderWeekSummary() {
+  if (!document.getElementById('week-summary-body')) return;
+  const { start, end } = getWeekRange();
+  const weekWorkouts = workouts.filter(w => w.date >= start && w.date <= end);
+  const uniqueDays = new Set(weekWorkouts.map(w => w.date)).size;
+  const totalSets = weekWorkouts.reduce((s,w) => s + (w.sets?.length || 0), 0);
+  const totalVol = weekWorkouts.reduce((s,w) => s + volumeOfWorkout(w), 0);
+
+  document.getElementById('wk-workouts').textContent = uniqueDays;
+  document.getElementById('wk-sets').textContent = totalSets;
+  document.getElementById('wk-volume').textContent = totalVol.toLocaleString();
+
+  // Compare to the 7 days before that window
+  const priorEndDate = new Date(start + 'T12:00:00');
+  priorEndDate.setDate(priorEndDate.getDate() - 1);
+  const priorEnd = priorEndDate.toISOString().slice(0,10);
+  const priorStartDate = new Date(priorEndDate);
+  priorStartDate.setDate(priorStartDate.getDate() - 6);
+  const priorStart = priorStartDate.toISOString().slice(0,10);
+  const priorVol = workouts
+    .filter(w => w.date >= priorStart && w.date <= priorEnd)
+    .reduce((s,w) => s + volumeOfWorkout(w), 0);
+
+  const compareEl = document.getElementById('wk-compare');
+  if (priorVol === 0) {
+    compareEl.textContent = totalVol > 0 ? 'No data from previous week to compare' : 'No workouts logged this week';
+  } else {
+    const diff = totalVol - priorVol;
+    const pct = Math.round((diff / priorVol) * 100);
+    const sign = diff >= 0 ? '+' : '';
+    const color = diff >= 0 ? 'var(--green)' : 'var(--accent2)';
+    compareEl.innerHTML = `<span style="color:${color};font-weight:600;">${sign}${pct}%</span> vs previous week`;
+  }
+}
+
+function renderMuscleBalance() {
+  if (!document.getElementById('muscle-balance-body')) return;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  const cutoffStr = cutoff.toISOString().slice(0,10);
+
+  const recent = workouts.filter(w => w.date >= cutoffStr);
+  const setCounts = { Push: 0, Pull: 0, Legs: 0, Core: 0, Cardio: 0, Other: 0 };
+  recent.forEach(w => {
+    const ex = getExById(w.exerciseId);
+    if (!ex) return;
+    const cat = ex.cat || 'Other';
+    setCounts[cat] = (setCounts[cat] || 0) + (w.sets?.length || 0);
+  });
+
+  const total = Object.values(setCounts).reduce((s,v) => s + v, 0);
+  const colors = { Push:'#ff6584', Pull:'#6c63ff', Legs:'#43e97b', Core:'#f9d423', Cardio:'#ff9a3c', Other:'#a78bfa' };
+  const container = document.getElementById('muscle-balance-body');
+
+  if (total === 0) {
+    container.innerHTML = '<div class="no-data-msg">No workouts in the last 30 days</div>';
+    return;
+  }
+
+  const rows = Object.entries(setCounts)
+    .filter(([_, count]) => count > 0)
+    .sort(([,a],[,b]) => b - a)
+    .map(([cat, count]) => {
+      const pct = Math.round((count / total) * 100);
+      return `<div class="muscle-row">
+        <div class="muscle-row-label">${cat}</div>
+        <div class="muscle-row-bar"><div class="muscle-row-fill" style="width:${pct}%;background:${colors[cat]};"></div></div>
+        <div class="muscle-row-count">${count} (${pct}%)</div>
+      </div>`;
+    }).join('');
+  container.innerHTML = rows;
+}
+
+function renderRecentPRs() {
+  if (!document.getElementById('recent-prs-body')) return;
+  const container = document.getElementById('recent-prs-body');
+
+  // Walk workouts chronologically, flag each time the max weight for an exercise is beaten.
+  const sortedWorkouts = [...workouts].sort((a,b) => a.date.localeCompare(b.date));
+  const bestSoFar = {};
+  const prEvents = [];
+
+  for (const w of sortedWorkouts) {
+    const exId = w.exerciseId;
+    const maxW = Math.max(0, ...(w.sets || []).map(s => s.bodyweight ? 0 : s.weight));
+    if (maxW <= 0) continue;
+    if (!(exId in bestSoFar) || maxW > bestSoFar[exId]) {
+      bestSoFar[exId] = maxW;
+      const prSet = w.sets.find(s => !s.bodyweight && s.weight === maxW);
+      prEvents.push({ exId, date: w.date, weight: maxW, reps: prSet?.reps || 0 });
+    }
+  }
+
+  const recent = prEvents.slice(-5).reverse();
+  if (recent.length === 0) {
+    container.innerHTML = '<div class="no-data-msg">No PRs yet — keep lifting!</div>';
+    return;
+  }
+
+  container.innerHTML = recent.map(ev => {
+    const ex = getExById(ev.exId);
+    if (!ex) return '';
+    return `<div class="recent-pr-row">
+      <div class="recent-pr-name">${ex.name}</div>
+      <div class="recent-pr-val">${ev.weight} lb × ${ev.reps}</div>
+      <div class="recent-pr-date">${fmtDate(ev.date)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderLifetimeStats() {
+  if (!document.getElementById('lifetime-body')) return;
+  const uniqueDays = new Set(workouts.map(w => w.date)).size;
+  const totalSets = workouts.reduce((s,w) => s + (w.sets?.length || 0), 0);
+  const totalVol = workouts.reduce((s,w) => s + volumeOfWorkout(w), 0);
+
+  document.getElementById('lt-workouts').textContent = uniqueDays;
+  document.getElementById('lt-sets').textContent = totalSets;
+  document.getElementById('lt-volume').textContent = totalVol.toLocaleString();
+
+  const sinceEl = document.getElementById('lt-since');
+  if (workouts.length === 0) {
+    sinceEl.textContent = 'No workouts logged yet';
+  } else {
+    const sorted = [...workouts].sort((a,b) => a.date.localeCompare(b.date));
+    sinceEl.textContent = `since ${fmtDate(sorted[0].date)}`;
+  }
+}
+
+function renderRestDay() {
+  if (!document.getElementById('rest-day-number')) return;
+  const numEl = document.getElementById('rest-day-number');
+  const labelEl = document.getElementById('rest-day-label');
+  const ctxEl = document.getElementById('rest-day-context');
+
+  if (workouts.length === 0 && (!runs || runs.length === 0)) {
+    numEl.textContent = '—';
+    labelEl.textContent = 'no activity yet';
+    ctxEl.textContent = 'Log your first workout to start tracking';
+    return;
+  }
+
+  const allDates = [...workouts.map(w => w.date), ...(runs || []).map(r => r.date)];
+  const lastDate = allDates.sort().at(-1);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const last = new Date(lastDate + 'T12:00:00'); last.setHours(0,0,0,0);
+  const diffDays = Math.floor((today - last) / (1000*60*60*24));
+
+  numEl.textContent = diffDays;
+  labelEl.textContent = diffDays === 1 ? 'day since last activity' : 'days since last activity';
+
+  if (diffDays === 0) ctxEl.textContent = '🔥 Worked out today — great job!';
+  else if (diffDays === 1) ctxEl.textContent = 'Yesterday — rest or get after it today?';
+  else if (diffDays <= 3) ctxEl.textContent = 'Solid rest — time to hit it again?';
+  else if (diffDays <= 7) ctxEl.textContent = 'Getting a bit long — aim to move today';
+  else ctxEl.textContent = `Last active ${fmtDate(lastDate)} — let\'s get back at it 💪`;
 }
 
 // ── LOG FORM ─────────────────────────────────────────
