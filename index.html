@@ -384,7 +384,7 @@
   /* EDIT MODAL */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 500; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; width: 380px; max-width: 95vw; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; width: 380px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; }
   .modal-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.01em; }
   .modal-footer { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
   .tmpl-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
@@ -392,7 +392,8 @@
   .new-tmpl-toggle:hover { border-color: var(--accent); color: var(--accent); }
   .new-tmpl-form { display: none; margin-top: 12px; }
   .new-tmpl-form.open { display: block; }
-  .tmpl-ex-checks { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; max-height: 180px; overflow-y: auto; }
+  .tmpl-ex-checks { display: block; margin: 10px 0; max-height: 50vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .tmpl-ex-checks > * { margin-bottom: 4px; }
   .tmpl-ex-check { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; }
   .tmpl-ex-check input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
 
@@ -740,9 +741,8 @@
   <nav class="nav-tabs" id="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')">📊 Dashboard</button>
     <button class="nav-tab" onclick="showPage('log')">💪 Log Workout</button>
-    <button class="nav-tab" onclick="showPage('exercises')">📋 Exercises</button>
+    <button class="nav-tab" onclick="showPage('library')">📋 Library</button>
     <button class="nav-tab" onclick="showPage('run')">🏃 Run</button>
-    <button class="nav-tab" onclick="showPage('stretch')">🧘 Stretch</button>
     <button class="nav-tab" onclick="showPage('history')">📅 History</button>
   </nav>
   <div class="nav-scroll-hint" id="nav-scroll-hint">›</div>
@@ -1175,78 +1175,59 @@
 </div>
 
 <!-- EXERCISES -->
-<div id="page-exercises" class="page">
-  <div class="add-ex-form">
-    <div style="font-weight:600; margin-bottom:14px;">Add New Exercise</div>
-    <div class="inline-form">
-      <div class="form-group">
-        <label>Name</label>
-        <input type="text" id="new-ex-name" placeholder="e.g. Overhead Press">
-      </div>
-      <div class="form-group">
-        <label>Category</label>
-        <select id="new-ex-cat">
-          <option>Push</option><option>Pull</option><option>Legs</option><option>Core</option><option>Cardio</option><option>Other</option>
-        </select>
-      </div>
-      <button class="btn" style="margin-top:20px" onclick="addExercise()">Add</button>
-    </div>
+<!-- LIBRARY (Exercises + Stretch combined) -->
+<div id="page-library" class="page">
+  <div style="display:flex;gap:8px;margin-bottom:20px;background:var(--surface2);border-radius:10px;padding:4px;width:fit-content;">
+    <button id="lib-tab-exercises" onclick="switchLibTab('exercises')"
+      style="padding:8px 20px;border-radius:8px;border:none;font-family:'Inter',system-ui,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.15s;background:var(--accent);color:#fff;">
+      📋 Exercises
+    </button>
+    <button id="lib-tab-stretch" onclick="switchLibTab('stretch')"
+      style="padding:8px 20px;border-radius:8px;border:none;font-family:'Inter',system-ui,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.15s;background:none;color:var(--muted);">
+      🧘 Stretch
+    </button>
   </div>
-  <div class="exercise-grid" id="exercise-grid"></div>
-</div>
+  <div id="lib-exercises">
+    <div class="stretch-layout">
 
-<!-- RUN -->
-<div id="page-run" class="page">
-  <div class="stat-grid" id="run-stat-grid" style="margin-bottom:20px;"></div>
-  <div class="run-layout">
-    <!-- LEFT: LOG FORM -->
-    <div class="form-card">
-      <h2>Log a Run</h2>
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" id="run-date">
-      </div>
-      <div class="form-group">
-        <label>Distance</label>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input type="number" id="run-distance" placeholder="0.0" min="0" step="0.01" style="flex:1;">
-          <select id="run-unit" style="width:80px;">
-            <option value="mi">mi</option>
-            <option value="km">km</option>
+      <!-- LEFT SIDEBAR: CATEGORIES + ADD NEW -->
+      <div class="stretch-library">
+        <div style="font-weight:700;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:10px;">Categories</div>
+        <div id="ex-category-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
+
+        <hr class="tmpl-divider">
+
+        <div style="font-weight:700;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:10px;margin-top:4px;">Add New</div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>Name</label>
+          <input type="text" id="new-ex-name" placeholder="e.g. Overhead Press">
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>Category</label>
+          <select id="new-ex-cat">
+            <option>Push</option><option>Pull</option><option>Legs</option><option>Core</option><option>Cardio</option><option>Other</option>
           </select>
         </div>
+        <button class="btn" style="width:100%;" onclick="addExercise()">+ Add Exercise</button>
       </div>
-      <div class="form-group">
-        <label>Duration</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;">
-          <div><input type="number" id="run-hrs" placeholder="hrs" min="0" max="23"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">hrs</div></div>
-          <div><input type="number" id="run-mins" placeholder="min" min="0" max="59"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">min</div></div>
-          <div><input type="number" id="run-secs" placeholder="sec" min="0" max="59"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">sec</div></div>
+
+      <!-- RIGHT: EXERCISE LIST FOR SELECTED CATEGORY -->
+      <div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div id="ex-selected-cat-title" style="font-weight:700;font-size:1.05rem;letter-spacing:-0.01em;">All Exercises</div>
+            <div id="ex-selected-cat-count" style="font-size:0.75rem;color:var(--muted);"></div>
+          </div>
+          <div id="ex-filtered-list"></div>
         </div>
       </div>
-      <div class="form-group">
-        <label>Route / Notes <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
-        <input type="text" id="run-notes" placeholder="e.g. Riverside loop, hilly">
-      </div>
-      <div id="run-pace-preview" style="font-size:0.82rem;color:var(--accent);margin-bottom:14px;min-height:18px;"></div>
-      <button class="btn" onclick="saveRun()">Save Run</button>
-      <span class="success-msg" id="run-success-msg" style="margin-left:12px;">✓ Run saved!</span>
-    </div>
 
-    <!-- RIGHT: CHART + HISTORY -->
-    <div>
-      <div class="chart-card" style="margin-bottom:16px;">
-        <div class="chart-title">Pace Over Time <span style="font-size:0.75rem;color:var(--muted);font-weight:400;margin-left:6px;" id="run-chart-unit"></span></div>
-        <div class="chart-wrap"><canvas id="paceChart"></canvas></div>
-      </div>
-      <div class="chart-title" style="padding:0 2px 10px;">Recent Runs</div>
-      <div class="run-history-list" id="run-history-list"></div>
     </div>
   </div>
-</div>
 
-<!-- STRETCH -->
-<div id="page-stretch" class="page">
+<!-- RUN -->
+  </div>
+  <div id="lib-stretch" style="display:none;">
   <div class="stretch-layout">
 
     <!-- LEFT: LIBRARY + PRESETS -->
@@ -1437,7 +1418,59 @@
       <div class="stretch-log-history" id="stretch-log-history" style="margin-top:16px;"></div>
     </div>
   </div>
+  </div>
 </div>
+
+<div id="page-run" class="page">
+  <div class="stat-grid" id="run-stat-grid" style="margin-bottom:20px;"></div>
+  <div class="run-layout">
+    <!-- LEFT: LOG FORM -->
+    <div class="form-card">
+      <h2>Log a Run</h2>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="run-date">
+      </div>
+      <div class="form-group">
+        <label>Distance</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="number" id="run-distance" placeholder="0.0" min="0" step="0.01" style="flex:1;">
+          <select id="run-unit" style="width:80px;">
+            <option value="mi">mi</option>
+            <option value="km">km</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Duration</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;">
+          <div><input type="number" id="run-hrs" placeholder="hrs" min="0" max="23"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">hrs</div></div>
+          <div><input type="number" id="run-mins" placeholder="min" min="0" max="59"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">min</div></div>
+          <div><input type="number" id="run-secs" placeholder="sec" min="0" max="59"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">sec</div></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Route / Notes <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+        <input type="text" id="run-notes" placeholder="e.g. Riverside loop, hilly">
+      </div>
+      <div id="run-pace-preview" style="font-size:0.82rem;color:var(--accent);margin-bottom:14px;min-height:18px;"></div>
+      <button class="btn" onclick="saveRun()">Save Run</button>
+      <span class="success-msg" id="run-success-msg" style="margin-left:12px;">✓ Run saved!</span>
+    </div>
+
+    <!-- RIGHT: CHART + HISTORY -->
+    <div>
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-title">Pace Over Time <span style="font-size:0.75rem;color:var(--muted);font-weight:400;margin-left:6px;" id="run-chart-unit"></span></div>
+        <div class="chart-wrap"><canvas id="paceChart"></canvas></div>
+      </div>
+      <div class="chart-title" style="padding:0 2px 10px;">Recent Runs</div>
+      <div class="run-history-list" id="run-history-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STRETCH -->
 
 <!-- HISTORY (updated) -->
 <div id="page-history" class="page">
@@ -1489,7 +1522,7 @@
       <input type="text" id="edit-tmpl-name">
     </div>
     <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Exercises</div>
-    <div class="tmpl-ex-checks" id="edit-tmpl-checks" style="max-height:200px;overflow-y:auto;"></div>
+    <div class="tmpl-ex-checks" id="edit-tmpl-checks"></div>
     <div class="modal-footer">
       <button class="btn-sm" onclick="closeEditModal()">Cancel</button>
       <button class="btn" onclick="saveEditTemplate()">Save Changes</button>
@@ -2046,14 +2079,40 @@ function getWeekKey(dateStr) {
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  event.target.classList.add('active');
-  if (name === 'dashboard') renderDashboard();
-  if (name === 'history') { historyTab = historyTab || 'lifts'; renderHistory(); }
-  if (name === 'exercises') renderExercises();
-  if (name === 'log') renderTemplates();
-  if (name === 'run') renderRunPage();
-  if (name === 'stretch') { renderStretchLog(); renderStretchPresets(); }
+  // Map old stretch/exercises routes to library
+  const pageName = (name === 'exercises' || name === 'stretch') ? 'library' : name;
+  document.getElementById('page-' + pageName)?.classList.add('active');
+  if (event?.target) event.target.classList.add('active');
+  if (pageName === 'dashboard') renderDashboard();
+  if (pageName === 'history') { historyTab = historyTab || 'lifts'; renderHistory(); }
+  if (pageName === 'library') { switchLibTab(name === 'stretch' ? 'stretch' : 'exercises'); }
+  if (pageName === 'log') renderTemplates();
+  if (pageName === 'run') renderRunPage();
+}
+
+let currentLibTab = 'exercises';
+function switchLibTab(tab) {
+  currentLibTab = tab;
+  const exDiv = document.getElementById('lib-exercises');
+  const strDiv = document.getElementById('lib-stretch');
+  const exBtn = document.getElementById('lib-tab-exercises');
+  const strBtn = document.getElementById('lib-tab-stretch');
+  if (!exDiv || !strDiv) return;
+
+  if (tab === 'exercises') {
+    exDiv.style.display = '';
+    strDiv.style.display = 'none';
+    if (exBtn) { exBtn.style.background = 'var(--accent)'; exBtn.style.color = '#fff'; }
+    if (strBtn) { strBtn.style.background = 'none'; strBtn.style.color = 'var(--muted)'; }
+    renderExercises();
+  } else {
+    exDiv.style.display = 'none';
+    strDiv.style.display = '';
+    if (strBtn) { strBtn.style.background = 'var(--accent)'; strBtn.style.color = '#fff'; }
+    if (exBtn) { exBtn.style.background = 'none'; exBtn.style.color = 'var(--muted)'; }
+    renderStretchLog();
+    renderStretchPresets();
+  }
 }
 
 // ── STATS ────────────────────────────────────────────
@@ -2852,7 +2911,7 @@ function renderTemplates() {
     const items = catExs.map(e =>
       `<label class="tmpl-ex-check" style="padding:4px 8px;"><input type="checkbox" value="${e.id}"> ${e.name}</label>`
     ).join('');
-    return `<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:4px;">
+    return `<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:4px;">
       <div onclick="toggleEditCat('${catId}')" style="padding:8px 12px;background:var(--surface2);cursor:pointer;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center;">
         ${cat} <span id="${catId}-arrow" style="font-size:0.6rem;transition:transform 0.2s;">▶</span>
       </div>
@@ -2879,7 +2938,7 @@ function openEditTemplate(id) {
         <input type="checkbox" value="${e.id}" ${tmpl.exerciseIds.includes(e.id) ? 'checked' : ''}>
         ${e.name}
       </label>`).join('');
-    return `<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:4px;">
+    return `<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:4px;">
       <div onclick="toggleEditCat('${catId}')" style="padding:8px 12px;background:var(--surface2);cursor:pointer;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center;">
         ${cat} <span id="${catId}-arrow" style="font-size:0.6rem;transition:transform 0.2s;">▶</span>
       </div>
@@ -3419,41 +3478,72 @@ const CAT_META = {
   Other:  { color: '#a78bfa' },
 };
 
+let selectedExCat = 'All';
+
 function renderExercises() {
+  const catListEl = document.getElementById('ex-category-list');
+  if (!catListEl) return; // not on library page
+  const categories = ['All', 'Push', 'Pull', 'Legs', 'Core', 'Cardio', 'Other'];
+
+  // Build the sidebar category buttons
+  catListEl.innerHTML = categories.map(cat => {
+    const count = cat === 'All' ? exercises.length : exercises.filter(e => e.cat === cat).length;
+    if (cat !== 'All' && count === 0) return '';
+    const meta = CAT_META[cat] ?? { color: 'var(--accent)' };
+    const isActive = selectedExCat === cat;
+    return `<div onclick="selectExCategory('${cat}')"
+      style="padding:11px 14px;border-radius:8px;cursor:pointer;background:${isActive ? 'rgba(108,99,255,0.12)' : 'var(--surface2)'};border:1px solid ${isActive ? 'var(--accent)' : 'var(--border)'};transition:all 0.12s;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-weight:${isActive ? '700' : '600'};font-size:0.85rem;color:${isActive ? 'var(--accent)' : (cat === 'All' ? 'var(--text)' : meta.color)};">${cat}</span>
+      <span style="font-size:0.7rem;color:var(--muted);">${count}</span>
+    </div>`;
+  }).join('');
+
+  renderExFilteredList();
+}
+
+function selectExCategory(cat) {
+  selectedExCat = cat;
+  renderExercises();
+}
+
+function renderExFilteredList() {
+  const listEl = document.getElementById('ex-filtered-list');
+  const titleEl = document.getElementById('ex-selected-cat-title');
+  const countEl = document.getElementById('ex-selected-cat-count');
+  if (!listEl) return;
+
   const prs = computePRs();
-  const grid = document.getElementById('exercise-grid');
-  const categories = ['Push', 'Pull', 'Legs', 'Core', 'Cardio', 'Other'];
-  grid.innerHTML = categories.map(cat => {
-    const catExs = exercises.filter(e => e.cat === cat);
-    if (!catExs.length) return '';
-    const meta = CAT_META[cat] ?? { color: 'var(--muted)' };
-    const cards = catExs.map(e => {
-      const pr = prs.find(p => p.ex.id === e.id);
-      const prText = pr ? (pr.weight > 0 ? `PR: ${pr.weight} lbs × ${pr.reps}` : `PR: ${pr.reps} reps BW`) : 'No data yet';
-      return `<div class="ex-card" onclick="showExDetailModal(${e.id})" style="cursor:pointer;">
-        <div class="ex-name">${e.name}</div>
-        <div class="ex-pr">${prText}</div>
-      </div>`;
-    }).join('');
-    return `<div class="ex-category-panel collapsed" id="ex-cat-${cat}">
-      <div class="ex-category-header" onclick="toggleExCategory('${cat}')" style="cursor:pointer;">
-        <span class="ex-category-title" style="color:${meta.color}">${cat}</span>
-        <span class="ex-category-count">${catExs.length} exercises</span>
-        <span style="margin-left:auto;font-size:0.65rem;color:var(--muted);transition:transform 0.2s;" id="ex-arrow-${cat}">▶</span>
+  const filtered = selectedExCat === 'All'
+    ? [...exercises].sort((a,b) => a.name.localeCompare(b.name))
+    : exercises.filter(e => e.cat === selectedExCat).sort((a,b) => a.name.localeCompare(b.name));
+
+  titleEl.textContent = selectedExCat === 'All' ? 'All Exercises' : selectedExCat;
+  countEl.textContent = `${filtered.length} exercise${filtered.length !== 1 ? 's' : ''}`;
+
+  if (!filtered.length) {
+    listEl.innerHTML = `<div style="padding:20px;color:var(--muted);font-size:0.85rem;text-align:center;">No exercises in this category yet.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(e => {
+    const pr = prs.find(p => p.ex.id === e.id);
+    const prText = pr ? (pr.weight > 0 ? `PR: ${pr.weight} lbs × ${pr.reps}` : `PR: ${pr.reps} reps BW`) : 'No data yet';
+    const meta = CAT_META[e.cat] ?? { color: 'var(--muted)' };
+    return `<div onclick="showExDetailModal(${e.id})"
+      style="padding:12px 14px;margin-bottom:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all 0.12s;"
+      onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="min-width:0;flex:1;">
+        <div style="font-weight:600;font-size:0.88rem;margin-bottom:2px;">${e.name}</div>
+        <div style="font-size:0.72rem;color:var(--muted);">${prText}</div>
       </div>
-      <div class="ex-cards-row" id="ex-body-${cat}" style="display:none;">${cards}</div>
+      ${selectedExCat === 'All' ? `<span style="font-size:0.62rem;color:${meta.color};background:var(--surface);padding:3px 8px;border-radius:4px;font-weight:600;letter-spacing:0.3px;flex-shrink:0;margin-left:8px;">${e.cat.toUpperCase()}</span>` : ''}
     </div>`;
   }).join('');
 }
 
 function toggleExCategory(cat) {
-  const body = document.getElementById(`ex-body-${cat}`);
-  const arrow = document.getElementById(`ex-arrow-${cat}`);
-  const panel = document.getElementById(`ex-cat-${cat}`);
-  const isCollapsed = body.style.display === 'none';
-  body.style.display = isCollapsed ? 'grid' : 'none';
-  arrow.style.transform = isCollapsed ? 'rotate(90deg)' : '';
-  panel.classList.toggle('collapsed', !isCollapsed);
+  // Kept for backward compat but no longer used with sidebar layout
+  selectExCategory(cat);
 }
 
 let historyTab = 'lifts';
