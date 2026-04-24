@@ -316,7 +316,8 @@
   .ex-category-title { font-weight: 700; font-size: 0.78rem; letter-spacing: 0.5px; text-transform: uppercase; }
   .ex-category-count { font-size: 0.68rem; color: var(--muted); margin-left: auto; font-weight: 500; letter-spacing: 0.3px; }
   .ex-cards-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1px; background: var(--border); }
-  .ex-card { background: var(--surface2); padding: 14px 16px; }
+  .ex-card { background: var(--surface2); padding: 14px 16px; transition: all 0.15s; }
+  .ex-card:hover { background: var(--surface); border-color: var(--accent); transform: translateY(-1px); }
   .ex-name { font-weight: 600; font-size: 0.82rem; margin-bottom: 4px; letter-spacing: -0.01em; }
   .ex-cat { font-size: 0.65rem; color: var(--accent); background: rgba(108,99,255,0.1); padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
   .ex-pr { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
@@ -492,6 +493,23 @@
   .live-last-hint strong { color: var(--text); font-weight: 600; }
   .live-tip-box { background: rgba(249,212,35,0.08); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 12px 14px; margin-bottom: 20px; font-size: 0.85rem; color: var(--text); line-height: 1.5; }
   .live-tip-label { font-size: 0.65rem; color: var(--yellow); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+
+  /* ── EXERCISE SILHOUETTE DEMO ─────────────────────── */
+  .ex-demo { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 10px; margin-bottom: 16px; }
+  .ex-demo-frame { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px 4px; min-width: 0; }
+  .ex-demo-frame svg { width: 100%; max-width: 110px; height: auto; display: block; }
+  .ex-demo-frame svg .sil-body { fill: var(--text); }
+  .ex-demo-frame svg .sil-accent { fill: var(--accent); }
+  .ex-demo-frame svg .sil-stroke { stroke: var(--text); fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .ex-demo-frame svg .sil-equip { fill: var(--muted); opacity: 0.7; }
+  .ex-demo-frame svg .sil-floor { stroke: var(--border); stroke-width: 2; }
+  .ex-demo-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
+  .ex-demo-arrow { color: var(--muted); font-size: 1rem; flex-shrink: 0; opacity: 0.6; }
+
+  /* Compact variant for the live-mode header */
+  .ex-demo.compact { padding: 10px 8px; margin-bottom: 14px; }
+  .ex-demo.compact svg { max-width: 86px; }
+  .ex-demo.compact .ex-demo-label { font-size: 0.58rem; }
 
   /* Main set card — the current set is the hero */
   .live-set-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
@@ -816,6 +834,24 @@
     <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:space-between;align-items:center;">
       <button class="btn-sm" onclick="resetDashboardLayout()" style="color:var(--muted);">Reset</button>
       <button class="btn" onclick="closeCustomizeModal()" style="padding:8px 18px;">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXERCISE DETAIL MODAL -->
+<div id="ex-detail-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeExDetailModal()">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);gap:12px;">
+      <div style="min-width:0;flex:1;">
+        <div id="ex-detail-name" style="font-weight:700;font-size:1.05rem;letter-spacing:-0.01em;"></div>
+        <div id="ex-detail-cat" style="font-size:0.68rem;color:var(--accent);text-transform:uppercase;font-weight:700;letter-spacing:0.6px;margin-top:4px;"></div>
+      </div>
+      <button onclick="closeExDetailModal()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1;flex-shrink:0;">×</button>
+    </div>
+    <div style="padding:20px;">
+      <div class="ex-demo" id="ex-detail-demo"></div>
+      <div id="ex-detail-tip" style="background:rgba(249,212,35,0.08);border-left:3px solid var(--yellow);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:0.85rem;line-height:1.5;"></div>
+      <div id="ex-detail-pr" style="text-align:center;font-size:0.82rem;color:var(--muted);"></div>
     </div>
   </div>
 </div>
@@ -1475,6 +1511,7 @@
       <span class="live-ex-cat" id="live-ex-cat">Push</span>
     </div>
     <div class="live-last-hint" id="live-last-hint"></div>
+    <div class="ex-demo compact" id="live-demo"></div>
     <div class="live-tip-box" id="live-tip-box">
       <div class="live-tip-label">Form Cue</div>
       <div id="live-tip-text">Focus on controlled reps and full range of motion.</div>
@@ -3393,7 +3430,7 @@ function renderExercises() {
     const cards = catExs.map(e => {
       const pr = prs.find(p => p.ex.id === e.id);
       const prText = pr ? (pr.weight > 0 ? `PR: ${pr.weight} lbs × ${pr.reps}` : `PR: ${pr.reps} reps BW`) : 'No data yet';
-      return `<div class="ex-card">
+      return `<div class="ex-card" onclick="showExDetailModal(${e.id})" style="cursor:pointer;">
         <div class="ex-name">${e.name}</div>
         <div class="ex-pr">${prText}</div>
       </div>`;
@@ -4333,6 +4370,554 @@ function getLiveTip(ex) {
   return LIVE_CAT_CUES[ex.cat] || LIVE_CAT_CUES.Other;
 }
 
+// ── EXERCISE SILHOUETTES ─────────────────────────────
+// Each entry: { match: [keywords], labels: [startLabel, endLabel], svgs: [svgA, svgB] }
+// All SVGs use 100x120 viewBox with classes: sil-body, sil-stroke, sil-equip, sil-floor.
+// Ground line at y=110. Figure centered at x=50.
+
+// Reusable pieces
+const SIL = {
+  head: (cx, cy, r=6) => `<circle class="sil-body" cx="${cx}" cy="${cy}" r="${r}"/>`,
+  floor: `<line class="sil-floor" x1="10" y1="112" x2="90" y2="112"/>`,
+  // Simple torso+limbs helper. Pass an object with joint coords.
+  figure: (j) => {
+    // j: { head:[x,y], shoulder:[x,y], hipL:[x,y], hipR:[x,y], elbowL, handL, elbowR, handR, kneeL, footL, kneeR, footR }
+    const line = (a, b, w=3.5) => a && b ? `<path class="sil-stroke" stroke-width="${w}" d="M${a[0]},${a[1]} L${b[0]},${b[1]}"/>` : '';
+    const parts = [];
+    // torso
+    if (j.shoulder && j.hip) parts.push(line(j.shoulder, j.hip, 4.5));
+    // arms
+    if (j.shoulder && j.elbowL) parts.push(line(j.shoulder, j.elbowL));
+    if (j.elbowL && j.handL) parts.push(line(j.elbowL, j.handL));
+    if (j.shoulder && j.elbowR) parts.push(line(j.shoulder, j.elbowR));
+    if (j.elbowR && j.handR) parts.push(line(j.elbowR, j.handR));
+    // legs
+    if (j.hip && j.kneeL) parts.push(line(j.hip, j.kneeL, 4));
+    if (j.kneeL && j.footL) parts.push(line(j.kneeL, j.footL, 4));
+    if (j.hip && j.kneeR) parts.push(line(j.hip, j.kneeR, 4));
+    if (j.kneeR && j.footR) parts.push(line(j.kneeR, j.footR, 4));
+    // head last so it sits on top
+    if (j.head) parts.push(`<circle class="sil-body" cx="${j.head[0]}" cy="${j.head[1]}" r="6"/>`);
+    return parts.join('');
+  },
+  // SVG shell
+  svg: (inner) => `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}${inner}</svg>`,
+};
+const SIL_FLOOR = `<line class="sil-floor" x1="10" y1="112" x2="90" y2="112"/>`;
+
+// Helper: build an SVG from a joint config
+function silSVG(joints, extras = '') {
+  return `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}${extras}${SIL.figure(joints)}</svg>`;
+}
+
+// Horizontal bar (barbell) helper
+function bar(x, y, len = 60) {
+  const half = len / 2;
+  return `<rect class="sil-equip" x="${x - half}" y="${y - 1.5}" width="${len}" height="3" rx="1.5"/>
+          <circle class="sil-equip" cx="${x - half - 3}" cy="${y}" r="4"/>
+          <circle class="sil-equip" cx="${x + half + 3}" cy="${y}" r="4"/>`;
+}
+// Dumbbell helper
+function db(x, y, size = 4) {
+  return `<rect class="sil-equip" x="${x-1.2}" y="${y-size-2}" width="2.4" height="${size*2+4}" rx="1"/>
+          <rect class="sil-equip" x="${x-3.5}" y="${y-size-3}" width="7" height="3" rx="1"/>
+          <rect class="sil-equip" x="${x-3.5}" y="${y+size}" width="7" height="3" rx="1"/>`;
+}
+// Bench helper
+function bench(cx = 50, cy = 88, w = 55) {
+  return `<rect class="sil-equip" x="${cx - w/2}" y="${cy - 4}" width="${w}" height="4" rx="1"/>
+          <rect class="sil-equip" x="${cx - w/2 + 2}" y="${cy}" width="3" height="10"/>
+          <rect class="sil-equip" x="${cx + w/2 - 5}" y="${cy}" width="3" height="10"/>`;
+}
+
+const SILHOUETTES = [
+  // ─── CHEST / PRESSES ────────────────────────────────
+  { match: ['bench press', 'dumbbell bench', 'dumbbell press'], labels: ['Bottom', 'Top'],
+    svgs: [
+      // Frame A: bar at chest (bottom of press) — lying on bench
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}${bench(50, 82)}
+       <circle class="sil-body" cx="26" cy="78" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M32,80 L70,82"/>
+       <path class="sil-stroke" stroke-width="4" d="M70,82 L85,95"/>
+       <path class="sil-stroke" stroke-width="4" d="M85,95 L90,108"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M55,82 L48,72 L52,68"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M55,82 L62,72 L58,68"/>
+       ${bar(55, 66, 44)}
+       </svg>`,
+      // Frame B: bar at top (arms extended up)
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}${bench(50, 82)}
+       <circle class="sil-body" cx="26" cy="78" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M32,80 L70,82"/>
+       <path class="sil-stroke" stroke-width="4" d="M70,82 L85,95"/>
+       <path class="sil-stroke" stroke-width="4" d="M85,95 L90,108"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M55,82 L52,62"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M55,82 L58,62"/>
+       ${bar(55, 56, 44)}
+       </svg>`,
+    ]
+  },
+  { match: ['incline bench', 'incline dumbbell', 'incline press'], labels: ['Lower', 'Press'],
+    svgs: [
+      // Inclined bench — figure reclined at angle
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <path class="sil-equip" d="M25,95 L75,70 L80,73 L30,98 Z"/>
+       <rect class="sil-equip" x="27" y="98" width="3" height="12"/>
+       <rect class="sil-equip" x="74" y="72" width="3" height="8"/>
+       <circle class="sil-body" cx="35" cy="78" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M40,80 L68,68"/>
+       <path class="sil-stroke" stroke-width="4" d="M68,68 L82,82"/>
+       <path class="sil-stroke" stroke-width="4" d="M82,82 L88,95"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M54,74 L48,62"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M54,74 L56,62"/>
+       ${bar(52, 58, 40)}
+       </svg>`,
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <path class="sil-equip" d="M25,95 L75,70 L80,73 L30,98 Z"/>
+       <rect class="sil-equip" x="27" y="98" width="3" height="12"/>
+       <rect class="sil-equip" x="74" y="72" width="3" height="8"/>
+       <circle class="sil-body" cx="35" cy="78" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M40,80 L68,68"/>
+       <path class="sil-stroke" stroke-width="4" d="M68,68 L82,82"/>
+       <path class="sil-stroke" stroke-width="4" d="M82,82 L88,95"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M54,74 L44,52"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M54,74 L52,52"/>
+       ${bar(48, 48, 36)}
+       </svg>`,
+    ]
+  },
+  { match: ['overhead press', 'shoulder press', 'military press'], labels: ['Shoulders', 'Overhead'],
+    svgs: [
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[36,32], handL:[36,22], elbowR:[64,32], handR:[64,22], kneeL:[42,90], footL:[42,110], kneeR:[58,90], footR:[58,110] }, bar(50, 18, 40)),
+      silSVG({ head:[50,30], shoulder:[50,40], hip:[50,72], elbowL:[44,22], handL:[44,8],  elbowR:[56,22], handR:[56,8],  kneeL:[42,92], footL:[42,110], kneeR:[58,92], footR:[58,110] }, bar(50, 4, 40)),
+    ]
+  },
+  { match: ['lateral raise'], labels: ['Arms Down', 'Arms Up'],
+    svgs: [
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[42,48], handL:[36,62], elbowR:[58,48], handR:[64,62], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }, db(36,62) + db(64,62)),
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[30,32], handL:[20,32], elbowR:[70,32], handR:[80,32], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }, db(20,32) + db(80,32)),
+    ]
+  },
+  { match: ['front raise'], labels: ['Down', 'Up'],
+    svgs: [
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[44,50], handL:[42,64], elbowR:[56,50], handR:[58,64], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }, db(42,64) + db(58,64)),
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[38,24], handL:[32,16], elbowR:[62,24], handR:[68,16], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }, db(32,16) + db(68,16)),
+    ]
+  },
+
+  // ─── PULLS ──────────────────────────────────────────
+  { match: ['deadlift'], labels: ['Setup', 'Lockout'],
+    svgs: [
+      // Hinged position, bar on floor
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-body" cx="35" cy="40" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M40,44 L70,70"/>
+       <path class="sil-stroke" stroke-width="4" d="M70,70 L52,95"/>
+       <path class="sil-stroke" stroke-width="4" d="M52,95 L50,110"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M68,68 L60,92"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M72,72 L72,92"/>
+       ${bar(58, 100, 52)}
+       </svg>`,
+      // Standing tall, bar at hip
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,64], elbowL:[46,48], handL:[44,62], elbowR:[54,48], handR:[56,62], kneeL:[44,88], footL:[44,110], kneeR:[56,88], footR:[56,110] }, bar(50, 62, 54)),
+    ]
+  },
+  { match: ['squat'], labels: ['Bottom', 'Top'],
+    svgs: [
+      // Deep squat, bar on back
+      silSVG({ head:[50,26], shoulder:[50,36], hip:[50,70], elbowL:[34,40], handL:[34,30], elbowR:[66,40], handR:[66,30], kneeL:[36,78], footL:[38,108], kneeR:[64,78], footR:[62,108] }, bar(50, 34, 50)),
+      // Standing, bar on back
+      silSVG({ head:[50,20], shoulder:[50,30], hip:[50,64], elbowL:[34,34], handL:[34,24], elbowR:[66,34], handR:[66,24], kneeL:[44,88], footL:[44,110], kneeR:[56,88], footR:[56,110] }, bar(50, 28, 50)),
+    ]
+  },
+  { match: ['leg press'], labels: ['Bent', 'Extended'],
+    svgs: [
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <rect class="sil-equip" x="8" y="85" width="28" height="18" rx="2"/>
+       <rect class="sil-equip" x="65" y="30" width="22" height="34" rx="2"/>
+       <rect class="sil-equip" x="36" y="54" width="34" height="4"/>
+       <circle class="sil-body" cx="22" cy="78" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M28,82 L40,84"/>
+       <path class="sil-stroke" stroke-width="4" d="M40,84 L44,70"/>
+       <path class="sil-stroke" stroke-width="4" d="M44,70 L60,62"/>
+       <path class="sil-stroke" stroke-width="4" d="M40,84 L44,78"/>
+       <path class="sil-stroke" stroke-width="4" d="M44,78 L62,68"/>
+       </svg>`,
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <rect class="sil-equip" x="8" y="85" width="28" height="18" rx="2"/>
+       <rect class="sil-equip" x="78" y="30" width="12" height="34" rx="2"/>
+       <rect class="sil-equip" x="36" y="54" width="42" height="4"/>
+       <circle class="sil-body" cx="22" cy="78" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M28,82 L40,84"/>
+       <path class="sil-stroke" stroke-width="4" d="M40,84 L62,72"/>
+       <path class="sil-stroke" stroke-width="4" d="M62,72 L78,58"/>
+       <path class="sil-stroke" stroke-width="4" d="M40,84 L62,78"/>
+       <path class="sil-stroke" stroke-width="4" d="M62,78 L78,62"/>
+       </svg>`,
+    ]
+  },
+  { match: ['lunge', 'split squat'], labels: ['Down', 'Up'],
+    svgs: [
+      // Front knee bent, back knee near floor
+      silSVG({ head:[50,24], shoulder:[50,34], hip:[50,70], elbowL:[42,46], handL:[38,62], elbowR:[58,46], handR:[62,62], kneeL:[32,88], footL:[30,110], kneeR:[68,82], footR:[78,110] }),
+      // Standing upright
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,66], elbowL:[42,46], handL:[40,62], elbowR:[58,46], handR:[60,62], kneeL:[44,88], footL:[44,110], kneeR:[56,88], footR:[56,110] }),
+    ]
+  },
+  { match: ['pull-up', 'chin-up', 'chinup', 'pullup'], labels: ['Hang', 'Top'],
+    svgs: [
+      // Hanging from bar
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <rect class="sil-equip" x="10" y="12" width="80" height="3" rx="1"/>
+       <circle class="sil-body" cx="50" cy="36" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M50,42 L50,80"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,42 L38,28 L38,14"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,42 L62,28 L62,14"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,80 L44,100"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,80 L56,100"/>
+       </svg>`,
+      // Chin over bar
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <rect class="sil-equip" x="10" y="12" width="80" height="3" rx="1"/>
+       <circle class="sil-body" cx="50" cy="20" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M50,26 L50,64"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,26 L42,22 L38,14"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,26 L58,22 L62,14"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,64 L42,84"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,64 L58,84"/>
+       </svg>`,
+    ]
+  },
+  { match: ['lat pulldown'], labels: ['Up', 'Down'],
+    svgs: [
+      // Seated, bar above
+      silSVG({ head:[50,38], shoulder:[50,48], hip:[50,80], elbowL:[36,38], handL:[32,16], elbowR:[64,38], handR:[68,16], kneeL:[42,90], footL:[38,108], kneeR:[58,90], footR:[62,108] }, bar(50, 14, 44)),
+      // Bar pulled to chest
+      silSVG({ head:[50,32], shoulder:[50,42], hip:[50,78], elbowL:[34,48], handL:[36,60], elbowR:[66,48], handR:[64,60], kneeL:[42,90], footL:[38,108], kneeR:[58,90], footR:[62,108] }, bar(50, 58, 36)),
+    ]
+  },
+  { match: ['row'], labels: ['Extended', 'Pulled'],
+    svgs: [
+      // Hinged over, arms straight down
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-body" cx="30" cy="44" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M36,48 L68,60"/>
+       <path class="sil-stroke" stroke-width="4" d="M68,60 L64,90"/>
+       <path class="sil-stroke" stroke-width="4" d="M64,90 L60,110"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M56,54 L54,80"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M60,55 L62,80"/>
+       ${bar(58, 84, 46)}
+       </svg>`,
+      // Hinged over, bar pulled to abdomen
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-body" cx="30" cy="44" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M36,48 L68,60"/>
+       <path class="sil-stroke" stroke-width="4" d="M68,60 L64,90"/>
+       <path class="sil-stroke" stroke-width="4" d="M64,90 L60,110"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M56,54 L44,58"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M60,56 L50,62"/>
+       ${bar(48, 60, 46)}
+       </svg>`,
+    ]
+  },
+  { match: ['face pull'], labels: ['Extended', 'Pulled'],
+    svgs: [
+      silSVG({ head:[50,26], shoulder:[50,36], hip:[50,68], elbowL:[38,32], handL:[20,24], elbowR:[62,32], handR:[80,24], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }),
+      silSVG({ head:[50,26], shoulder:[50,36], hip:[50,68], elbowL:[28,26], handL:[42,22], elbowR:[72,26], handR:[58,22], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }),
+    ]
+  },
+
+  // ─── BICEPS / TRICEPS ───────────────────────────────
+  { match: ['curl'], labels: ['Extended', 'Curled'],
+    svgs: [
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[44,52], handL:[44,70], elbowR:[56,52], handR:[56,70], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }, db(44,70) + db(56,70)),
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[44,52], handL:[42,34], elbowR:[56,52], handR:[58,34], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }, db(42,34) + db(58,34)),
+    ]
+  },
+  { match: ['tricep pushdown', 'pushdown'], labels: ['Bent', 'Extended'],
+    svgs: [
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[44,46], handL:[38,34], elbowR:[56,46], handR:[62,34], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }),
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[44,46], handL:[38,66], elbowR:[56,46], handR:[62,66], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }),
+    ]
+  },
+  { match: ['skull crusher'], labels: ['Bent', 'Extended'],
+    svgs: [
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}${bench(50, 82)}
+       <circle class="sil-body" cx="26" cy="78" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M32,80 L70,82"/>
+       <path class="sil-stroke" stroke-width="4" d="M70,82 L85,95"/>
+       <path class="sil-stroke" stroke-width="4" d="M85,95 L90,108"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,78 L52,62"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,78 L52,62"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M52,62 L38,70"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M52,62 L38,70"/>
+       ${bar(34, 70, 28)}
+       </svg>`,
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}${bench(50, 82)}
+       <circle class="sil-body" cx="26" cy="78" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M32,80 L70,82"/>
+       <path class="sil-stroke" stroke-width="4" d="M70,82 L85,95"/>
+       <path class="sil-stroke" stroke-width="4" d="M85,95 L90,108"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,78 L50,58"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,78 L50,58"/>
+       ${bar(50, 54, 28)}
+       </svg>`,
+    ]
+  },
+  { match: ['dip'], labels: ['Bottom', 'Top'],
+    svgs: [
+      // Chest/tricep dip on parallel bars, elbows bent
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <rect class="sil-equip" x="18" y="56" width="28" height="3" rx="1"/>
+       <rect class="sil-equip" x="54" y="56" width="28" height="3" rx="1"/>
+       <rect class="sil-equip" x="20" y="59" width="3" height="48"/>
+       <rect class="sil-equip" x="77" y="59" width="3" height="48"/>
+       <circle class="sil-body" cx="50" cy="54" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M50,60 L50,86"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,60 L36,58"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M36,58 L34,64"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,60 L64,58"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M64,58 L66,64"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,86 L44,102"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,86 L56,102"/>
+       </svg>`,
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <rect class="sil-equip" x="18" y="68" width="28" height="3" rx="1"/>
+       <rect class="sil-equip" x="54" y="68" width="28" height="3" rx="1"/>
+       <rect class="sil-equip" x="20" y="71" width="3" height="36"/>
+       <rect class="sil-equip" x="77" y="71" width="3" height="36"/>
+       <circle class="sil-body" cx="50" cy="36" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M50,42 L50,74"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,42 L36,70"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,42 L64,70"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,74 L44,92"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,74 L56,92"/>
+       </svg>`,
+    ]
+  },
+  { match: ['push-up', 'pushup'], labels: ['Down', 'Up'],
+    svgs: [
+      // Horizontal body, elbows bent
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-body" cx="18" cy="82" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M24,84 L78,88"/>
+       <path class="sil-stroke" stroke-width="4" d="M78,88 L86,102"/>
+       <path class="sil-stroke" stroke-width="4" d="M86,102 L92,110"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M30,86 L28,98"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M60,88 L62,102"/>
+       </svg>`,
+      // Arms extended
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-body" cx="18" cy="66" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M24,68 L78,72"/>
+       <path class="sil-stroke" stroke-width="4" d="M78,72 L86,94"/>
+       <path class="sil-stroke" stroke-width="4" d="M86,94 L92,108"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M30,70 L30,98"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M60,72 L62,102"/>
+       </svg>`,
+    ]
+  },
+
+  // ─── CORE ───────────────────────────────────────────
+  { match: ['plank'], labels: ['Hold', 'Hold'],
+    svgs: [
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-body" cx="18" cy="78" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M24,80 L80,84"/>
+       <path class="sil-stroke" stroke-width="4" d="M80,84 L88,104"/>
+       <path class="sil-stroke" stroke-width="4" d="M88,104 L94,110"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M30,82 L28,100"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M28,100 L26,108"/>
+       </svg>`,
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-body" cx="18" cy="78" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M24,80 L80,84"/>
+       <path class="sil-stroke" stroke-width="4" d="M80,84 L88,104"/>
+       <path class="sil-stroke" stroke-width="4" d="M88,104 L94,110"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M30,82 L28,100"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M28,100 L26,108"/>
+       </svg>`,
+    ]
+  },
+  { match: ['crunch', 'sit-up', 'situp'], labels: ['Down', 'Up'],
+    svgs: [
+      // Lying back
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-body" cx="18" cy="90" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M24,92 L58,94"/>
+       <path class="sil-stroke" stroke-width="4" d="M58,94 L68,76"/>
+       <path class="sil-stroke" stroke-width="4" d="M68,76 L82,90"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M30,92 L34,80"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M34,80 L38,82"/>
+       </svg>`,
+      // Crunched up
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-body" cx="40" cy="72" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M44,76 L60,92"/>
+       <path class="sil-stroke" stroke-width="4" d="M60,92 L68,76"/>
+       <path class="sil-stroke" stroke-width="4" d="M68,76 L82,90"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M40,76 L32,70"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M32,70 L34,64"/>
+       </svg>`,
+    ]
+  },
+  { match: ['leg raise', 'hanging knee'], labels: ['Down', 'Up'],
+    svgs: [
+      // Hanging from bar, legs down
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <rect class="sil-equip" x="10" y="12" width="80" height="3" rx="1"/>
+       <circle class="sil-body" cx="50" cy="34" r="6"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,34 L42,22 L40,14"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,34 L58,22 L60,14"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M50,40 L50,78"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,78 L44,102"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,78 L56,102"/>
+       </svg>`,
+      // Legs raised to 90°
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <rect class="sil-equip" x="10" y="12" width="80" height="3" rx="1"/>
+       <circle class="sil-body" cx="50" cy="34" r="6"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,34 L42,22 L40,14"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,34 L58,22 L60,14"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M50,40 L50,70"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,70 L70,66"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,70 L72,72"/>
+       </svg>`,
+    ]
+  },
+
+  // ─── CARDIO ─────────────────────────────────────────
+  { match: ['run', 'jog', 'sprint'], labels: ['Stride A', 'Stride B'],
+    svgs: [
+      silSVG({ head:[50,22], shoulder:[52,32], hip:[50,64], elbowL:[40,42], handL:[44,56], elbowR:[62,42], handR:[58,28], kneeL:[40,82], footL:[32,108], kneeR:[62,78], footR:[72,98] }),
+      silSVG({ head:[50,22], shoulder:[48,32], hip:[50,64], elbowL:[40,42], handL:[44,28], elbowR:[60,42], handR:[56,56], kneeL:[62,82], footL:[72,108], kneeR:[38,78], footR:[28,98] }),
+    ]
+  },
+  { match: ['bike', 'cycling'], labels: ['Top', 'Bottom'],
+    svgs: [
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-equip" cx="28" cy="96" r="12" fill="none" stroke="var(--muted)" stroke-width="2"/>
+       <circle class="sil-equip" cx="72" cy="96" r="12" fill="none" stroke="var(--muted)" stroke-width="2"/>
+       <path class="sil-equip" stroke="var(--muted)" stroke-width="2" fill="none" d="M28,96 L50,76 L72,96 M50,76 L50,60 M40,60 L60,60"/>
+       <circle class="sil-body" cx="50" cy="34" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M50,40 L50,70"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,42 L42,60"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M42,60 L40,62"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,70 L38,86"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,70 L64,96"/>
+       </svg>`,
+      `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+       <circle class="sil-equip" cx="28" cy="96" r="12" fill="none" stroke="var(--muted)" stroke-width="2"/>
+       <circle class="sil-equip" cx="72" cy="96" r="12" fill="none" stroke="var(--muted)" stroke-width="2"/>
+       <path class="sil-equip" stroke="var(--muted)" stroke-width="2" fill="none" d="M28,96 L50,76 L72,96 M50,76 L50,60 M40,60 L60,60"/>
+       <circle class="sil-body" cx="50" cy="34" r="6"/>
+       <path class="sil-stroke" stroke-width="4.5" d="M50,40 L50,70"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M50,42 L42,60"/>
+       <path class="sil-stroke" stroke-width="3.5" d="M42,60 L40,62"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,70 L40,96"/>
+       <path class="sil-stroke" stroke-width="4" d="M50,70 L62,82"/>
+       </svg>`,
+    ]
+  },
+  { match: ['calf raise'], labels: ['Down', 'Up'],
+    svgs: [
+      silSVG({ head:[50,22], shoulder:[50,32], hip:[50,64], elbowL:[44,46], handL:[42,62], elbowR:[56,46], handR:[58,62], kneeL:[46,86], footL:[46,110], kneeR:[54,86], footR:[54,110] }),
+      silSVG({ head:[50,16], shoulder:[50,26], hip:[50,58], elbowL:[44,40], handL:[42,56], elbowR:[56,40], handR:[58,56], kneeL:[46,80], footL:[46,104], kneeR:[54,80], footR:[54,104] }),
+    ]
+  },
+];
+
+// Category fallback silhouettes — generic figure suggestive of the muscle group
+const SIL_CATEGORY = {
+  Push: [
+    silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[40,40], handL:[38,54], elbowR:[60,40], handR:[62,54], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }),
+    silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[38,26], handL:[30,14], elbowR:[62,26], handR:[70,14], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }),
+  ],
+  Pull: [
+    silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[38,40], handL:[28,52], elbowR:[62,40], handR:[72,52], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }),
+    silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[32,36], handL:[48,48], elbowR:[68,36], handR:[52,48], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }),
+  ],
+  Legs: [
+    silSVG({ head:[50,22], shoulder:[50,32], hip:[50,62], elbowL:[42,46], handL:[40,60], elbowR:[58,46], handR:[60,60], kneeL:[46,88], footL:[46,110], kneeR:[54,88], footR:[54,110] }),
+    silSVG({ head:[50,26], shoulder:[50,36], hip:[50,70], elbowL:[40,46], handL:[38,58], elbowR:[60,46], handR:[62,58], kneeL:[36,80], footL:[38,108], kneeR:[64,80], footR:[62,108] }),
+  ],
+  Core: [
+    `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+     <circle class="sil-body" cx="18" cy="88" r="6"/>
+     <path class="sil-stroke" stroke-width="4.5" d="M24,90 L60,94"/>
+     <path class="sil-stroke" stroke-width="4" d="M60,94 L70,78"/>
+     <path class="sil-stroke" stroke-width="4" d="M70,78 L82,90"/>
+     <path class="sil-stroke" stroke-width="3.5" d="M30,92 L32,80"/>
+     </svg>`,
+    `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">${SIL_FLOOR}
+     <circle class="sil-body" cx="38" cy="70" r="6"/>
+     <path class="sil-stroke" stroke-width="4.5" d="M42,74 L62,92"/>
+     <path class="sil-stroke" stroke-width="4" d="M62,92 L72,76"/>
+     <path class="sil-stroke" stroke-width="4" d="M72,76 L84,90"/>
+     <path class="sil-stroke" stroke-width="3.5" d="M38,72 L30,66"/>
+     </svg>`,
+  ],
+  Cardio: [
+    silSVG({ head:[50,22], shoulder:[52,32], hip:[50,64], elbowL:[40,42], handL:[44,56], elbowR:[62,42], handR:[58,28], kneeL:[40,82], footL:[32,108], kneeR:[62,78], footR:[72,98] }),
+    silSVG({ head:[50,22], shoulder:[48,32], hip:[50,64], elbowL:[40,42], handL:[44,28], elbowR:[60,42], handR:[56,56], kneeL:[62,82], footL:[72,108], kneeR:[38,78], footR:[28,98] }),
+  ],
+  Other: [
+    silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[42,46], handL:[40,62], elbowR:[58,46], handR:[60,62], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }),
+    silSVG({ head:[50,22], shoulder:[50,32], hip:[50,68], elbowL:[38,30], handL:[30,20], elbowR:[62,30], handR:[70,20], kneeL:[44,90], footL:[44,110], kneeR:[56,90], footR:[56,110] }),
+  ],
+};
+
+function getSilhouettes(ex) {
+  if (!ex) return { svgs: SIL_CATEGORY.Other, labels: ['Start', 'End'] };
+  const name = ex.name.toLowerCase();
+  for (const entry of SILHOUETTES) {
+    if (entry.match.some(kw => name.includes(kw))) return entry;
+  }
+  return { svgs: SIL_CATEGORY[ex.cat] || SIL_CATEGORY.Other, labels: ['Start', 'End'] };
+}
+
+// Render the two-frame demo into a container element
+function renderSilhouetteDemo(containerEl, ex) {
+  if (!containerEl) return;
+  const { svgs, labels } = getSilhouettes(ex);
+  containerEl.innerHTML = `
+    <div class="ex-demo-frame">
+      ${svgs[0]}
+      <div class="ex-demo-label">${labels[0]}</div>
+    </div>
+    <div class="ex-demo-arrow">→</div>
+    <div class="ex-demo-frame">
+      ${svgs[1]}
+      <div class="ex-demo-label">${labels[1]}</div>
+    </div>
+  `;
+}
+
+// ── EXERCISE DETAIL MODAL ─────────────────────────────
+function showExDetailModal(exId) {
+  const ex = getExById(exId);
+  if (!ex) return;
+  document.getElementById('ex-detail-name').textContent = ex.name;
+  document.getElementById('ex-detail-cat').textContent = ex.cat;
+  renderSilhouetteDemo(document.getElementById('ex-detail-demo'), ex);
+  document.getElementById('ex-detail-tip').innerHTML = `<div style="font-size:0.62rem;color:var(--yellow);font-weight:700;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:4px;">Form Cue</div>${getLiveTip(ex)}`;
+  // PR
+  const prs = computePRs();
+  const pr = prs.find(p => p.ex.id === exId);
+  const prEl = document.getElementById('ex-detail-pr');
+  if (pr) {
+    prEl.innerHTML = pr.weight > 0
+      ? `<strong style="color:var(--yellow);">PR:</strong> ${pr.weight} lbs × ${pr.reps} reps`
+      : `<strong style="color:var(--yellow);">PR:</strong> ${pr.reps} reps (bodyweight)`;
+  } else {
+    prEl.textContent = 'No PR data yet';
+  }
+  document.getElementById('ex-detail-modal').style.display = 'flex';
+}
+
+function closeExDetailModal() {
+  document.getElementById('ex-detail-modal').style.display = 'none';
+}
+
 function startLiveFromSingle() {
   const exId = selectedExerciseId || +document.getElementById('log-exercise').value;
   if (!exId) { alert('Please select an exercise first.'); return; }
@@ -4491,6 +5076,9 @@ function renderLiveMode() {
 
   // Form cue
   document.getElementById('live-tip-text').textContent = getLiveTip(ex);
+
+  // Exercise silhouette demo
+  renderSilhouetteDemo(document.getElementById('live-demo'), ex);
 
   // Completed-sets strip
   renderLiveDoneStrip();
