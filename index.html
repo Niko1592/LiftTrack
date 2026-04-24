@@ -220,6 +220,19 @@
   .chart-card.full { grid-column: 1 / -1; }
 
   /* Dashboard layout — panels flow in a 2-col grid, .full spans both */
+  .dash-welcome { background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 26px; margin-bottom: 20px; position: relative; overflow: hidden; }
+  .dash-welcome::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.12; pointer-events: none; }
+  .dash-welcome-greeting { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); line-height: 1.2; position: relative; z-index: 1; }
+  .dash-welcome-greeting .wave { display: inline-block; animation: wave 1.4s ease-in-out 0.4s 1; transform-origin: 70% 70%; }
+  @keyframes wave { 0%,60%,100% { transform: rotate(0deg); } 15% { transform: rotate(14deg); } 30% { transform: rotate(-8deg); } 45% { transform: rotate(10deg); } }
+  .dash-welcome-sub { font-size: 0.88rem; color: var(--muted); margin-top: 6px; line-height: 1.45; position: relative; z-index: 1; }
+  .dash-welcome-sub strong { color: var(--text); font-weight: 600; }
+  @media (max-width: 600px) {
+    .dash-welcome { padding: 18px 20px; }
+    .dash-welcome-greeting { font-size: 1.25rem; }
+    .dash-welcome-sub { font-size: 0.82rem; }
+  }
+
   .dash-header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; }
   .dash-header-label { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
   .dash-customize-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; letter-spacing: 0.2px; }
@@ -612,9 +625,11 @@
     .templates-panel { padding: 14px; }
     .form-card { padding: 16px; max-width: 100%; }
 
-    /* Set rows — tighter */
-    .set-row { grid-template-columns: 28px 1fr 1fr auto 26px; gap: 5px; }
-    .session-set-row { grid-template-columns: 28px 1fr 1fr auto 26px; gap: 5px; }
+    /* Set rows — tighter, but give BW label enough room and separate the delete button */
+    .set-row { grid-template-columns: 24px minmax(0,1fr) minmax(0,1fr) 50px 30px; gap: 8px; }
+    .session-set-row { grid-template-columns: 24px minmax(0,1fr) minmax(0,1fr) 50px 30px; gap: 8px; }
+    .set-row .bw-label, .session-set-row .bw-label { font-size: 0.65rem; justify-content: center; gap: 4px; }
+    .set-row .btn-danger, .session-set-row .btn-danger { padding: 4px 0; width: 100%; text-align: center; min-width: 0; }
 
     /* Run layout */
     .run-layout { grid-template-columns: 1fr; }
@@ -682,6 +697,25 @@
   .auth-tab { flex: 1; background: none; border: none; padding: 9px; font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; font-family: 'Inter', system-ui, sans-serif; transition: all 0.15s; }
   .auth-tab.active { background: var(--accent); color: #fff; }
   .auth-error { color: var(--accent2); font-size: 0.78rem; margin-bottom: 12px; min-height: 18px; text-align: center; }
+
+  /* Signup multi-step */
+  .signup-stepper { display: flex; align-items: center; justify-content: center; gap: 4px; margin: 4px 0 24px; }
+  .step-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all 0.25s; flex-shrink: 0; }
+  .step-dot span { font-size: 0.72rem; font-weight: 700; color: var(--muted); }
+  .step-dot.active { background: var(--accent); border-color: var(--accent); }
+  .step-dot.active span { color: #fff; }
+  .step-dot.done { background: var(--surface2); border-color: var(--accent); }
+  .step-dot.done span { color: var(--accent); }
+  .step-line { flex: 1; max-width: 40px; height: 2px; background: var(--border); transition: background 0.25s; }
+  .step-line.active { background: var(--accent); }
+  .signup-step-title { font-size: 0.9rem; font-weight: 700; color: var(--text); text-align: center; margin-bottom: 18px; letter-spacing: -0.01em; }
+  .form-row { display: flex; gap: 10px; }
+  .form-row > .form-group { margin-bottom: 14px; }
+
+  /* Profile modal uses the same form styling */
+  .profile-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+  .profile-modal-overlay.open { display: flex; }
+  .profile-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
   .user-badge { margin-left: auto; display: flex; align-items: center; gap: 8px; position: relative; }
   .settings-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
   .settings-section-label { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; padding: 8px 14px 4px; }
@@ -722,28 +756,116 @@
       <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
       <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Create Account</button>
     </div>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email" oninput="showEmailSuggestions(this.value)" onblur="hideEmailSuggestions()" autocapitalize="none">
-      <div id="email-suggestions" style="display:none;position:absolute;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-top:4px;overflow:hidden;z-index:100;width:100%;left:0;"></div>
+
+    <!-- SIGN IN VIEW (single step) -->
+    <div id="auth-signin-view">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email" oninput="showEmailSuggestions(this.value)" onblur="hideEmailSuggestions()" autocapitalize="none">
+        <div id="email-suggestions" style="display:none;position:absolute;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-top:4px;overflow:hidden;z-index:100;width:100%;left:0;"></div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
     </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+
+    <!-- SIGN UP VIEW (multi-step) -->
+    <div id="auth-signup-view" style="display:none;">
+      <div class="signup-stepper">
+        <div class="step-dot active" id="step-dot-1"><span>1</span></div>
+        <div class="step-line" id="step-line-1"></div>
+        <div class="step-dot" id="step-dot-2"><span>2</span></div>
+        <div class="step-line" id="step-line-2"></div>
+        <div class="step-dot" id="step-dot-3"><span>3</span></div>
+      </div>
+
+      <!-- Step 1: Account credentials -->
+      <div class="signup-step" id="signup-step-1">
+        <div class="signup-step-title">Create your account</div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="su-email" placeholder="you@example.com" autocomplete="email" autocapitalize="none">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="su-password" placeholder="At least 6 characters" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="su-password2" placeholder="Confirm password" autocomplete="new-password">
+        </div>
+      </div>
+
+      <!-- Step 2: Personal info -->
+      <div class="signup-step" id="signup-step-2" style="display:none;">
+        <div class="signup-step-title">About you</div>
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="su-firstname" placeholder="e.g. Nick" autocomplete="given-name" autocapitalize="words">
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1;">
+            <label>Age</label>
+            <input type="number" id="su-age" placeholder="25" min="13" max="120" inputmode="numeric">
+          </div>
+          <div class="form-group" style="flex:1.3;">
+            <label>Gender</label>
+            <select id="su-gender" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:0.9rem;outline:none;width:100%;font-family:'Inter',system-ui,sans-serif;">
+              <option value="">Select…</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="prefer_not_to_say">Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Body metrics -->
+      <div class="signup-step" id="signup-step-3" style="display:none;">
+        <div class="signup-step-title">Starting measurements</div>
+        <div class="form-group">
+          <label>Height</label>
+          <div class="form-row" style="gap:8px;">
+            <div style="flex:1;display:flex;align-items:center;gap:6px;">
+              <input type="number" id="su-height-ft" placeholder="5" min="3" max="8" inputmode="numeric" style="flex:1;">
+              <span style="font-size:0.8rem;color:var(--muted);">ft</span>
+            </div>
+            <div style="flex:1;display:flex;align-items:center;gap:6px;">
+              <input type="number" id="su-height-in" placeholder="10" min="0" max="11" inputmode="numeric" style="flex:1;">
+              <span style="font-size:0.8rem;color:var(--muted);">in</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Current Weight</label>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input type="number" id="su-weight" placeholder="185" min="50" max="700" step="0.1" inputmode="decimal" style="flex:1;">
+            <span style="font-size:0.8rem;color:var(--muted);">lbs</span>
+          </div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:6px;">We'll add this as your first weight log entry.</div>
+        </div>
+      </div>
     </div>
+
     <div class="auth-error" id="auth-error"></div>
-    <button class="btn" style="width:100%;margin-top:4px;" id="auth-btn" onclick="handleAuth()">Sign In</button>
+
+    <!-- Buttons: change based on mode + step -->
+    <div id="auth-btn-row" style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn-sm" id="auth-back-btn" onclick="signupBack()" style="display:none;flex:0 0 auto;">← Back</button>
+      <button class="btn" style="flex:1;" id="auth-btn" onclick="handleAuth()">Sign In</button>
+    </div>
   </div>
 </div>
 
 <div class="topbar">
   <div class="logo">LiftTrack</div>
   <nav class="nav-tabs" id="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('dashboard')">📊 Dashboard</button>
-    <button class="nav-tab" onclick="showPage('log')">💪 Log Workout</button>
-    <button class="nav-tab" onclick="showPage('library')">📋 Library</button>
-    <button class="nav-tab" onclick="showPage('run')">🏃 Run</button>
-    <button class="nav-tab" onclick="showPage('history')">📅 History</button>
+    <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('log')">Log Workout</button>
+    <button class="nav-tab" onclick="showPage('library')">Library</button>
+    <button class="nav-tab" onclick="showPage('run')">Run</button>
+    <button class="nav-tab" onclick="showPage('history')">History</button>
   </nav>
   <div class="nav-scroll-hint" id="nav-scroll-hint">›</div>
   <div class="user-badge">
@@ -772,9 +894,61 @@
         <div class="color-swatch" data-secondary="hot-pink"        onclick="setSecondary('hot-pink')"        style="background:#ec4899;" title="Hot Pink"><span>Pink</span></div>
       </div>
       <hr class="settings-divider">
+      <button class="settings-item" onclick="openProfileModal()">
+        <span>Edit Profile</span>
+      </button>
       <button class="settings-item" onclick="signOut()">
         <span>Sign Out</span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL — edit user info anytime -->
+<div class="profile-modal-overlay" id="profile-modal" onclick="if(event.target===this)closeProfileModal()">
+  <div class="profile-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);">
+      <div style="font-weight:700;font-size:1rem;letter-spacing:-0.01em;">Your Profile</div>
+      <button onclick="closeProfileModal()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div style="padding:20px;">
+      <div class="form-group">
+        <label>First Name</label>
+        <input type="text" id="prof-firstname" placeholder="e.g. Nick" autocapitalize="words">
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1;">
+          <label>Age</label>
+          <input type="number" id="prof-age" placeholder="25" min="13" max="120" inputmode="numeric">
+        </div>
+        <div class="form-group" style="flex:1.3;">
+          <label>Gender</label>
+          <select id="prof-gender" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:0.9rem;outline:none;width:100%;font-family:'Inter',system-ui,sans-serif;">
+            <option value="">Select…</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="prefer_not_to_say">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Height</label>
+        <div class="form-row" style="gap:8px;">
+          <div style="flex:1;display:flex;align-items:center;gap:6px;">
+            <input type="number" id="prof-height-ft" placeholder="5" min="3" max="8" inputmode="numeric" style="flex:1;">
+            <span style="font-size:0.8rem;color:var(--muted);">ft</span>
+          </div>
+          <div style="flex:1;display:flex;align-items:center;gap:6px;">
+            <input type="number" id="prof-height-in" placeholder="10" min="0" max="11" inputmode="numeric" style="flex:1;">
+            <span style="font-size:0.8rem;color:var(--muted);">in</span>
+          </div>
+        </div>
+      </div>
+      <div class="auth-error" id="prof-error" style="min-height:0;margin:0 0 12px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-sm" onclick="closeProfileModal()" style="flex:1;">Cancel</button>
+        <button class="btn" onclick="saveProfile()" style="flex:2;">Save Profile</button>
+      </div>
     </div>
   </div>
 </div>
@@ -884,6 +1058,10 @@
 
 <!-- DASHBOARD -->
 <div id="page-dashboard" class="page active">
+  <div class="dash-welcome" id="dash-welcome" style="display:none;">
+    <div class="dash-welcome-greeting" id="dash-welcome-greeting"></div>
+    <div class="dash-welcome-sub" id="dash-welcome-sub"></div>
+  </div>
   <div class="stat-grid" id="stat-grid"></div>
 
   <!-- Dashboard header: customize control -->
@@ -1184,7 +1362,10 @@
   </div>
   <!-- /log-form-view -->
 </div>
+<!-- /page-log-form-view-wrapper -->
+</div>
 <!-- /page-log -->
+
 <!-- LIBRARY (Exercises + Stretch combined) -->
 <div id="page-library" class="page">
   <div style="display:flex;gap:8px;margin-bottom:20px;background:var(--surface2);border-radius:10px;padding:4px;width:fit-content;">
@@ -1233,10 +1414,8 @@
       </div>
 
     </div>
-  </div>
+  </div><!-- /lib-exercises -->
 
-<!-- RUN -->
-  </div>
   <div id="lib-stretch" style="display:none;">
   <div class="stretch-layout">
 
@@ -1610,14 +1789,37 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let currentSession = null; // holds the logged-in user's session
 
 // ── AUTH HELPERS ──────────────────────────────────────
-async function signUp(email, password) {
+async function signUp(email, password, metadata) {
+  const body = { email, password };
+  if (metadata && typeof metadata === 'object') body.data = metadata;
   const res = await fetch(SUPABASE_URL + '/auth/v1/signup', {
     method: 'POST',
     headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify(body)
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.msg || data.error_description || 'Sign up failed');
+  return data;
+}
+
+async function updateUserMetadata(metadata) {
+  if (!currentSession?.access_token) throw new Error('Not signed in');
+  const res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+    method: 'PUT',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + currentSession.access_token,
+    },
+    body: JSON.stringify({ data: metadata })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.msg || data.error_description || 'Could not update profile');
+  // Update local cached user
+  if (currentSession && data) {
+    currentSession.user = data;
+    try { localStorage.setItem('lt_session', JSON.stringify(currentSession)); } catch {}
+  }
   return data;
 }
 
@@ -2478,6 +2680,7 @@ function renderDashboard() {
   const bwDate = document.getElementById('bw-date');
   if (bwDate && !bwDate.value) bwDate.value = today;
 
+  renderWelcome();
   renderStats();
   populateExSelect();
   renderWeightChart();
@@ -2493,6 +2696,136 @@ function renderDashboard() {
   renderRestDay();
   // Apply user's chosen order + visibility
   applyDashboardLayout();
+}
+
+// ── WELCOME BANNER ────────────────────────────────────
+function getUserDisplayName() {
+  // Try Supabase user metadata first, then email local-part, then fallback.
+  const user = currentSession?.user;
+  if (user) {
+    const meta = user.user_metadata || {};
+    // first_name is set explicitly during signup — prefer it
+    if (meta.first_name && typeof meta.first_name === 'string') {
+      return meta.first_name.trim().split(/\s+/)[0];
+    }
+    const name = meta.full_name || meta.name || meta.display_name || meta.preferred_username;
+    if (name && typeof name === 'string') {
+      const first = name.trim().split(/\s+/)[0];
+      if (first) return first;
+    }
+    if (user.email && typeof user.email === 'string') {
+      const local = user.email.split('@')[0];
+      const cleaned = local.split(/[._\-+]/)[0];
+      if (cleaned && /^[a-zA-Z]/.test(cleaned)) {
+        return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+      }
+    }
+  }
+  return 'there';
+}
+
+function getTimeGreeting() {
+  const h = new Date().getHours();
+  if (h < 5)  return 'Working late';
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  if (h < 21) return 'Good evening';
+  return 'Burning the midnight oil';
+}
+
+function getWelcomeSubMessage() {
+  const name = getUserDisplayName();
+  const hasWorkouts = workouts && workouts.length > 0;
+  const hasRuns = runs && runs.length > 0;
+
+  // First-time user
+  if (!hasWorkouts && !hasRuns) {
+    return `Welcome to LiftTrack! Head to the <strong>Log</strong> tab to record your first workout.`;
+  }
+
+  // Figure out last activity date and days since
+  const allDates = [
+    ...(workouts || []).map(w => w.date),
+    ...(runs || []).map(r => r.date),
+  ];
+  const lastDate = allDates.sort().at(-1);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const last = new Date(lastDate + 'T12:00:00'); last.setHours(0,0,0,0);
+  const daysSince = Math.floor((today - last) / (1000 * 60 * 60 * 24));
+
+  // Week stats
+  const { start, end } = getWeekRange();
+  const weekWorkouts = (workouts || []).filter(w => w.date >= start && w.date <= end);
+  const weekDaysActive = new Set(weekWorkouts.map(w => w.date)).size;
+
+  // Check if they hit a PR in the last 7 days
+  let recentPRCount = 0;
+  try {
+    const sortedWorkouts = [...workouts].sort((a,b) => a.date.localeCompare(b.date));
+    const bestSoFar = {};
+    const cutoffDate = new Date(); cutoffDate.setDate(cutoffDate.getDate() - 7);
+    const cutoffStr = cutoffDate.toISOString().slice(0,10);
+    for (const w of sortedWorkouts) {
+      const maxW = Math.max(0, ...(w.sets || []).map(s => s.bodyweight ? 0 : s.weight));
+      if (maxW <= 0) continue;
+      if (!(w.exerciseId in bestSoFar) || maxW > bestSoFar[w.exerciseId]) {
+        bestSoFar[w.exerciseId] = maxW;
+        if (w.date >= cutoffStr) recentPRCount++;
+      }
+    }
+  } catch {}
+
+  // Build message based on activity state, preferring the most meaningful signal
+  if (daysSince === 0) {
+    if (recentPRCount > 0) {
+      return `You crushed it today${recentPRCount > 1 ? ` — ${recentPRCount} new PRs this week` : ' and set a new PR this week'}! 💪 Rest up and hydrate.`;
+    }
+    return `You already got your workout in today — nice work! ${weekDaysActive >= 3 ? `That's <strong>${weekDaysActive} days</strong> active this week.` : ''}`;
+  }
+  if (daysSince === 1) {
+    if (recentPRCount > 0) {
+      return `You hit <strong>${recentPRCount} new PR${recentPRCount > 1 ? 's' : ''}</strong> in the last week. Ready for another session?`;
+    }
+    return `Yesterday you got after it. Ready to keep the momentum going?`;
+  }
+  if (daysSince <= 3) {
+    if (weekDaysActive >= 2) {
+      return `Solid rest — you've already logged <strong>${weekDaysActive} workouts</strong> this week. Time to hit the gym?`;
+    }
+    return `${daysSince} days since your last workout. A good day to get moving!`;
+  }
+  if (daysSince <= 7) {
+    return `It's been <strong>${daysSince} days</strong> since your last workout. Let's get back after it.`;
+  }
+  if (daysSince <= 21) {
+    return `Glad you're back! It's been <strong>${daysSince} days</strong> — start easy and build back in.`;
+  }
+  return `Welcome back after a long break! Every session counts — ease in and you'll be stronger for it.`;
+}
+
+function renderWelcome() {
+  const banner = document.getElementById('dash-welcome');
+  if (!banner) return;
+  const name = getUserDisplayName();
+  const timeGreeting = getTimeGreeting();
+
+  // If we have a real name, use "Welcome back, Nick!" — otherwise a generic greeting
+  let greetingText;
+  if (name === 'there') {
+    greetingText = `${timeGreeting}! <span class="wave">👋</span>`;
+  } else {
+    // Mix it up between time-based and "Welcome back"
+    const hasWorkouts = (workouts && workouts.length > 0) || (runs && runs.length > 0);
+    if (hasWorkouts) {
+      greetingText = `Welcome back, ${name}! <span class="wave">👋</span>`;
+    } else {
+      greetingText = `${timeGreeting}, ${name}! <span class="wave">👋</span>`;
+    }
+  }
+
+  document.getElementById('dash-welcome-greeting').innerHTML = greetingText;
+  document.getElementById('dash-welcome-sub').innerHTML = getWelcomeSubMessage();
+  banner.style.display = '';
 }
 
 // ── DASHBOARD CUSTOMIZATION ───────────────────────────
@@ -5604,55 +5937,246 @@ function hideEmailSuggestions() {
 
 // ── AUTH UI ───────────────────────────────────────────
 let authMode = 'signin';
+let signupStep = 1;
+const SIGNUP_STEP_COUNT = 3;
 
 function switchAuthTab(mode) {
   authMode = mode;
   document.getElementById('tab-signin').classList.toggle('active', mode === 'signin');
   document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
-  document.getElementById('auth-btn').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('auth-signin-view').style.display = mode === 'signin' ? '' : 'none';
+  document.getElementById('auth-signup-view').style.display = mode === 'signup' ? '' : 'none';
+  document.getElementById('auth-error').textContent = '';
+  if (mode === 'signup') {
+    signupStep = 1;
+    updateSignupUI();
+  } else {
+    document.getElementById('auth-back-btn').style.display = 'none';
+    document.getElementById('auth-btn').textContent = 'Sign In';
+  }
+}
+
+function updateSignupUI() {
+  // Show only the active step
+  for (let i = 1; i <= SIGNUP_STEP_COUNT; i++) {
+    const step = document.getElementById('signup-step-' + i);
+    if (step) step.style.display = i === signupStep ? '' : 'none';
+    const dot = document.getElementById('step-dot-' + i);
+    if (dot) {
+      dot.classList.toggle('active', i === signupStep);
+      dot.classList.toggle('done', i < signupStep);
+    }
+    if (i < SIGNUP_STEP_COUNT) {
+      const line = document.getElementById('step-line-' + i);
+      if (line) line.classList.toggle('active', i < signupStep);
+    }
+  }
+  // Back button
+  document.getElementById('auth-back-btn').style.display = signupStep > 1 ? '' : 'none';
+  // Primary button label
+  const btn = document.getElementById('auth-btn');
+  btn.textContent = signupStep < SIGNUP_STEP_COUNT ? 'Next →' : 'Create Account';
+  btn.disabled = false;
   document.getElementById('auth-error').textContent = '';
 }
 
+function signupBack() {
+  if (signupStep > 1) {
+    signupStep--;
+    updateSignupUI();
+  }
+}
+
+function validateSignupStep(step) {
+  const errEl = document.getElementById('auth-error');
+  errEl.textContent = '';
+
+  if (step === 1) {
+    const email = document.getElementById('su-email').value.trim();
+    const pw = document.getElementById('su-password').value;
+    const pw2 = document.getElementById('su-password2').value;
+    if (!email) return 'Please enter your email.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Please enter a valid email.';
+    if (!pw || pw.length < 6) return 'Password must be at least 6 characters.';
+    if (pw !== pw2) return 'Passwords don\'t match.';
+    return null;
+  }
+  if (step === 2) {
+    const name = document.getElementById('su-firstname').value.trim();
+    const age = +document.getElementById('su-age').value;
+    const gender = document.getElementById('su-gender').value;
+    if (!name) return 'Please enter your first name.';
+    if (!age || age < 13 || age > 120) return 'Please enter a valid age (13–120).';
+    if (!gender) return 'Please select an option for gender.';
+    return null;
+  }
+  if (step === 3) {
+    const ft = +document.getElementById('su-height-ft').value;
+    const inch = +document.getElementById('su-height-in').value;
+    const weight = +document.getElementById('su-weight').value;
+    if (!ft || ft < 3 || ft > 8) return 'Please enter a valid height (feet).';
+    if (isNaN(inch) || inch < 0 || inch > 11) return 'Please enter valid inches (0–11).';
+    if (!weight || weight < 50 || weight > 700) return 'Please enter a valid weight in lbs.';
+    return null;
+  }
+  return null;
+}
+
 async function handleAuth() {
-  const email = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value;
   const errEl = document.getElementById('auth-error');
   const btn = document.getElementById('auth-btn');
 
-  if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; return; }
-  if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  if (authMode === 'signin') {
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; return; }
+    if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
 
-  btn.textContent = 'Please wait…';
+    btn.textContent = 'Signing in…';
+    btn.disabled = true;
+    errEl.textContent = '';
+    try {
+      const data = await signIn(email, password);
+      saveSession(data);
+      await launchApp();
+    } catch(e) {
+      errEl.textContent = e.message || 'Something went wrong. Please try again.';
+      btn.textContent = 'Sign In';
+      btn.disabled = false;
+    }
+    return;
+  }
+
+  // ── SIGN UP FLOW ──
+  // Validate current step
+  const err = validateSignupStep(signupStep);
+  if (err) { errEl.textContent = err; return; }
+
+  // If not on final step, just advance
+  if (signupStep < SIGNUP_STEP_COUNT) {
+    signupStep++;
+    updateSignupUI();
+    return;
+  }
+
+  // Final step — collect everything and submit
+  const email = document.getElementById('su-email').value.trim();
+  const password = document.getElementById('su-password').value;
+  const firstName = document.getElementById('su-firstname').value.trim();
+  const age = +document.getElementById('su-age').value;
+  const gender = document.getElementById('su-gender').value;
+  const ft = +document.getElementById('su-height-ft').value;
+  const inch = +document.getElementById('su-height-in').value;
+  const totalInches = ft * 12 + inch;
+  const weight = +document.getElementById('su-weight').value;
+
+  const metadata = {
+    first_name: firstName,
+    full_name: firstName, // used as fallback by getUserDisplayName
+    age,
+    gender,
+    height_inches: totalInches,
+    height_ft: ft,
+    height_in: inch,
+  };
+
+  btn.textContent = 'Creating account…';
   btn.disabled = true;
   errEl.textContent = '';
 
   try {
-    let data;
-    if (authMode === 'signup') {
-      data = await signUp(email, password);
-      // After signup, sign in immediately
-      data = await signIn(email, password);
-    } else {
-      data = await signIn(email, password);
+    await signUp(email, password, metadata);
+    // Sign in to get session
+    const session = await signIn(email, password);
+    saveSession(session);
+
+    // Seed first body weight entry with today's date
+    if (!Array.isArray(bodyWeightLog)) bodyWeightLog = [];
+    const today = new Date().toISOString().slice(0,10);
+    // Avoid duplicating if there's already an entry for today (shouldn't be, on a fresh account)
+    if (!bodyWeightLog.some(e => e.date === today)) {
+      bodyWeightLog.push({ date: today, weight });
     }
-    saveSession(data);
+
     await launchApp();
+    // Persist the seeded weight to Supabase
+    try { await persist(); } catch {}
   } catch(e) {
-    errEl.textContent = e.message || 'Something went wrong. Please try again.';
-    btn.textContent = authMode === 'signin' ? 'Sign In' : 'Create Account';
+    errEl.textContent = e.message || 'Could not create account. Please try again.';
+    btn.textContent = 'Create Account';
     btn.disabled = false;
+  }
+}
+
+// ── PROFILE MODAL ─────────────────────────────────────
+function openProfileModal() {
+  // Close settings dropdown if open
+  document.getElementById('settings-dropdown')?.classList.remove('open');
+
+  const meta = currentSession?.user?.user_metadata || {};
+  document.getElementById('prof-firstname').value = meta.first_name || meta.full_name || '';
+  document.getElementById('prof-age').value = meta.age || '';
+  document.getElementById('prof-gender').value = meta.gender || '';
+  document.getElementById('prof-height-ft').value = meta.height_ft || '';
+  document.getElementById('prof-height-in').value = (meta.height_in !== undefined && meta.height_in !== null) ? meta.height_in : '';
+  document.getElementById('prof-error').textContent = '';
+
+  document.getElementById('profile-modal').classList.add('open');
+}
+
+function closeProfileModal() {
+  document.getElementById('profile-modal').classList.remove('open');
+}
+
+async function saveProfile() {
+  const errEl = document.getElementById('prof-error');
+  const name = document.getElementById('prof-firstname').value.trim();
+  const age = +document.getElementById('prof-age').value;
+  const gender = document.getElementById('prof-gender').value;
+  const ft = +document.getElementById('prof-height-ft').value;
+  const inch = +document.getElementById('prof-height-in').value;
+
+  if (!name) { errEl.textContent = 'Please enter your first name.'; return; }
+  if (!age || age < 13 || age > 120) { errEl.textContent = 'Please enter a valid age.'; return; }
+  if (!gender) { errEl.textContent = 'Please select an option for gender.'; return; }
+  if (!ft || ft < 3 || ft > 8) { errEl.textContent = 'Please enter a valid height (feet).'; return; }
+  if (isNaN(inch) || inch < 0 || inch > 11) { errEl.textContent = 'Please enter valid inches (0–11).'; return; }
+
+  errEl.textContent = '';
+  const totalInches = ft * 12 + inch;
+  try {
+    await updateUserMetadata({
+      first_name: name,
+      full_name: name,
+      age,
+      gender,
+      height_inches: totalInches,
+      height_ft: ft,
+      height_in: inch,
+    });
+    closeProfileModal();
+    // Refresh dashboard so welcome banner picks up the new name
+    if (typeof renderWelcome === 'function') renderWelcome();
+  } catch(e) {
+    errEl.textContent = e.message || 'Could not save profile. Please try again.';
   }
 }
 
 // ── INIT ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   loadSavedTheme();
-  // Wire up Enter key on auth form
+  // Wire up Enter key on sign-in form
   document.getElementById('auth-password')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') handleAuth();
   });
   document.getElementById('auth-email')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('auth-password')?.focus();
+  });
+  // Wire up Enter key for signup (advances step or submits)
+  ['su-email','su-password','su-password2','su-firstname','su-age','su-height-ft','su-height-in','su-weight'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); handleAuth(); }
+    });
   });
 
   // Try to restore existing session silently
@@ -5666,11 +6190,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function showAuthScreen() {
   document.getElementById('auth-screen').classList.add('visible');
-  document.getElementById('auth-email').value = '';
-  document.getElementById('auth-password').value = '';
+  // Clear all inputs
+  ['auth-email','auth-password','su-email','su-password','su-password2','su-firstname','su-age','su-height-ft','su-height-in','su-weight'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const g = document.getElementById('su-gender'); if (g) g.value = '';
   document.getElementById('auth-error').textContent = '';
-  document.getElementById('auth-btn').textContent = 'Sign In';
-  document.getElementById('auth-btn').disabled = false;
+  signupStep = 1;
   switchAuthTab('signin');
 }
 
