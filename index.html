@@ -617,6 +617,15 @@
   * { max-width: 100%; }
 
   @media (max-width: 600px) {
+    /* Boost background gradient visibility — much more apparent on phones */
+    body::before {
+      opacity: 0.18;
+      background:
+        radial-gradient(circle at 15% 8%, var(--accent) 0%, transparent 38%),
+        radial-gradient(circle at 95% 92%, var(--accent) 0%, transparent 42%),
+        radial-gradient(circle at 85% 25%, var(--accent2) 0%, transparent 35%);
+    }
+
     /* Nav — scrollable horizontally but hidden scrollbar */
     .topbar { padding: 0 12px; gap: 0; height: auto; min-height: 52px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
     .logo { font-size: 0.85rem; margin-right: auto; }
