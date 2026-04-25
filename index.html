@@ -896,7 +896,6 @@
     <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
     <button class="nav-tab" onclick="showPage('log')">Log Workout</button>
     <button class="nav-tab" onclick="showPage('library')">Library</button>
-    <button class="nav-tab" onclick="showPage('run')">Run</button>
     <button class="nav-tab" onclick="showPage('history')">History</button>
   </nav>
   <div class="user-badge">
@@ -1263,12 +1262,23 @@
       <p style="margin:8px 0 0;font-size:0.82rem;color:var(--muted);">Pick a single exercise or a session template to get started.</p>
     </div>
 
-    <div class="tmpl-card single-ex" onclick="selectTemplate(null)" style="margin-bottom:16px;padding:18px 20px;border:2px solid var(--accent);cursor:pointer;">
+    <div class="tmpl-card single-ex" onclick="selectTemplate(null)" style="margin-bottom:12px;padding:18px 20px;border:2px solid var(--accent);cursor:pointer;">
       <div style="display:flex;align-items:center;gap:12px;">
         <span style="font-size:1.4rem;">💪</span>
         <div style="flex:1;">
           <div class="tmpl-name" style="font-size:1rem;">Single Exercise</div>
           <div class="tmpl-exlist">Log one exercise at a time</div>
+        </div>
+        <span style="font-size:1.1rem;color:var(--muted);">›</span>
+      </div>
+    </div>
+
+    <div class="tmpl-card single-ex" onclick="selectRun()" style="margin-bottom:16px;padding:18px 20px;border:2px solid var(--accent);cursor:pointer;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:1.4rem;">🏃</span>
+        <div style="flex:1;">
+          <div class="tmpl-name" style="font-size:1rem;">Run</div>
+          <div class="tmpl-exlist">Log a run with pace tracking</div>
         </div>
         <span style="font-size:1.1rem;color:var(--muted);">›</span>
       </div>
@@ -1391,9 +1401,63 @@
     </div>
     <!-- /log-form-view inner -->
   </div>
+  <!-- /log-form-view inner wrapper -->
+  </div>
   <!-- /log-form-view -->
-</div>
-<!-- /page-log-form-view-wrapper -->
+
+  <!-- RUN VIEW: takes over when user picks Run on the selection screen -->
+  <div id="log-run-view" style="display:none;">
+    <div style="max-width:820px;margin:0 auto;">
+      <button class="btn-sm" onclick="backToLogSelection()" style="margin-bottom:14px;">← Back</button>
+      <div class="stat-grid" id="run-stat-grid" style="margin-bottom:20px;"></div>
+      <div class="run-layout">
+        <!-- LEFT: LOG FORM -->
+        <div class="form-card">
+          <h2>Log a Run</h2>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="run-date">
+          </div>
+          <div class="form-group">
+            <label>Distance</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="number" id="run-distance" placeholder="0.0" min="0" step="0.01" data-scrub data-scrub-step="0.1" style="flex:1;">
+              <select id="run-unit" style="width:80px;">
+                <option value="mi">mi</option>
+                <option value="km">km</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Duration</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;">
+              <div><input type="number" id="run-hrs" placeholder="hrs" min="0" max="23" data-scrub data-scrub-step="1"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">hrs</div></div>
+              <div><input type="number" id="run-mins" placeholder="min" min="0" max="59" data-scrub data-scrub-step="1"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">min</div></div>
+              <div><input type="number" id="run-secs" placeholder="sec" min="0" max="59" data-scrub data-scrub-step="5"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">sec</div></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Route / Notes <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+            <input type="text" id="run-notes" placeholder="e.g. Riverside loop, hilly">
+          </div>
+          <div id="run-pace-preview" style="font-size:0.82rem;color:var(--accent);margin-bottom:14px;min-height:18px;"></div>
+          <button class="btn" onclick="saveRun()">Save Run</button>
+          <span class="success-msg" id="run-success-msg" style="margin-left:12px;">✓ Run saved!</span>
+        </div>
+
+        <!-- RIGHT: CHART + HISTORY -->
+        <div>
+          <div class="chart-card" style="margin-bottom:16px;">
+            <div class="chart-title">Pace Over Time <span style="font-size:0.75rem;color:var(--muted);font-weight:400;margin-left:6px;" id="run-chart-unit"></span></div>
+            <div class="chart-wrap"><canvas id="paceChart"></canvas></div>
+          </div>
+          <div class="chart-title" style="padding:0 2px 10px;">Recent Runs</div>
+          <div class="run-history-list" id="run-history-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /log-run-view -->
 </div>
 <!-- /page-log -->
 
@@ -1640,57 +1704,6 @@
   </div>
   </div>
 </div>
-
-<div id="page-run" class="page">
-  <div class="stat-grid" id="run-stat-grid" style="margin-bottom:20px;"></div>
-  <div class="run-layout">
-    <!-- LEFT: LOG FORM -->
-    <div class="form-card">
-      <h2>Log a Run</h2>
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" id="run-date">
-      </div>
-      <div class="form-group">
-        <label>Distance</label>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input type="number" id="run-distance" placeholder="0.0" min="0" step="0.01" data-scrub data-scrub-step="0.1" style="flex:1;">
-          <select id="run-unit" style="width:80px;">
-            <option value="mi">mi</option>
-            <option value="km">km</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Duration</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;">
-          <div><input type="number" id="run-hrs" placeholder="hrs" min="0" max="23" data-scrub data-scrub-step="1"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">hrs</div></div>
-          <div><input type="number" id="run-mins" placeholder="min" min="0" max="59" data-scrub data-scrub-step="1"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">min</div></div>
-          <div><input type="number" id="run-secs" placeholder="sec" min="0" max="59" data-scrub data-scrub-step="5"><div style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:3px;">sec</div></div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Route / Notes <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
-        <input type="text" id="run-notes" placeholder="e.g. Riverside loop, hilly">
-      </div>
-      <div id="run-pace-preview" style="font-size:0.82rem;color:var(--accent);margin-bottom:14px;min-height:18px;"></div>
-      <button class="btn" onclick="saveRun()">Save Run</button>
-      <span class="success-msg" id="run-success-msg" style="margin-left:12px;">✓ Run saved!</span>
-    </div>
-
-    <!-- RIGHT: CHART + HISTORY -->
-    <div>
-      <div class="chart-card" style="margin-bottom:16px;">
-        <div class="chart-title">Pace Over Time <span style="font-size:0.75rem;color:var(--muted);font-weight:400;margin-left:6px;" id="run-chart-unit"></span></div>
-        <div class="chart-wrap"><canvas id="paceChart"></canvas></div>
-      </div>
-      <div class="chart-title" style="padding:0 2px 10px;">Recent Runs</div>
-      <div class="run-history-list" id="run-history-list"></div>
-    </div>
-  </div>
-</div>
-
-<!-- STRETCH -->
 
 <!-- HISTORY (updated) -->
 <div id="page-history" class="page">
@@ -2326,19 +2339,25 @@ function getWeekKey(dateStr) {
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  // Map old stretch/exercises routes to library
-  const pageName = (name === 'exercises' || name === 'stretch') ? 'library' : name;
+  // Map old routes to current pages
+  let pageName = (name === 'exercises' || name === 'stretch') ? 'library' : name;
+  if (pageName === 'run') pageName = 'log'; // Run lives inside Log now
   document.getElementById('page-' + pageName)?.classList.add('active');
   if (event?.target) event.target.classList.add('active');
   if (pageName === 'dashboard') renderDashboard();
   if (pageName === 'history') { historyTab = historyTab || 'lifts'; renderHistory(); }
   if (pageName === 'library') { switchLibTab(name === 'stretch' ? 'stretch' : 'exercises'); }
   if (pageName === 'log') {
-    document.getElementById('log-form-view').style.display = 'none';
-    document.getElementById('log-selection-view').style.display = '';
-    renderTemplates();
+    if (name === 'run') {
+      // Came in via the (now-removed) run nav route — open the run view directly
+      selectRun();
+    } else {
+      document.getElementById('log-form-view').style.display = 'none';
+      document.getElementById('log-run-view').style.display = 'none';
+      document.getElementById('log-selection-view').style.display = '';
+      renderTemplates();
+    }
   }
-  if (pageName === 'run') renderRunPage();
 }
 
 let currentLibTab = 'exercises';
@@ -3375,6 +3394,7 @@ function selectTemplate(id) {
   activeTemplateId = id;
   // Switch to form takeover view
   document.getElementById('log-selection-view').style.display = 'none';
+  document.getElementById('log-run-view').style.display = 'none';
   document.getElementById('log-form-view').style.display = '';
   if (id === null) {
     document.getElementById('log-single-panel').style.display = '';
@@ -3386,8 +3406,17 @@ function selectTemplate(id) {
   }
 }
 
+function selectRun() {
+  activeTemplateId = null;
+  document.getElementById('log-selection-view').style.display = 'none';
+  document.getElementById('log-form-view').style.display = 'none';
+  document.getElementById('log-run-view').style.display = '';
+  renderRunPage();
+}
+
 function backToLogSelection() {
   document.getElementById('log-form-view').style.display = 'none';
+  document.getElementById('log-run-view').style.display = 'none';
   document.getElementById('log-selection-view').style.display = '';
   activeTemplateId = null;
   renderTemplates();
