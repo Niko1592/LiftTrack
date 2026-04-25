@@ -191,7 +191,9 @@
 
   /* NAV */
   .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 32px; height: 56px; position: sticky; top: 0; z-index: 100; }
-  .logo { font-weight: 700; font-size: 0.95rem; color: var(--accent); letter-spacing: 0.3px; }
+  .logo { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; line-height: 1; }
+  .logo .logo-lift { color: var(--accent); }
+  .logo .logo-track { color: var(--text); }
   #sync-status { font-size: 0.68rem; color: var(--muted); margin-left: auto; padding: 3px 10px; background: var(--surface2); border-radius: 20px; white-space: nowrap; letter-spacing: 0.3px; font-weight: 500; }
   .nav-tabs { display: flex; gap: 2px; }
   .nav-tab { background: none; border: none; color: var(--muted); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.15s; letter-spacing: 0.1px; font-family: 'Inter', system-ui, sans-serif; }
@@ -628,7 +630,7 @@
 
     /* Nav — scrollable horizontally but hidden scrollbar */
     .topbar { padding: 0 12px; gap: 0; height: auto; min-height: 52px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 6px; row-gap: 10px; }
-    .logo { font-size: 0.85rem; margin-right: auto; }
+    .logo { font-size: 1.05rem; margin-right: auto; }
     .nav-tabs { order: 3; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 6px; gap: 2px; margin-top: 4px; }
     .nav-tabs::-webkit-scrollbar { display: none; }
     .nav-tab { padding: 5px 10px; font-size: 0.72rem; white-space: nowrap; flex-shrink: 0; }
@@ -889,7 +891,7 @@
 </div>
 
 <div class="topbar">
-  <div class="logo">LiftTrack</div>
+  <div class="logo"><span class="logo-lift">Lift</span><span class="logo-track">Track</span></div>
   <nav class="nav-tabs" id="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
     <button class="nav-tab" onclick="showPage('log')">Log Workout</button>
