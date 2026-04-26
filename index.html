@@ -712,6 +712,64 @@
   .wheel-picker.compact .wheel-direct-input { top: 32px !important; height: 32px !important; }
   .wheel-picker.compact .wheel-direct-input input { font-size: 1.05rem !important; font-weight: 700 !important; }
 
+  /* PLANNER */
+  .planner-view-btn { padding:7px 16px; border-radius:7px; border:none; font-family:'Inter',system-ui,sans-serif; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.12s; background:none; color:var(--muted); }
+  .planner-view-btn.active { background:var(--accent); color:#fff; }
+  .planner-week-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:10px; }
+  .planner-day-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 8px; min-height:130px; cursor:pointer; transition:all 0.15s; display:flex; flex-direction:column; gap:6px; position:relative; }
+  .planner-day-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+  .planner-day-card.today { border-color:var(--accent); box-shadow:0 0 0 2px rgba(108,99,255,0.18); }
+  .planner-day-card.completed { background:linear-gradient(135deg,var(--surface),rgba(67,233,123,0.08)); }
+  .planner-day-card.rest { background:repeating-linear-gradient(45deg,var(--surface),var(--surface) 6px,var(--surface2) 6px,var(--surface2) 12px); }
+  .planner-day-name { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.7px; font-weight:700; }
+  .planner-day-num { font-size:1.4rem; font-weight:700; letter-spacing:-0.02em; line-height:1; }
+  .planner-day-num.today { color:var(--accent); }
+  .planner-item { font-size:0.7rem; padding:3px 6px; border-radius:5px; background:var(--surface2); border:1px solid var(--border); margin-bottom:3px; line-height:1.2; }
+  .planner-item.workout { border-left:3px solid var(--accent); }
+  .planner-item.run { border-left:3px solid var(--green); }
+  .planner-item.stretch { border-left:3px solid var(--yellow); }
+  .planner-item.rest { color:var(--muted); font-style:italic; text-align:center; border-left:none; }
+  .planner-item.completed { opacity:0.6; }
+  .planner-item.completed::before { content:'✓ '; color:var(--green); font-weight:700; }
+  .planner-status-dot { position:absolute; top:8px; right:8px; width:8px; height:8px; border-radius:50%; }
+  .planner-status-dot.done { background:var(--green); }
+  .planner-status-dot.partial { background:var(--yellow); }
+  .planner-status-dot.skipped { background:var(--accent2); }
+
+  /* Mobile planner */
+  @media (max-width: 720px) {
+    .planner-week-grid { grid-template-columns:1fr; gap:6px; }
+    .planner-day-card { min-height:auto; padding:10px 12px; flex-direction:row; align-items:center; gap:10px; }
+    .planner-day-card .planner-day-info { flex:1; min-width:0; }
+    .planner-day-card .planner-day-num { font-size:1.05rem; }
+  }
+
+  /* Month grid */
+  .planner-month-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; }
+  .planner-month-day { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:6px; min-height:60px; cursor:pointer; font-size:0.7rem; transition:all 0.12s; }
+  .planner-month-day:hover { border-color:var(--accent); }
+  .planner-month-day.today { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .planner-month-day.empty { background:transparent; border:none; cursor:default; }
+  .planner-month-num { font-weight:600; margin-bottom:3px; }
+  .planner-month-num.today { color:var(--accent); }
+  .planner-month-mini { display:flex; gap:2px; flex-wrap:wrap; }
+  .planner-month-mini-dot { width:6px; height:6px; border-radius:50%; }
+  .planner-month-mini-dot.workout { background:var(--accent); }
+  .planner-month-mini-dot.run { background:var(--green); }
+  .planner-month-mini-dot.stretch { background:var(--yellow); }
+  .planner-month-mini-dot.rest { background:var(--muted); opacity:0.5; }
+
+  /* Year view */
+  .planner-year-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; }
+  @media (max-width: 720px) { .planner-year-grid { grid-template-columns:repeat(2, 1fr); } }
+  .planner-year-month { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px; cursor:pointer; transition:all 0.12s; }
+  .planner-year-month:hover { border-color:var(--accent); transform:translateY(-2px); }
+  .planner-year-title { font-size:0.78rem; font-weight:700; margin-bottom:6px; }
+  .planner-year-mini { display:grid; grid-template-columns:repeat(7, 1fr); gap:2px; }
+  .planner-year-day { aspect-ratio:1; border-radius:2px; background:var(--surface2); }
+  .planner-year-day.has-plan { background:var(--accent); opacity:0.6; }
+  .planner-year-day.today { box-shadow:0 0 0 1px var(--accent); }
+
   /* Scrub popover — floats under focused number inputs */
   .scrub-popover { animation: scrub-pop-in 0.15s ease-out; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border-radius: 8px; }
   @keyframes scrub-pop-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
@@ -1050,7 +1108,8 @@
   <div class="logo"><span class="logo-lift">Lift</span><span class="logo-track">Track</span></div>
   <nav class="nav-tabs" id="nav-tabs">
     <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
-    <button class="nav-tab" onclick="showPage('log')">Log Workout</button>
+    <button class="nav-tab" onclick="showPage('log')">Log</button>
+    <button class="nav-tab" onclick="showPage('planner')">Planner</button>
     <button class="nav-tab" onclick="showPage('library')">Library</button>
     <button class="nav-tab" onclick="showPage('nutrition')">Nutrition</button>
     <button class="nav-tab" onclick="showPage('history')">History</button>
@@ -2153,7 +2212,91 @@
   </div>
 </div>
 
-<!-- HISTORY (updated) -->
+<!-- PLANNER -->
+<div id="page-planner" class="page">
+
+  <!-- Header with view toggles -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div>
+      <div id="planner-week-label" style="font-weight:700;font-size:1.1rem;letter-spacing:-0.01em;">This Week</div>
+      <div id="planner-week-range" style="font-size:0.78rem;color:var(--muted);"></div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn-sm" onclick="plannerNavigate(-1)" title="Previous">‹</button>
+      <button class="btn-sm" onclick="plannerGoToday()">Today</button>
+      <button class="btn-sm" onclick="plannerNavigate(1)" title="Next">›</button>
+    </div>
+  </div>
+
+  <!-- View toggle: Week / Month / Year -->
+  <div style="display:flex;gap:6px;background:var(--surface2);border-radius:10px;padding:4px;width:fit-content;margin-bottom:16px;">
+    <button id="planner-view-week" onclick="setPlannerView('week')" class="planner-view-btn active">Week</button>
+    <button id="planner-view-month" onclick="setPlannerView('month')" class="planner-view-btn">Month</button>
+    <button id="planner-view-year" onclick="setPlannerView('year')" class="planner-view-btn">Year</button>
+  </div>
+
+  <!-- Week view: 7 day cards horizontal -->
+  <div id="planner-week-view"></div>
+
+  <!-- Month view: calendar grid with planned items per day -->
+  <div id="planner-month-view" style="display:none;"></div>
+
+  <!-- Year view: 12 month mini-grid -->
+  <div id="planner-year-view" style="display:none;"></div>
+
+  <!-- Planned vs Completed summary -->
+  <div id="planner-summary" style="margin-top:20px;"></div>
+
+</div>
+
+<!-- DAY EDIT MODAL -->
+<div id="planner-day-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closePlannerDayModal()">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);">
+      <div id="planner-modal-title" style="font-weight:700;font-size:1rem;"></div>
+      <button onclick="closePlannerDayModal()" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;padding:0 4px;">×</button>
+    </div>
+    <div style="padding:18px 22px;">
+      <!-- Workout template picker -->
+      <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;font-weight:700;margin-bottom:8px;">Workout Template</div>
+      <select id="planner-modal-template" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:0.875rem;outline:none;font-family:'Inter',system-ui,sans-serif;margin-bottom:14px;">
+        <option value="">— None —</option>
+      </select>
+
+      <!-- Run toggle -->
+      <label style="display:flex;align-items:center;gap:10px;font-size:0.875rem;cursor:pointer;margin-bottom:10px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+        <input type="checkbox" id="planner-modal-run" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer;" onchange="document.getElementById('planner-modal-run-details').style.display=this.checked?'block':'none';">
+        <span>Include a run</span>
+      </label>
+      <div id="planner-modal-run-details" style="display:none;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="number" id="planner-modal-run-distance" placeholder="0.0" step="0.1" min="0" data-scrub data-scrub-step="0.5" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:0.85rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+          <select id="planner-modal-run-unit" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:0.85rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
+            <option value="mi">miles</option>
+            <option value="km">km</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Stretch routine -->
+      <label style="display:flex;align-items:center;gap:10px;font-size:0.875rem;cursor:pointer;margin-bottom:14px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+        <input type="checkbox" id="planner-modal-stretch" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer;">
+        <span>Include stretching</span>
+      </label>
+
+      <!-- Rest day -->
+      <label style="display:flex;align-items:center;gap:10px;font-size:0.875rem;cursor:pointer;margin-bottom:14px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+        <input type="checkbox" id="planner-modal-rest" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer;" onchange="if(this.checked){document.getElementById('planner-modal-template').value='';document.getElementById('planner-modal-run').checked=false;document.getElementById('planner-modal-run-details').style.display='none';document.getElementById('planner-modal-stretch').checked=false;}">
+        <span>Rest day</span>
+      </label>
+
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="btn-sm" onclick="clearPlannerDay()" style="flex:1;">Clear</button>
+        <button class="btn" onclick="savePlannerDay()" style="flex:2;">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="page-history" class="page">
   <div class="history-filter-bar">
     <div style="display:flex;gap:6px;align-items:center;margin-bottom:0;">
@@ -2629,6 +2772,7 @@ function lsSet() {
     localStorage.setItem('lt_nutritionGoals',   JSON.stringify(nutritionGoals));
     localStorage.setItem('lt_nutritionPresets', JSON.stringify(nutritionPresets));
     localStorage.setItem('lt_weightGoal',       JSON.stringify(weightGoal));
+    localStorage.setItem('lt_workoutPlan',       JSON.stringify(workoutPlan));
   } catch(e) {}
 }
 
@@ -2654,6 +2798,7 @@ function buildSupabasePayload() {
     nutrition_goals: nutritionGoals,
     nutrition_presets: nutritionPresets,
     weight_goal: weightGoal,
+    workout_plan: workoutPlan,
     updated_at: new Date().toISOString(),
   };
 }
@@ -2742,6 +2887,7 @@ async function loadData() {
   nutritionGoals   = lsGet('nutritionGoals')   ?? { calories: 0, protein: 0 };
   nutritionPresets = lsGet('nutritionPresets') ?? [];
   weightGoal       = lsGet('weightGoal')       ?? null;
+  workoutPlan      = lsGet('workoutPlan')      ?? {};
 
   try {
     const userId = currentSession.user.id;
@@ -2765,6 +2911,7 @@ async function loadData() {
       if ('nutrition_goals' in data && data.nutrition_goals && typeof data.nutrition_goals === 'object') nutritionGoals = data.nutrition_goals;
       if ('nutrition_presets' in data && Array.isArray(data.nutrition_presets)) nutritionPresets = data.nutrition_presets;
       if ('weight_goal' in data) weightGoal = data.weight_goal; // null is valid
+      if ('workout_plan' in data && data.workout_plan && typeof data.workout_plan === 'object') workoutPlan = data.workout_plan;
       lsSet();
       // If any of the newer fields are missing from the schema, surface a friendly warning
       const missing = ['nutrition_log','nutrition_goals','nutrition_presets','weight_goal','stretch_presets']
@@ -2919,6 +3066,7 @@ function showPage(name) {
   if (pageName === 'history') { historyTab = historyTab || 'lifts'; renderHistory(); }
   if (pageName === 'library') { switchLibTab(name === 'stretch' ? 'stretch' : 'exercises'); }
   if (pageName === 'nutrition') renderNutrition();
+  if (pageName === 'planner') renderPlanner();
   if (pageName === 'log') {
     if (name === 'run') {
       // Came in via the (now-removed) run nav route — open the run view directly
@@ -3312,6 +3460,342 @@ function renderProteinTracker() {
 }
 
 // ── NUTRITION ─────────────────────────────────────────
+// ── PLANNER ───────────────────────────────────────────
+let workoutPlan = {}; // { 'YYYY-MM-DD': { templateId, run: {distance, unit}, stretch: bool, rest: bool } }
+let plannerView = 'week';
+let plannerCursor = new Date(); // anchor date for current view
+let plannerEditingDate = null;
+
+function getStartOfWeek(d) {
+  const dt = new Date(d);
+  dt.setHours(0,0,0,0);
+  const day = dt.getDay();
+  // Treat Monday as start of week
+  const diff = day === 0 ? -6 : 1 - day;
+  dt.setDate(dt.getDate() + diff);
+  return dt;
+}
+
+function fmtDateKey(d) {
+  return d.toISOString().slice(0,10);
+}
+
+function renderPlanner() {
+  if (plannerView === 'week') {
+    document.getElementById('planner-week-view').style.display = '';
+    document.getElementById('planner-month-view').style.display = 'none';
+    document.getElementById('planner-year-view').style.display = 'none';
+    renderPlannerWeek();
+  } else if (plannerView === 'month') {
+    document.getElementById('planner-week-view').style.display = 'none';
+    document.getElementById('planner-month-view').style.display = '';
+    document.getElementById('planner-year-view').style.display = 'none';
+    renderPlannerMonth();
+  } else {
+    document.getElementById('planner-week-view').style.display = 'none';
+    document.getElementById('planner-month-view').style.display = 'none';
+    document.getElementById('planner-year-view').style.display = '';
+    renderPlannerYear();
+  }
+  renderPlannerSummary();
+}
+
+function setPlannerView(v) {
+  plannerView = v;
+  document.querySelectorAll('.planner-view-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('planner-view-' + v)?.classList.add('active');
+  renderPlanner();
+}
+
+function plannerNavigate(dir) {
+  if (plannerView === 'week') plannerCursor.setDate(plannerCursor.getDate() + dir * 7);
+  else if (plannerView === 'month') plannerCursor.setMonth(plannerCursor.getMonth() + dir);
+  else plannerCursor.setFullYear(plannerCursor.getFullYear() + dir);
+  renderPlanner();
+}
+
+function plannerGoToday() {
+  plannerCursor = new Date();
+  renderPlanner();
+}
+
+function getDayPlanItems(dateKey) {
+  return workoutPlan[dateKey] || null;
+}
+
+function isDayCompleted(dateKey, plan) {
+  if (!plan) return false;
+  if (plan.rest) return true; // rest day is auto-completed
+  let needed = 0, done = 0;
+  if (plan.templateId != null) {
+    needed++;
+    const tmpl = templates.find(t => t.id === plan.templateId);
+    const tmplName = tmpl?.name || '';
+    if (workouts.some(w => w.date === dateKey && w.templateName === tmplName)) done++;
+  }
+  if (plan.run) {
+    needed++;
+    if (runs.some(r => r.date === dateKey)) done++;
+  }
+  if (plan.stretch) {
+    needed++;
+    if (stretchLogs && stretchLogs.some(l => l.date === dateKey)) done++;
+  }
+  if (needed === 0) return false;
+  if (done === needed) return 'done';
+  if (done > 0) return 'partial';
+  // If date is in the past with nothing done, it's skipped
+  const today = new Date(); today.setHours(0,0,0,0);
+  const planDate = new Date(dateKey + 'T12:00:00');
+  if (planDate < today) return 'skipped';
+  return false;
+}
+
+function renderPlannerWeek() {
+  const weekStart = getStartOfWeek(plannerCursor);
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Update labels
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  const isCurrentWeek = today >= weekStart && today <= weekEnd;
+  document.getElementById('planner-week-label').textContent = isCurrentWeek ? 'This Week' : `Week of ${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  const sameMonth = weekStart.getMonth() === weekEnd.getMonth();
+  const range = sameMonth
+    ? `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${weekEnd.getDate()}, ${weekEnd.getFullYear()}`
+    : `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${weekEnd.getFullYear()}`;
+  document.getElementById('planner-week-range').textContent = range;
+
+  // Build day cards
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const cards = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    const dateKey = fmtDateKey(d);
+    const isToday = d.getTime() === today.getTime();
+    const plan = getDayPlanItems(dateKey);
+    const status = isDayCompleted(dateKey, plan);
+
+    let itemsHtml = '';
+    if (plan?.rest) {
+      itemsHtml = `<div class="planner-item rest">Rest</div>`;
+    } else if (plan) {
+      if (plan.templateId != null) {
+        const tmpl = templates.find(t => t.id === plan.templateId);
+        const tmplName = tmpl?.name || 'Unknown';
+        const isDone = workouts.some(w => w.date === dateKey && w.templateName === tmplName);
+        itemsHtml += `<div class="planner-item workout ${isDone ? 'completed' : ''}">${tmplName}</div>`;
+      }
+      if (plan.run) {
+        const isDone = runs.some(r => r.date === dateKey);
+        itemsHtml += `<div class="planner-item run ${isDone ? 'completed' : ''}">🏃 ${plan.run.distance ? plan.run.distance + ' ' + plan.run.unit : 'Run'}</div>`;
+      }
+      if (plan.stretch) {
+        const isDone = stretchLogs && stretchLogs.some(l => l.date === dateKey);
+        itemsHtml += `<div class="planner-item stretch ${isDone ? 'completed' : ''}">🧘 Stretch</div>`;
+      }
+    }
+    if (!itemsHtml) {
+      itemsHtml = `<div style="font-size:0.7rem;color:var(--muted);font-style:italic;text-align:center;padding:6px 0;">Tap to plan</div>`;
+    }
+
+    let statusDot = '';
+    if (status === 'done') statusDot = `<div class="planner-status-dot done" title="Completed"></div>`;
+    else if (status === 'partial') statusDot = `<div class="planner-status-dot partial" title="Partial"></div>`;
+    else if (status === 'skipped') statusDot = `<div class="planner-status-dot skipped" title="Skipped"></div>`;
+
+    const cardClass = `planner-day-card ${isToday ? 'today' : ''} ${status === 'done' ? 'completed' : ''} ${plan?.rest ? 'rest' : ''}`;
+
+    cards.push(`<div class="${cardClass}" onclick="openPlannerDayModal('${dateKey}')">
+      ${statusDot}
+      <div class="planner-day-info">
+        <div class="planner-day-name">${dayNames[i]}</div>
+        <div class="planner-day-num ${isToday ? 'today' : ''}">${d.getDate()}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;">${itemsHtml}</div>
+    </div>`);
+  }
+
+  document.getElementById('planner-week-view').innerHTML = `<div class="planner-week-grid">${cards.join('')}</div>`;
+}
+
+function renderPlannerMonth() {
+  const cursor = plannerCursor;
+  const year = cursor.getFullYear();
+  const month = cursor.getMonth();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const monthName = cursor.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('planner-week-label').textContent = monthName;
+  document.getElementById('planner-week-range').textContent = '';
+
+  const firstDay = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startOffset = (firstDay.getDay() + 6) % 7; // Mon=0
+
+  const dayHeaders = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+    .map(d => `<div style="text-align:center;font-size:0.65rem;color:var(--muted);font-weight:700;letter-spacing:0.6px;">${d}</div>`).join('');
+
+  let cells = '';
+  for (let i = 0; i < startOffset; i++) cells += `<div class="planner-month-day empty"></div>`;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(year, month, day);
+    const dateKey = fmtDateKey(d);
+    const isToday = d.getTime() === today.getTime();
+    const plan = getDayPlanItems(dateKey);
+    let dots = '';
+    if (plan?.rest) dots = `<div class="planner-month-mini-dot rest" title="Rest"></div>`;
+    else if (plan) {
+      if (plan.templateId != null) dots += `<div class="planner-month-mini-dot workout"></div>`;
+      if (plan.run) dots += `<div class="planner-month-mini-dot run"></div>`;
+      if (plan.stretch) dots += `<div class="planner-month-mini-dot stretch"></div>`;
+    }
+    cells += `<div class="planner-month-day ${isToday ? 'today' : ''}" onclick="openPlannerDayModal('${dateKey}')">
+      <div class="planner-month-num ${isToday ? 'today' : ''}">${day}</div>
+      <div class="planner-month-mini">${dots}</div>
+    </div>`;
+  }
+
+  document.getElementById('planner-month-view').innerHTML = `<div class="planner-month-grid" style="margin-bottom:6px;">${dayHeaders}</div><div class="planner-month-grid">${cells}</div>`;
+}
+
+function renderPlannerYear() {
+  const year = plannerCursor.getFullYear();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  document.getElementById('planner-week-label').textContent = year.toString();
+  document.getElementById('planner-week-range').textContent = '';
+
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let html = '<div class="planner-year-grid">';
+  for (let m = 0; m < 12; m++) {
+    const daysInMonth = new Date(year, m + 1, 0).getDate();
+    let dayCells = '';
+    for (let day = 1; day <= daysInMonth; day++) {
+      const d = new Date(year, m, day);
+      const dateKey = fmtDateKey(d);
+      const isToday = d.getTime() === today.getTime();
+      const plan = getDayPlanItems(dateKey);
+      const hasPlan = plan && (plan.templateId != null || plan.run || plan.stretch || plan.rest);
+      dayCells += `<div class="planner-year-day ${hasPlan ? 'has-plan' : ''} ${isToday ? 'today' : ''}" title="${dateKey}"></div>`;
+    }
+    html += `<div class="planner-year-month" onclick="plannerCursor=new Date(${year}, ${m}, 1); setPlannerView('month');">
+      <div class="planner-year-title">${months[m]}</div>
+      <div class="planner-year-mini">${dayCells}</div>
+    </div>`;
+  }
+  html += '</div>';
+  document.getElementById('planner-year-view').innerHTML = html;
+}
+
+function renderPlannerSummary() {
+  if (plannerView !== 'week') {
+    document.getElementById('planner-summary').innerHTML = '';
+    return;
+  }
+  const weekStart = getStartOfWeek(plannerCursor);
+  let planned = 0, done = 0, partial = 0, skipped = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    const plan = getDayPlanItems(fmtDateKey(d));
+    if (plan && (plan.templateId != null || plan.run || plan.stretch || plan.rest)) {
+      planned++;
+      const status = isDayCompleted(fmtDateKey(d), plan);
+      if (status === 'done') done++;
+      else if (status === 'partial') partial++;
+      else if (status === 'skipped') skipped++;
+    }
+  }
+  if (planned === 0) {
+    document.getElementById('planner-summary').innerHTML = `<div style="text-align:center;color:var(--muted);font-size:0.85rem;padding:14px;">No workouts planned this week. Tap any day to start.</div>`;
+    return;
+  }
+  document.getElementById('planner-summary').innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;gap:18px;flex-wrap:wrap;justify-content:space-between;">
+      <div><div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;font-weight:700;">Planned</div><div style="font-size:1.3rem;font-weight:700;">${planned}</div></div>
+      <div><div style="font-size:0.65rem;color:var(--green);text-transform:uppercase;letter-spacing:0.7px;font-weight:700;">Completed</div><div style="font-size:1.3rem;font-weight:700;color:var(--green);">${done}</div></div>
+      ${partial > 0 ? `<div><div style="font-size:0.65rem;color:var(--yellow);text-transform:uppercase;letter-spacing:0.7px;font-weight:700;">Partial</div><div style="font-size:1.3rem;font-weight:700;color:var(--yellow);">${partial}</div></div>` : ''}
+      ${skipped > 0 ? `<div><div style="font-size:0.65rem;color:var(--accent2);text-transform:uppercase;letter-spacing:0.7px;font-weight:700;">Skipped</div><div style="font-size:1.3rem;font-weight:700;color:var(--accent2);">${skipped}</div></div>` : ''}
+    </div>`;
+}
+
+function openPlannerDayModal(dateKey) {
+  plannerEditingDate = dateKey;
+  const d = new Date(dateKey + 'T12:00:00');
+  document.getElementById('planner-modal-title').textContent = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  // Populate templates select
+  const sel = document.getElementById('planner-modal-template');
+  sel.innerHTML = '<option value="">— None —</option>' + templates.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+
+  const plan = workoutPlan[dateKey];
+  if (plan) {
+    sel.value = plan.templateId != null ? plan.templateId : '';
+    document.getElementById('planner-modal-run').checked = !!plan.run;
+    document.getElementById('planner-modal-run-details').style.display = plan.run ? 'block' : 'none';
+    if (plan.run) {
+      document.getElementById('planner-modal-run-distance').value = plan.run.distance || '';
+      document.getElementById('planner-modal-run-unit').value = plan.run.unit || 'mi';
+    }
+    document.getElementById('planner-modal-stretch').checked = !!plan.stretch;
+    document.getElementById('planner-modal-rest').checked = !!plan.rest;
+  } else {
+    sel.value = '';
+    document.getElementById('planner-modal-run').checked = false;
+    document.getElementById('planner-modal-run-details').style.display = 'none';
+    document.getElementById('planner-modal-run-distance').value = '';
+    document.getElementById('planner-modal-stretch').checked = false;
+    document.getElementById('planner-modal-rest').checked = false;
+  }
+
+  document.getElementById('planner-day-modal').style.display = 'flex';
+}
+
+function closePlannerDayModal() {
+  document.getElementById('planner-day-modal').style.display = 'none';
+  plannerEditingDate = null;
+}
+
+function savePlannerDay() {
+  if (!plannerEditingDate) return;
+  const isRest = document.getElementById('planner-modal-rest').checked;
+  if (isRest) {
+    workoutPlan[plannerEditingDate] = { rest: true };
+  } else {
+    const tmplId = document.getElementById('planner-modal-template').value;
+    const runChecked = document.getElementById('planner-modal-run').checked;
+    const stretch = document.getElementById('planner-modal-stretch').checked;
+    const plan = {};
+    if (tmplId) plan.templateId = +tmplId;
+    if (runChecked) {
+      const dist = parseFloat(document.getElementById('planner-modal-run-distance').value) || null;
+      const unit = document.getElementById('planner-modal-run-unit').value || 'mi';
+      plan.run = { distance: dist, unit };
+    }
+    if (stretch) plan.stretch = true;
+    if (Object.keys(plan).length === 0) {
+      delete workoutPlan[plannerEditingDate];
+    } else {
+      workoutPlan[plannerEditingDate] = plan;
+    }
+  }
+  persist();
+  closePlannerDayModal();
+  renderPlanner();
+  renderDashboard(); // update Today's Plan card if visible
+}
+
+function clearPlannerDay() {
+  if (!plannerEditingDate) return;
+  delete workoutPlan[plannerEditingDate];
+  persist();
+  closePlannerDayModal();
+  renderPlanner();
+  renderDashboard();
+}
+
 function renderNutrition() {
   const today = new Date().toISOString().slice(0,10);
   // Today's totals
