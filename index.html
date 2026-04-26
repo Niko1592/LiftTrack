@@ -621,6 +621,38 @@
   .food-result-actions select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 8px; border-radius: 6px; font-size: 0.78rem; font-family: 'Inter', system-ui, sans-serif; }
   .food-search-loading { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.85rem; }
 
+  /* Nutrition history (collapsible per-day cards) */
+  .nutr-hist-day { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+  .nutr-hist-day-header { display: grid; grid-template-columns: minmax(110px, 0.9fr) 1fr auto; gap: 12px; align-items: center; padding: 12px 14px; cursor: pointer; transition: background 0.15s; }
+  .nutr-hist-day-header:hover { background: var(--surface2); }
+  .nutr-hist-date { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .nutr-hist-date-main { font-weight: 700; font-size: 0.88rem; color: var(--text); letter-spacing: -0.01em; }
+  .nutr-hist-date-count { font-size: 0.7rem; color: var(--muted); }
+  .nutr-hist-totals { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; min-width: 0; text-align: right; }
+  .nutr-hist-total-cal { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .nutr-hist-total-prot { font-size: 0.74rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .nutr-hist-total-cal.nutr-hist-hit { color: var(--green); }
+  .nutr-hist-total-cal.nutr-hist-over { color: var(--accent2); }
+  .nutr-hist-total-prot.nutr-hist-hit { color: var(--green); font-weight: 600; }
+  .nutr-hist-chevron { color: var(--muted); font-size: 0.8rem; transition: transform 0.2s; flex-shrink: 0; }
+  .nutr-hist-day.expanded .nutr-hist-chevron { transform: rotate(180deg); }
+  .nutr-hist-day-entries { display: none; padding: 0 14px 12px; border-top: 1px solid var(--border); background: var(--surface2); }
+  .nutr-hist-day.expanded .nutr-hist-day-entries { display: block; padding-top: 10px; }
+  .nutr-hist-entry { display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 10px; align-items: center; padding: 6px 0; font-size: 0.82rem; border-bottom: 1px dashed var(--border); }
+  .nutr-hist-entry:last-child { border-bottom: none; }
+  .nutr-hist-icon { font-size: 0.95rem; flex-shrink: 0; }
+  .nutr-hist-name { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nutr-hist-cal { color: var(--accent); font-weight: 600; font-size: 0.78rem; white-space: nowrap; }
+  .nutr-hist-prot { color: var(--green); font-weight: 600; font-size: 0.74rem; white-space: nowrap; }
+  .nutr-hist-time { color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
+  @media (max-width: 600px) {
+    .nutr-hist-day-header { grid-template-columns: 1fr auto; gap: 8px; }
+    .nutr-hist-totals { grid-column: 1 / -1; align-items: flex-start; text-align: left; flex-direction: row; gap: 12px; flex-wrap: wrap; }
+    .nutr-hist-chevron { grid-row: 1; grid-column: 2; }
+    .nutr-hist-entry { grid-template-columns: auto 1fr auto auto; }
+    .nutr-hist-time { display: none; }
+  }
+
   @media (max-width: 600px) {
     .nutrition-hero { padding: 18px 18px; }
     .nutr-hero-row { grid-template-columns: 1fr; gap: 16px; }
@@ -1316,6 +1348,18 @@
       <button class="btn-sm" onclick="showPage('nutrition')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
         <span>🍎</span> Open Nutrition
       </button>
+    </div>
+
+    <!-- Nutrition 7-Day Trend -->
+    <div class="chart-card dash-panel" data-panel-id="nutrition-trend">
+      <div class="chart-title">
+        <span>Nutrition Trend</span>
+        <span style="font-size:0.65rem;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;margin-left:4px;">Last 7 days</span>
+      </div>
+      <div style="margin-bottom:4px;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">Calories</div>
+      <div style="height:90px;margin-bottom:10px;"><canvas id="dash-nutr-cal-trend"></canvas></div>
+      <div style="margin-bottom:4px;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">Protein (g)</div>
+      <div style="height:90px;"><canvas id="dash-nutr-prot-trend"></canvas></div>
     </div>
 
     <!-- Protein Tracker -->
@@ -2030,6 +2074,26 @@
       <div id="nutr-today-list"><div class="nutr-empty">Nothing logged yet today.</div></div>
     </div>
 
+    <!-- WEEKLY SUMMARY -->
+    <div class="nutr-section">
+      <div class="nutr-section-title">
+        <div class="nutr-section-title-icon"><span style="font-size:0.95rem;">📊</span> <span>This Week</span></div>
+        <span style="font-size:0.7rem;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;" id="nutr-wk-compare"></span>
+      </div>
+      <div id="nutr-wk-stats" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div>
+    </div>
+
+    <!-- 7-DAY TREND CHART -->
+    <div class="nutr-section">
+      <div class="nutr-section-title">
+        <div class="nutr-section-title-icon"><span style="font-size:0.95rem;">📈</span> <span>7-Day Trend</span></div>
+      </div>
+      <div style="margin-bottom:6px;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">Calories</div>
+      <div style="height:140px;margin-bottom:14px;"><canvas id="nutr-cal-trend"></canvas></div>
+      <div style="margin-bottom:6px;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">Protein (g)</div>
+      <div style="height:140px;"><canvas id="nutr-prot-trend"></canvas></div>
+    </div>
+
     <!-- BODY WEIGHT TRACKING -->
     <div class="nutr-section">
       <div class="nutr-section-title">
@@ -2095,6 +2159,7 @@
     <div style="display:flex;gap:6px;align-items:center;margin-bottom:0;">
       <button class="btn-sm" id="hist-tab-lifts" onclick="setHistoryTab('lifts')" style="border-color:var(--accent);color:var(--accent);">Lifts</button>
       <button class="btn-sm" id="hist-tab-runs" onclick="setHistoryTab('runs')">Runs</button>
+      <button class="btn-sm" id="hist-tab-nutrition" onclick="setHistoryTab('nutrition')">Nutrition</button>
     </div>
     <div id="hist-lift-filters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
       <div>
@@ -2565,6 +2630,38 @@ function lsSet() {
 
 // Save everything to Supabase + localStorage backup
 let saveTimer = null;
+// Fields that definitely exist in the original Supabase schema. If a full save fails
+// because newer columns (nutrition_*, weight_goal, stretch_presets, protein_goal) don't
+// exist yet, we retry with just these so at least the user's workouts persist.
+const SUPABASE_LEGACY_FIELDS = ['exercises', 'workouts', 'templates', 'runs', 'stretch_logs', 'body_weight_log', 'protein_log', 'updated_at'];
+
+function buildSupabasePayload() {
+  return {
+    exercises,
+    workouts,
+    templates,
+    runs,
+    stretch_logs: stretchLogs,
+    body_weight_log: bodyWeightLog,
+    protein_log: proteinLog,
+    protein_goal: proteinGoal,
+    stretch_presets: stretchPresets,
+    nutrition_log: nutritionLog,
+    nutrition_goals: nutritionGoals,
+    nutrition_presets: nutritionPresets,
+    weight_goal: weightGoal,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function legacyOnly(payload) {
+  const out = {};
+  for (const k of SUPABASE_LEGACY_FIELDS) {
+    if (k in payload) out[k] = payload[k];
+  }
+  return out;
+}
+
 async function persist() {
   lsSet();
   clearTimeout(saveTimer);
@@ -2573,22 +2670,46 @@ async function persist() {
     try {
       setStatus('saving');
       const userId = currentSession.user.id;
-      // Try to update first
+      const fullPayload = buildSupabasePayload();
       const existing = await sbFetch('/rest/v1/lifttrack_data?user_id=eq.' + userId + '&select=user_id');
+
+      // Helper: try with the full payload, retry with legacy fields if the full one fails
+      // due to a schema/column error (most likely cause of cross-device data loss).
+      const trySave = async (path, method, payload) => {
+        try {
+          await sbFetch(path, { method, prefer: 'return=minimal', body: JSON.stringify(payload) });
+          return { ok: true };
+        } catch (e) {
+          const msg = String(e?.message || e);
+          // PostgREST returns "column ... does not exist" or PGRST204/PGRST106 codes when columns are missing
+          const isSchemaErr = /column .* does not exist|PGRST20[34]|schema cache|Could not find/i.test(msg);
+          return { ok: false, schemaErr: isSchemaErr, error: msg };
+        }
+      };
+
+      let result;
       if (existing && existing.length > 0) {
-        await sbFetch('/rest/v1/lifttrack_data?user_id=eq.' + userId, {
-          method: 'PATCH',
-          prefer: 'return=minimal',
-          body: JSON.stringify({ exercises, workouts, templates, runs, stretch_logs: stretchLogs, body_weight_log: bodyWeightLog, protein_log: proteinLog, protein_goal: proteinGoal, stretch_presets: stretchPresets, nutrition_log: nutritionLog, nutrition_goals: nutritionGoals, nutrition_presets: nutritionPresets, weight_goal: weightGoal, updated_at: new Date().toISOString() })
-        });
+        // Update
+        result = await trySave('/rest/v1/lifttrack_data?user_id=eq.' + userId, 'PATCH', fullPayload);
+        if (!result.ok && result.schemaErr) {
+          console.warn('Full save failed (likely missing columns), retrying with legacy fields only:', result.error);
+          result = await trySave('/rest/v1/lifttrack_data?user_id=eq.' + userId, 'PATCH', legacyOnly(fullPayload));
+        }
       } else {
-        await sbFetch('/rest/v1/lifttrack_data', {
-          method: 'POST',
-          prefer: 'return=minimal',
-          body: JSON.stringify({ user_id: userId, exercises, workouts, templates, runs, stretch_logs: stretchLogs })
-        });
+        // First save for this user — include user_id
+        result = await trySave('/rest/v1/lifttrack_data', 'POST', { user_id: userId, ...fullPayload });
+        if (!result.ok && result.schemaErr) {
+          console.warn('Full first-save failed (likely missing columns), retrying with legacy fields only:', result.error);
+          result = await trySave('/rest/v1/lifttrack_data', 'POST', { user_id: userId, ...legacyOnly(fullPayload) });
+        }
       }
-      setStatus('synced');
+
+      if (result.ok) {
+        setStatus('synced');
+      } else {
+        console.error('Supabase save failed:', result.error);
+        setStatus('offline');
+      }
     } catch(e) {
       console.warn('Supabase save failed:', e);
       setStatus('offline');
@@ -2622,12 +2743,36 @@ async function loadData() {
       lsSet();
       setStatus('synced');
     } else {
-      // First time this user logs in — create their row with defaults
-      await sbFetch('/rest/v1/lifttrack_data', {
-        method: 'POST',
-        prefer: 'return=minimal',
-        body: JSON.stringify({ user_id: userId, exercises: DEFAULTS.exercises, workouts: [], templates: DEFAULTS.templates, runs: [], stretch_logs: [], body_weight_log: [], protein_log: [], protein_goal: 0 })
-      });
+      // First time this user logs in — create their row with full defaults.
+      // If the full payload fails due to missing columns, retry with legacy fields only.
+      const initialPayload = {
+        user_id: userId,
+        exercises: DEFAULTS.exercises,
+        workouts: [],
+        templates: DEFAULTS.templates,
+        runs: [],
+        stretch_logs: [],
+        body_weight_log: [],
+        protein_log: [],
+        protein_goal: 0,
+        stretch_presets: [],
+        nutrition_log: [],
+        nutrition_goals: { calories: 0, protein: 0 },
+        nutrition_presets: [],
+        weight_goal: null,
+      };
+      try {
+        await sbFetch('/rest/v1/lifttrack_data', { method: 'POST', prefer: 'return=minimal', body: JSON.stringify(initialPayload) });
+      } catch (e) {
+        const msg = String(e?.message || e);
+        if (/column .* does not exist|PGRST20[34]|schema cache|Could not find/i.test(msg)) {
+          console.warn('First-save failed (likely missing columns), retrying with legacy fields only:', msg);
+          const legacy = legacyOnly(initialPayload);
+          await sbFetch('/rest/v1/lifttrack_data', { method: 'POST', prefer: 'return=minimal', body: JSON.stringify({ user_id: userId, ...legacy }) });
+        } else {
+          throw e;
+        }
+      }
       exercises = DEFAULTS.exercises; workouts = []; templates = DEFAULTS.templates; runs = []; stretchLogs = []; bodyWeightLog = []; proteinLog = []; proteinGoal = 0;
       nutritionLog = []; nutritionGoals = { calories: 0, protein: 0 }; nutritionPresets = []; weightGoal = null;
       setStatus('synced');
@@ -3177,6 +3322,9 @@ function renderNutrition() {
   renderNutritionTodayList(todays);
   // Presets
   renderNutritionPresets();
+  // Weekly summary tiles + trend charts
+  renderNutritionWeeklySummary();
+  renderNutritionTrendCharts();
   // Body weight section
   renderBodyWeightSection();
 }
@@ -3368,6 +3516,290 @@ function guessFoodIcon(name) {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ── NUTRITION TRENDS & STATS ──────────────────────────
+
+// Build per-day totals over a window of N days ending today.
+// Returns array of {date: 'YYYY-MM-DD', dateLabel: 'Mon 15', calories, protein}
+function getNutritionDailyTotals(days = 7) {
+  const out = [];
+  const today = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const iso = d.toISOString().slice(0,10);
+    const entries = nutritionLog.filter(e => e.date === iso);
+    const calories = entries.reduce((s, e) => s + (e.calories || 0), 0);
+    const protein = entries.reduce((s, e) => s + (e.protein || 0), 0);
+    const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+    out.push({
+      date: iso,
+      dateLabel: dayName,
+      calories,
+      protein,
+      hasEntries: entries.length > 0,
+    });
+  }
+  return out;
+}
+
+// Compute the protein-goal streak: how many consecutive days (ending today or yesterday)
+// did the user hit their protein goal? If no goal set, returns 0.
+function getProteinStreak() {
+  if (!nutritionGoals?.protein) return 0;
+  const goal = nutritionGoals.protein;
+  const today = new Date();
+  let streak = 0;
+  // Walk backward from today. Today itself is forgiving — it's still in progress.
+  // So if today doesn't yet hit the goal but yesterday did, the streak still counts yesterday's run.
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const iso = d.toISOString().slice(0,10);
+    const entries = nutritionLog.filter(e => e.date === iso);
+    const totalProt = entries.reduce((s, e) => s + (e.protein || 0), 0);
+    if (totalProt >= goal) {
+      streak++;
+    } else {
+      // Special case: if today hasn't met goal yet, don't break the streak — peek at yesterday.
+      if (i === 0) continue;
+      break;
+    }
+  }
+  return streak;
+}
+
+function renderNutritionWeeklySummary() {
+  const stats = document.getElementById('nutr-wk-stats');
+  if (!stats) return;
+  const days = getNutritionDailyTotals(7);
+  const calGoal = nutritionGoals?.calories || 0;
+  const protGoal = nutritionGoals?.protein || 0;
+
+  // Only count days with at least one entry for averages — otherwise zero-days drag the avg down
+  const loggedDays = days.filter(d => d.hasEntries);
+  const avgCal = loggedDays.length ? Math.round(loggedDays.reduce((s,d) => s + d.calories, 0) / loggedDays.length) : 0;
+  const avgProt = loggedDays.length ? Math.round(loggedDays.reduce((s,d) => s + d.protein, 0) / loggedDays.length) : 0;
+
+  // Goal-hit days (protein only, since that's the typical "must-hit" target)
+  const protHitDays = protGoal > 0 ? loggedDays.filter(d => d.protein >= protGoal).length : 0;
+  const streak = getProteinStreak();
+
+  stats.innerHTML = `
+    <div class="wk-stat">
+      <div class="wk-stat-label">Avg Calories</div>
+      <div class="wk-stat-value">${avgCal.toLocaleString()}</div>
+      <div class="wk-stat-unit">${loggedDays.length} of 7 days logged</div>
+    </div>
+    <div class="wk-stat">
+      <div class="wk-stat-label">Avg Protein</div>
+      <div class="wk-stat-value">${avgProt}<span style="font-size:0.85rem;color:var(--muted);font-weight:500;">g</span></div>
+      <div class="wk-stat-unit">per logged day</div>
+    </div>
+    <div class="wk-stat">
+      <div class="wk-stat-label">Protein Goal Hit</div>
+      <div class="wk-stat-value">${protGoal > 0 ? protHitDays : '—'}<span style="font-size:0.85rem;color:var(--muted);font-weight:500;"> / 7</span></div>
+      <div class="wk-stat-unit">${protGoal > 0 ? 'days this week' : 'set a goal first'}</div>
+    </div>
+    <div class="wk-stat">
+      <div class="wk-stat-label">Protein Streak</div>
+      <div class="wk-stat-value" style="color:${streak >= 3 ? 'var(--green)' : 'var(--text)'};">${streak}${streak >= 7 ? ' 🔥' : ''}</div>
+      <div class="wk-stat-unit">${streak === 1 ? 'day in a row' : 'days in a row'}</div>
+    </div>
+  `;
+
+  // Compare to previous week
+  const compareEl = document.getElementById('nutr-wk-compare');
+  if (compareEl) {
+    const totalThis = days.reduce((s,d) => s + d.calories, 0);
+    // Previous 7 days (the week before this one)
+    const prevDays = [];
+    const today = new Date();
+    for (let i = 13; i >= 7; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const iso = d.toISOString().slice(0,10);
+      const cals = nutritionLog.filter(e => e.date === iso).reduce((s,e) => s + (e.calories || 0), 0);
+      prevDays.push(cals);
+    }
+    const totalPrev = prevDays.reduce((s,c) => s + c, 0);
+    if (totalPrev > 0) {
+      const diff = totalThis - totalPrev;
+      const pct = Math.round((diff / totalPrev) * 100);
+      const sign = diff >= 0 ? '+' : '';
+      compareEl.innerHTML = `<span style="color:${diff >= 0 ? 'var(--green)' : 'var(--accent2)'};font-weight:600;">${sign}${pct}%</span> vs last week`;
+    } else {
+      compareEl.textContent = '';
+    }
+  }
+}
+
+// Chart instances we manage
+let nutrCalChart = null, nutrProtChart = null;
+let dashNutrCalChart = null, dashNutrProtChart = null;
+
+function buildNutritionChart(canvasId, dataPoints, color, goal, unit) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const labels = dataPoints.map(d => d.dateLabel);
+  const values = dataPoints.map(d => d[unit === 'cal' ? 'calories' : 'protein']);
+
+  // Goal line (dashed) — only shown if goal is set
+  const datasets = [{
+    label: unit === 'cal' ? 'Calories' : 'Protein (g)',
+    data: values,
+    borderColor: color,
+    backgroundColor: color + '22', // 13% opacity hex
+    fill: true,
+    tension: 0.3,
+    pointBackgroundColor: color,
+    pointRadius: 3,
+    pointHoverRadius: 5,
+    borderWidth: 2,
+  }];
+  if (goal && goal > 0) {
+    datasets.push({
+      label: 'Goal',
+      data: labels.map(() => goal),
+      borderColor: '#7b7f96',
+      borderDash: [4, 4],
+      fill: false,
+      pointRadius: 0,
+      borderWidth: 1.5,
+    });
+  }
+
+  return new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1d27', titleColor: '#e8eaf0', bodyColor: '#e8eaf0',
+          borderColor: '#2a2e42', borderWidth: 1,
+          callbacks: {
+            label: ctx => {
+              if (ctx.datasetIndex === 1) return 'Goal: ' + ctx.parsed.y;
+              const v = ctx.parsed.y;
+              return unit === 'cal' ? `${v.toLocaleString()} cal` : `${v}g protein`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: '#7b7f96', font: { size: 10, family: 'Inter' } },
+        },
+        y: {
+          grid: { color: '#2a2e4233' },
+          ticks: {
+            color: '#7b7f96', font: { size: 10, family: 'Inter' },
+            callback: v => unit === 'cal' ? (v >= 1000 ? (v/1000).toFixed(1) + 'k' : v) : v + 'g'
+          },
+          beginAtZero: true,
+        }
+      }
+    }
+  });
+}
+
+function renderNutritionTrendCharts() {
+  // Skip if Chart.js not loaded yet (early call during page init)
+  if (typeof Chart === 'undefined') return;
+  const days = getNutritionDailyTotals(7);
+  const calGoal = nutritionGoals?.calories || 0;
+  const protGoal = nutritionGoals?.protein || 0;
+
+  // Destroy old instances first
+  if (nutrCalChart) { nutrCalChart.destroy(); nutrCalChart = null; }
+  if (nutrProtChart) { nutrProtChart.destroy(); nutrProtChart = null; }
+
+  if (document.getElementById('nutr-cal-trend')) {
+    nutrCalChart = buildNutritionChart('nutr-cal-trend', days, '#a855f7', calGoal, 'cal');
+  }
+  if (document.getElementById('nutr-prot-trend')) {
+    nutrProtChart = buildNutritionChart('nutr-prot-trend', days, '#43e97b', protGoal, 'prot');
+  }
+}
+
+function renderDashboardNutritionTrend() {
+  if (typeof Chart === 'undefined') return;
+  const days = getNutritionDailyTotals(7);
+  const calGoal = nutritionGoals?.calories || 0;
+  const protGoal = nutritionGoals?.protein || 0;
+
+  if (dashNutrCalChart) { dashNutrCalChart.destroy(); dashNutrCalChart = null; }
+  if (dashNutrProtChart) { dashNutrProtChart.destroy(); dashNutrProtChart = null; }
+
+  if (document.getElementById('dash-nutr-cal-trend')) {
+    dashNutrCalChart = buildNutritionChart('dash-nutr-cal-trend', days, '#a855f7', calGoal, 'cal');
+  }
+  if (document.getElementById('dash-nutr-prot-trend')) {
+    dashNutrProtChart = buildNutritionChart('dash-nutr-prot-trend', days, '#43e97b', protGoal, 'prot');
+  }
+}
+
+// ── NUTRITION HISTORY (per-day aggregated view) ───────
+function renderNutritionHistory(listEl) {
+  // Group nutritionLog entries by date (descending)
+  const byDate = {};
+  for (const entry of nutritionLog) {
+    if (!byDate[entry.date]) byDate[entry.date] = [];
+    byDate[entry.date].push(entry);
+  }
+  const sortedDates = Object.keys(byDate).sort().reverse();
+
+  if (sortedDates.length === 0) {
+    listEl.innerHTML = '<div class="nutr-empty" style="margin:40px 20px;">No nutrition logged yet. Head to the Nutrition tab to get started.</div>';
+    return;
+  }
+
+  const calGoal = nutritionGoals?.calories || 0;
+  const protGoal = nutritionGoals?.protein || 0;
+
+  listEl.innerHTML = sortedDates.map(date => {
+    const entries = byDate[date].sort((a,b) => (b.time || '').localeCompare(a.time || ''));
+    const totalCal = entries.reduce((s, e) => s + (e.calories || 0), 0);
+    const totalProt = entries.reduce((s, e) => s + (e.protein || 0), 0);
+    const calStatus = calGoal > 0 ? (totalCal > calGoal ? 'over' : (totalCal >= calGoal * 0.9 ? 'hit' : 'under')) : '';
+    const protStatus = protGoal > 0 ? (totalProt >= protGoal ? 'hit' : 'under') : '';
+
+    const calClass = calStatus === 'over' ? 'nutr-hist-over' : (calStatus === 'hit' ? 'nutr-hist-hit' : '');
+    const protClass = protStatus === 'hit' ? 'nutr-hist-hit' : '';
+
+    const entriesHtml = entries.map(e => `
+      <div class="nutr-hist-entry">
+        <span class="nutr-hist-icon">${guessFoodIcon(e.name)}</span>
+        <span class="nutr-hist-name">${escapeHtml(e.name)}</span>
+        <span class="nutr-hist-cal">${e.calories || 0} cal</span>
+        <span class="nutr-hist-prot">${e.protein || 0}g</span>
+        <span class="nutr-hist-time">${e.time || ''}</span>
+      </div>
+    `).join('');
+
+    return `<div class="nutr-hist-day">
+      <div class="nutr-hist-day-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="nutr-hist-date">
+          <span class="nutr-hist-date-main">${fmtDate(date)}</span>
+          <span class="nutr-hist-date-count">${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}</span>
+        </div>
+        <div class="nutr-hist-totals">
+          <span class="nutr-hist-total-cal ${calClass}">${totalCal.toLocaleString()} cal${calGoal > 0 ? ` / ${calGoal.toLocaleString()}` : ''}</span>
+          <span class="nutr-hist-total-prot ${protClass}">${totalProt}g protein${protGoal > 0 ? ` / ${protGoal}g` : ''}</span>
+        </div>
+        <span class="nutr-hist-chevron">▾</span>
+      </div>
+      <div class="nutr-hist-day-entries">${entriesHtml}</div>
+    </div>`;
+  }).join('');
 }
 
 // ── BODY WEIGHT GOAL & ETA (Phase 1b) ─────────────────
@@ -3686,6 +4118,7 @@ function renderDashboard() {
   renderLifetimeStats();
   renderRestDay();
   renderNutritionPanel();
+  renderDashboardNutritionTrend();
   renderRunningWeek();
   renderRecentRuns();
   renderRunningTotals();
@@ -3830,6 +4263,7 @@ const DASH_PANELS = [
   { id: 'week-summary',     label: 'This Week',            full: false, defaultOn: true  },
   { id: 'rest-day',         label: 'Rest Day Indicator',   full: false, defaultOn: true  },
   { id: 'nutrition',        label: 'Nutrition at a Glance',full: false, defaultOn: true  },
+  { id: 'nutrition-trend',  label: 'Nutrition Trend (7-day)', full: false, defaultOn: false },
   { id: 'protein',          label: 'Protein Tracker',      full: false, defaultOn: true  },
   { id: 'bodyweight',       label: 'Body Weight',          full: false, defaultOn: true  },
   { id: 'running-week',     label: 'Running This Week',    full: false, defaultOn: true  },
@@ -5187,16 +5621,23 @@ function setHistoryTab(tab) {
   historyTab = tab;
   const liftBtn = document.getElementById('hist-tab-lifts');
   const runBtn = document.getElementById('hist-tab-runs');
+  const nutrBtn = document.getElementById('hist-tab-nutrition');
   const liftFilters = document.getElementById('hist-lift-filters');
   const runFilters = document.getElementById('hist-run-filters');
+  // Reset all
+  [liftBtn, runBtn, nutrBtn].forEach(b => { if (b) { b.style.borderColor = ''; b.style.color = ''; } });
+  if (liftFilters) liftFilters.style.display = 'none';
+  if (runFilters) runFilters.style.display = 'none';
+  // Apply active
   if (tab === 'lifts') {
-    liftBtn.style.borderColor = 'var(--accent)'; liftBtn.style.color = 'var(--accent)';
-    runBtn.style.borderColor = ''; runBtn.style.color = '';
-    liftFilters.style.display = 'flex'; runFilters.style.display = 'none';
-  } else {
-    runBtn.style.borderColor = 'var(--accent)'; runBtn.style.color = 'var(--accent)';
-    liftBtn.style.borderColor = ''; liftBtn.style.color = '';
-    runFilters.style.display = 'flex'; liftFilters.style.display = 'none';
+    if (liftBtn) { liftBtn.style.borderColor = 'var(--accent)'; liftBtn.style.color = 'var(--accent)'; }
+    if (liftFilters) liftFilters.style.display = 'flex';
+  } else if (tab === 'runs') {
+    if (runBtn) { runBtn.style.borderColor = 'var(--accent)'; runBtn.style.color = 'var(--accent)'; }
+    if (runFilters) runFilters.style.display = 'flex';
+  } else if (tab === 'nutrition') {
+    if (nutrBtn) { nutrBtn.style.borderColor = 'var(--accent)'; nutrBtn.style.color = 'var(--accent)'; }
+    // Nutrition has no filter bar — nothing to show
   }
   renderHistory();
 }
@@ -5215,6 +5656,10 @@ function renderHistory() {
 
   if (historyTab === 'runs') {
     renderRunHistory(list);
+    return;
+  }
+  if (historyTab === 'nutrition') {
+    renderNutritionHistory(list);
     return;
   }
 
