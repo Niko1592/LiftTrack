@@ -2722,25 +2722,52 @@ function persistAll() { persist(); }
 async function loadData() {
   setStatus('loading');
   if (!currentSession) { setStatus('offline'); return; }
+  // Always start by loading from localStorage. This is our floor — if Supabase is missing
+  // a column (returns undefined for that field), we keep the localStorage value rather than
+  // blowing it away with an empty default.
+  exercises      = lsGet('exercises')      ?? DEFAULTS.exercises;
+  workouts       = lsGet('workouts')       ?? [];
+  templates      = lsGet('templates')      ?? DEFAULTS.templates;
+  runs           = lsGet('runs')           ?? [];
+  stretchLogs    = lsGet('stretchLogs')    ?? [];
+  bodyWeightLog  = lsGet('bodyWeightLog')  ?? [];
+  proteinLog     = lsGet('proteinLog')     ?? [];
+  proteinGoal    = lsGet('proteinGoal')    ?? 0;
+  stretchPresets = lsGet('stretchPresets') ?? [];
+  nutritionLog     = lsGet('nutritionLog')     ?? [];
+  nutritionGoals   = lsGet('nutritionGoals')   ?? { calories: 0, protein: 0 };
+  nutritionPresets = lsGet('nutritionPresets') ?? [];
+  weightGoal       = lsGet('weightGoal')       ?? null;
+
   try {
     const userId = currentSession.user.id;
     const rows = await sbFetch('/rest/v1/lifttrack_data?user_id=eq.' + userId + '&select=*');
     const data = rows?.[0];
     if (data) {
-      exercises     = data.exercises?.length  ? data.exercises   : DEFAULTS.exercises;
-      workouts      = data.workouts           ? data.workouts    : [];
-      templates     = data.templates?.length  ? data.templates   : DEFAULTS.templates;
-      runs          = data.runs              ? data.runs        : [];
-      stretchLogs   = data.stretch_logs      ? data.stretch_logs : [];
-      bodyWeightLog = data.body_weight_log   ? data.body_weight_log : [];
-      proteinLog    = data.protein_log       ? data.protein_log  : [];
-      proteinGoal   = data.protein_goal      ? data.protein_goal : 0;
-      stretchPresets = data.stretch_presets ? data.stretch_presets : [];
-      nutritionLog     = data.nutrition_log     ? data.nutrition_log     : [];
-      nutritionGoals   = data.nutrition_goals   ? data.nutrition_goals   : { calories: 0, protein: 0 };
-      nutritionPresets = data.nutrition_presets ? data.nutrition_presets : [];
-      weightGoal       = data.weight_goal       ? data.weight_goal       : null;
+      // Only overwrite each field if it's actually present in the response.
+      // `in` lets us distinguish "column missing entirely" from "column exists but empty".
+      // For arrays, also require non-zero length when we have a meaningful default to fall
+      // back to (exercises, templates) so empty Supabase data doesn't wipe defaults.
+      if ('exercises' in data && data.exercises?.length)      exercises = data.exercises;
+      if ('workouts' in data && Array.isArray(data.workouts))  workouts = data.workouts;
+      if ('templates' in data && data.templates?.length)      templates = data.templates;
+      if ('runs' in data && Array.isArray(data.runs))          runs = data.runs;
+      if ('stretch_logs' in data && Array.isArray(data.stretch_logs)) stretchLogs = data.stretch_logs;
+      if ('body_weight_log' in data && Array.isArray(data.body_weight_log)) bodyWeightLog = data.body_weight_log;
+      if ('protein_log' in data && Array.isArray(data.protein_log)) proteinLog = data.protein_log;
+      if ('protein_goal' in data && data.protein_goal != null) proteinGoal = data.protein_goal;
+      if ('stretch_presets' in data && Array.isArray(data.stretch_presets)) stretchPresets = data.stretch_presets;
+      if ('nutrition_log' in data && Array.isArray(data.nutrition_log)) nutritionLog = data.nutrition_log;
+      if ('nutrition_goals' in data && data.nutrition_goals && typeof data.nutrition_goals === 'object') nutritionGoals = data.nutrition_goals;
+      if ('nutrition_presets' in data && Array.isArray(data.nutrition_presets)) nutritionPresets = data.nutrition_presets;
+      if ('weight_goal' in data) weightGoal = data.weight_goal; // null is valid
       lsSet();
+      // If any of the newer fields are missing from the schema, surface a friendly warning
+      const missing = ['nutrition_log','nutrition_goals','nutrition_presets','weight_goal','stretch_presets']
+        .filter(k => !(k in data));
+      if (missing.length > 0) {
+        console.warn('Supabase is missing columns: ' + missing.join(', ') + '. Run the column-add SQL in Supabase to enable cross-device sync for these fields.');
+      }
       setStatus('synced');
     } else {
       // First time this user logs in — create their row with full defaults.
@@ -2779,19 +2806,7 @@ async function loadData() {
     }
   } catch(e) {
     console.warn('Supabase load failed, using localStorage:', e);
-    exercises     = lsGet('exercises')     ?? DEFAULTS.exercises;
-    workouts      = lsGet('workouts')      ?? [];
-    templates     = lsGet('templates')    ?? DEFAULTS.templates;
-    runs          = lsGet('runs')          ?? [];
-    stretchLogs   = lsGet('stretchLogs')  ?? [];
-    bodyWeightLog = lsGet('bodyWeightLog') ?? [];
-    proteinLog    = lsGet('proteinLog')    ?? [];
-    proteinGoal   = lsGet('proteinGoal')  ?? 0;
-    stretchPresets = lsGet('stretchPresets') ?? [];
-    nutritionLog     = lsGet('nutritionLog')     ?? [];
-    nutritionGoals   = lsGet('nutritionGoals')   ?? { calories: 0, protein: 0 };
-    nutritionPresets = lsGet('nutritionPresets') ?? [];
-    weightGoal       = lsGet('weightGoal')       ?? null;
+    // Already loaded from localStorage above — just update status
     setStatus('offline');
   }
   migrateExercises();
