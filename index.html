@@ -2967,25 +2967,35 @@ function renderStats() {
   const weekAgo = new Date(today); weekAgo.setDate(today.getDate()-7);
   const thisWeek = allDates.filter(d => new Date(d+'T12:00:00') >= weekAgo).length;
 
-  // Streak
-  const sortedDates = [...allDates].sort().reverse();
-  let streak = 0, cur = new Date(today);
-  for (let i = 0; i < 200; i++) {
-    const key = cur.toISOString().slice(0,10);
-    if (sortedDates.includes(key)) { streak++; cur.setDate(cur.getDate()-1); }
-    else if (i === 0) { cur.setDate(cur.getDate()-1); }
-    else break;
-  }
-
   // Body weight — most recent entry
   const latestBW = bodyWeightLog.length ? bodyWeightLog[bodyWeightLog.length - 1].weight : null;
+
+  // Today's calories vs goal
+  const todayKey = new Date().toISOString().slice(0,10);
+  const todayCal = (nutritionLog || [])
+    .filter(e => e.date === todayKey)
+    .reduce((s, e) => s + (e.calories || 0), 0);
+  const calGoal = nutritionGoals?.calories || 0;
+  // Color: green when on track (within 90% of goal), yellow when under, red when over goal
+  let calColor = 'yellow';
+  if (calGoal > 0) {
+    if (todayCal > calGoal) calColor = 'red';
+    else if (todayCal >= calGoal * 0.9) calColor = 'green';
+    else calColor = 'yellow';
+  }
+  const calDisplay = calGoal > 0
+    ? `${todayCal.toLocaleString()}<span style="font-size:1rem;color:var(--muted);">/${calGoal.toLocaleString()}</span>`
+    : `${todayCal.toLocaleString()}`;
+  const calSub = calGoal > 0
+    ? (todayCal > calGoal ? `+${(todayCal - calGoal).toLocaleString()} over` : `${(calGoal - todayCal).toLocaleString()} left`)
+    : 'no goal set';
 
   const prs = computePRs();
   const g = document.getElementById('stat-grid');
   g.innerHTML = `
     <div class="stat-card"><div class="stat-label">Total Sessions</div><div class="stat-value purple">${total}</div><div class="stat-sub">All time</div></div>
     <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value green">${thisWeek}</div><div class="stat-sub">sessions</div></div>
-    <div class="stat-card"><div class="stat-label">Current Streak</div><div class="stat-value yellow">${streak}</div><div class="stat-sub">days</div></div>
+    <div class="stat-card"><div class="stat-label">Calories Today</div><div class="stat-value ${calColor}">${calDisplay}</div><div class="stat-sub">${calSub}</div></div>
     <div class="stat-card"><div class="stat-label">Body Weight</div><div class="stat-value red">${latestBW ? latestBW + '<span style="font-size:1rem"> lbs</span>' : '–'}</div><div class="stat-sub">most recent</div></div>
   `;
 }
