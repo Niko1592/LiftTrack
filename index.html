@@ -693,7 +693,7 @@
   .live-set-input-group input:focus { border-color: var(--accent); }
 
   /* iOS-style scroll wheel picker */
-  .wheel-picker { position: relative; height: 180px; background: var(--surface2); border: 2px solid var(--border); border-radius: 12px; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: pan-y; }
+  .wheel-picker { position: relative; height: 180px; background: var(--surface2); border: 2px solid var(--border); border-radius: 12px; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: none; -ms-touch-action: none; overscroll-behavior: contain; }
   .wheel-picker::before, .wheel-picker::after { content: ''; position: absolute; left: 0; right: 0; height: 60px; pointer-events: none; z-index: 2; }
   .wheel-picker::before { top: 0; background: linear-gradient(to bottom, var(--surface2), transparent); }
   .wheel-picker::after { bottom: 0; background: linear-gradient(to top, var(--surface2), transparent); }
@@ -7443,10 +7443,16 @@ function attachWheelHandlers(wheel, wheelId) {
     startY = null;
   };
 
-  // Touch
+  // Touch — touchmove must be non-passive so we can preventDefault() and stop the
+  // page from scrolling along with the wheel drag.
   wheel.addEventListener('touchstart', (e) => onStart(e.touches[0].clientY), { passive: true });
-  wheel.addEventListener('touchmove', (e) => onMove(e.touches[0].clientY), { passive: true });
+  wheel.addEventListener('touchmove', (e) => {
+    // Only block page scroll if a drag has actually started on this wheel
+    if (startY !== null) e.preventDefault();
+    onMove(e.touches[0].clientY);
+  }, { passive: false });
   wheel.addEventListener('touchend', onEnd);
+  wheel.addEventListener('touchcancel', onEnd);
 
   // Mouse
   wheel.addEventListener('mousedown', (e) => { onStart(e.clientY); e.preventDefault(); });
