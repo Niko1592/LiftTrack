@@ -909,14 +909,16 @@
         radial-gradient(circle at 85% 25%, var(--accent2) 0%, transparent 35%);
     }
 
-    /* Nav — scrollable horizontally but hidden scrollbar */
-    .topbar { padding: 0 12px; gap: 0; height: auto; min-height: 52px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 6px; row-gap: 10px; }
+    /* Nav — distribute tabs evenly across the row so nothing gets cut off */
+    .topbar { padding: 0 10px; gap: 0; height: auto; min-height: 52px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 6px; row-gap: 10px; }
     .logo { font-size: 1.05rem; margin-right: auto; }
-    .nav-tabs { order: 3; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 6px; gap: 2px; margin-top: 4px; }
+    .nav-tabs { order: 3; width: 100%; display: flex; gap: 2px; padding: 0; margin-top: 4px; }
     .nav-tabs::-webkit-scrollbar { display: none; }
-    .nav-tab { padding: 5px 10px; font-size: 0.72rem; white-space: nowrap; flex-shrink: 0; }
+    .nav-tab { flex: 1 1 0; min-width: 0; padding: 6px 4px; font-size: 0.7rem; white-space: nowrap; text-align: center; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0; }
     .user-badge { order: 2; }
     .user-badge span { display: none; }
+    /* Hide the scroll hint chevron on mobile since we no longer scroll */
+    .nav-scroll-hint { display: none !important; }
 
     /* Date inputs */
     input[type="date"] { font-size: 0.78rem !important; padding: 6px 8px !important; }
@@ -984,7 +986,7 @@
   @media (max-width: 380px) {
     .stat-grid { grid-template-columns: 1fr 1fr; }
     .stat-value { font-size: 1.3rem; }
-    .nav-tab { padding: 4px 8px; font-size: 0.68rem; }
+    .nav-tab { padding: 5px 2px; font-size: 0.65rem; }
   }
 
   .email-suggestion { padding: 9px 14px; font-size: 0.82rem; cursor: pointer; color: var(--text); font-family: 'Inter', system-ui, sans-serif; transition: background 0.12s; }
@@ -1761,7 +1763,7 @@
             <input type="hidden" id="log-exercise">
           </div>
           <div class="form-group">
-            <label>Sets</label>
+            <label id="sets-heading">Sets</label>
             <div class="sets-container" id="sets-container"></div>
             <div class="btn-row" style="margin-top:12px">
               <button class="btn-sm" onclick="addSet()">+ Add Set</button>
@@ -3133,6 +3135,10 @@ let volumeChart = null;
 
 // ── UTILS ────────────────────────────────────────────
 function getExById(id) { return exercises.find(e => e.id === id); }
+function isCardio(exId) {
+  const ex = getExById(exId);
+  return !!(ex && ex.cat === 'Cardio');
+}
 function fmtDate(d) { return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
 function maxWeightInWorkout(w) { return Math.max(...w.sets.map(s => s.weight)); }
 function volumeOfWorkout(w) { return w.sets.reduce((s,x) => s + x.reps * x.weight, 0); }
@@ -3244,8 +3250,14 @@ function computePRs() {
   const map = {};
   for (const w of workouts) {
     const id = w.exerciseId;
-    const top = Math.max(...w.sets.map(s => s.weight));
-    const topReps = w.sets.find(s => s.weight === top)?.reps ?? 0;
+    // Skip cardio entirely — PRs are about weight × reps
+    const ex = getExById(id);
+    if (ex?.cat === 'Cardio') continue;
+    // Also skip workouts where every set is cardio (defensive)
+    const liftSets = w.sets.filter(s => !s.cardio && (s.weight > 0 || s.reps > 0));
+    if (!liftSets.length) continue;
+    const top = Math.max(...liftSets.map(s => s.weight));
+    const topReps = liftSets.find(s => s.weight === top)?.reps ?? 0;
     if (!map[id] || top > map[id].weight) map[id] = { weight: top, reps: topReps, date: w.date };
   }
   return Object.entries(map).map(([id,v]) => ({ ex: getExById(+id), ...v })).filter(x=>x.ex);
@@ -5983,6 +5995,16 @@ function selectExercise(id, name) {
   document.getElementById('log-exercise').value = id;
   document.getElementById('log-exercise-search').value = name;
   document.getElementById('exercise-dropdown').style.display = 'none';
+  // Rebuild the default 3 rows so cardio/lift differentiation kicks in
+  setCount = 0;
+  const setsContainer = document.getElementById('sets-container');
+  if (setsContainer) {
+    setsContainer.innerHTML = '';
+    addSet(); addSet(); addSet();
+  }
+  // Update the section heading so it reflects current input mode
+  const setsHeading = document.getElementById('sets-heading');
+  if (setsHeading) setsHeading.textContent = isCardio(id) ? 'Intervals' : 'Sets';
 }
 
 // ── TEMPLATES PANEL ──────────────────────────────────
@@ -6173,23 +6195,38 @@ function getLastWeight(exId) {
 function addSessionSet(exId) {
   sessionSetCounters[exId] = (sessionSetCounters[exId] || 0) + 1;
   const n = sessionSetCounters[exId];
+  const cardio = isCardio(exId);
   const lastWeight = getLastWeight(exId);
   const weightPlaceholder = lastWeight !== null && lastWeight > 0 ? lastWeight : '';
   const container = document.getElementById('session-sets-'+exId);
   const row = document.createElement('div');
-  row.className = 'session-set-row';
+  row.className = 'session-set-row' + (cardio ? ' set-row-cardio' : '');
   row.id = `sset-${exId}-${n}`;
-  row.style.cssText = 'display:grid;grid-template-columns:28px 1fr 1fr 32px 28px;gap:5px;align-items:center;';
-  row.innerHTML = `
-    <div class="set-num" style="font-size:0.72rem;text-align:center;color:var(--muted);font-weight:600;">${n}</div>
-    <input type="number" placeholder="Reps" min="1" id="sreps-${exId}-${n}" data-scrub data-scrub-step="1" style="min-width:0;">
-    <input type="number" placeholder="${weightPlaceholder || 'lbs'}" min="0" id="sweight-${exId}-${n}" data-scrub data-scrub-step="2.5" value="${weightPlaceholder}" style="min-width:0;">
-    <label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;">
-      <input type="checkbox" id="sbw-${exId}-${n}" onchange="toggleSessionBW(${exId},${n})" style="accent-color:var(--accent);cursor:pointer;width:14px;height:14px;">
-      <span style="font-size:0.55rem;color:var(--muted);line-height:1;">BW</span>
-    </label>
-    <button class="btn-danger" onclick="removeSessionSet(${exId},${n})" style="width:24px;height:24px;font-size:0.9rem;flex-shrink:0;">×</button>
-  `;
+  if (cardio) {
+    row.style.cssText = 'display:grid;grid-template-columns:28px 1fr 1fr 50px 28px;gap:5px;align-items:center;';
+    row.innerHTML = `
+      <div class="set-num" style="font-size:0.72rem;text-align:center;color:var(--muted);font-weight:600;">${n}</div>
+      <input type="number" placeholder="min" min="0" step="0.1" id="sduration-${exId}-${n}" data-scrub data-scrub-step="1" style="min-width:0;">
+      <input type="number" placeholder="dist" min="0" step="0.01" id="sdistance-${exId}-${n}" data-scrub data-scrub-step="0.1" style="min-width:0;">
+      <select id="sdistunit-${exId}-${n}" style="min-width:0;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 4px;border-radius:8px;font-size:0.72rem;">
+        <option value="mi">mi</option>
+        <option value="km">km</option>
+      </select>
+      <button class="btn-danger" onclick="removeSessionSet(${exId},${n})" style="width:24px;height:24px;font-size:0.9rem;flex-shrink:0;">×</button>
+    `;
+  } else {
+    row.style.cssText = 'display:grid;grid-template-columns:28px 1fr 1fr 32px 28px;gap:5px;align-items:center;';
+    row.innerHTML = `
+      <div class="set-num" style="font-size:0.72rem;text-align:center;color:var(--muted);font-weight:600;">${n}</div>
+      <input type="number" placeholder="Reps" min="1" id="sreps-${exId}-${n}" data-scrub data-scrub-step="1" style="min-width:0;">
+      <input type="number" placeholder="${weightPlaceholder || 'lbs'}" min="0" id="sweight-${exId}-${n}" data-scrub data-scrub-step="2.5" value="${weightPlaceholder}" style="min-width:0;">
+      <label style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;">
+        <input type="checkbox" id="sbw-${exId}-${n}" onchange="toggleSessionBW(${exId},${n})" style="accent-color:var(--accent);cursor:pointer;width:14px;height:14px;">
+        <span style="font-size:0.55rem;color:var(--muted);line-height:1;">BW</span>
+      </label>
+      <button class="btn-danger" onclick="removeSessionSet(${exId},${n})" style="width:24px;height:24px;font-size:0.9rem;flex-shrink:0;">×</button>
+    `;
+  }
   container.appendChild(row);
 }
 
@@ -6228,14 +6265,24 @@ function saveWorkoutSession() {
   allBlocks.forEach(block => {
     const exId = +block.id.replace('session-block-', '');
     if (!exId) return;
+    const cardio = isCardio(exId);
     const sets = [];
     block.querySelectorAll('.session-set-row').forEach(row => {
       const parts = row.id.split('-');
       const n = parts[parts.length - 1];
-      const reps = +document.getElementById(`sreps-${exId}-${n}`)?.value || 0;
-      const isBW = document.getElementById(`sbw-${exId}-${n}`)?.checked || false;
-      const weight = isBW ? 0 : (+document.getElementById(`sweight-${exId}-${n}`)?.value || 0);
-      if (reps > 0) sets.push({ reps, weight, bodyweight: isBW });
+      if (cardio) {
+        const duration = +document.getElementById(`sduration-${exId}-${n}`)?.value || 0;
+        const distance = +document.getElementById(`sdistance-${exId}-${n}`)?.value || 0;
+        const distanceUnit = document.getElementById(`sdistunit-${exId}-${n}`)?.value || 'mi';
+        if (duration > 0 || distance > 0) {
+          sets.push({ duration, distance, distanceUnit, reps: 0, weight: 0, bodyweight: false, cardio: true });
+        }
+      } else {
+        const reps = +document.getElementById(`sreps-${exId}-${n}`)?.value || 0;
+        const isBW = document.getElementById(`sbw-${exId}-${n}`)?.checked || false;
+        const weight = isBW ? 0 : (+document.getElementById(`sweight-${exId}-${n}`)?.value || 0);
+        if (reps > 0) sets.push({ reps, weight, bodyweight: isBW });
+      }
     });
     if (sets.length > 0) {
       workouts.push({ date, exerciseId: exId, sets, sessionId, templateName: sessionName });
@@ -6243,7 +6290,7 @@ function saveWorkoutSession() {
     }
   });
 
-  if (saved === 0) { alert('Fill in reps for at least one exercise.'); return; }
+  if (saved === 0) { alert('Fill in at least one set or interval.'); return; }
   persist();
   const msg = document.getElementById('session-success-msg');
   if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2500); }
@@ -6519,16 +6566,31 @@ function saveTemplate() {
 function addSet() {
   setCount++;
   const n = setCount;
+  const exId = selectedExerciseId || +document.getElementById('log-exercise')?.value;
+  const cardio = isCardio(exId);
   const row = document.createElement('div');
-  row.className = 'set-row';
+  row.className = 'set-row' + (cardio ? ' set-row-cardio' : '');
   row.id = 'set-row-' + n;
-  row.innerHTML = `
-    <div class="set-num">${n}</div>
-    <input type="number" placeholder="Reps" min="1" max="100" id="reps-${n}" data-scrub data-scrub-step="1" style="min-width:0;">
-    <input type="number" placeholder="lbs" min="0" id="weight-${n}" data-scrub data-scrub-step="2.5" style="min-width:0;">
-    <label class="bw-label"><input type="checkbox" id="bw-${n}" onchange="toggleBWInput(${n})" style="accent-color:var(--accent);"> BW</label>
-    <button class="btn-danger" onclick="removeSet(${n})">×</button>
-  `;
+  if (cardio) {
+    row.innerHTML = `
+      <div class="set-num">${n}</div>
+      <input type="number" placeholder="min" min="0" step="0.1" id="duration-${n}" data-scrub data-scrub-step="1" style="min-width:0;">
+      <input type="number" placeholder="distance" min="0" step="0.01" id="distance-${n}" data-scrub data-scrub-step="0.1" style="min-width:0;">
+      <select id="distunit-${n}" style="min-width:0;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 4px;border-radius:8px;font-size:0.78rem;">
+        <option value="mi">mi</option>
+        <option value="km">km</option>
+      </select>
+      <button class="btn-danger" onclick="removeSet(${n})">×</button>
+    `;
+  } else {
+    row.innerHTML = `
+      <div class="set-num">${n}</div>
+      <input type="number" placeholder="Reps" min="1" max="100" id="reps-${n}" data-scrub data-scrub-step="1" style="min-width:0;">
+      <input type="number" placeholder="lbs" min="0" id="weight-${n}" data-scrub data-scrub-step="2.5" style="min-width:0;">
+      <label class="bw-label"><input type="checkbox" id="bw-${n}" onchange="toggleBWInput(${n})" style="accent-color:var(--accent);"> BW</label>
+      <button class="btn-danger" onclick="removeSet(${n})">×</button>
+    `;
+  }
   document.getElementById('sets-container').appendChild(row);
   renumberSets();
 }
@@ -6557,15 +6619,31 @@ function toggleBWInput(n) {
 function saveWorkout() {
   const date = document.getElementById('log-date').value;
   const exId = selectedExerciseId || +document.getElementById('log-exercise').value;
+  const cardio = isCardio(exId);
   const sets = [];
   document.querySelectorAll('.set-row').forEach(row => {
     const id = row.id.replace('set-row-','');
-    const reps = +document.getElementById('reps-'+id)?.value || 0;
-    const isBW = document.getElementById('bw-'+id)?.checked || false;
-    const weight = isBW ? 0 : (+document.getElementById('weight-'+id)?.value || 0);
-    if (reps > 0) sets.push({ reps, weight, bodyweight: isBW });
+    if (cardio) {
+      const duration = +document.getElementById('duration-'+id)?.value || 0;
+      const distance = +document.getElementById('distance-'+id)?.value || 0;
+      const distanceUnit = document.getElementById('distunit-'+id)?.value || 'mi';
+      // Cardio set is valid if it has either time or distance
+      if (duration > 0 || distance > 0) {
+        sets.push({ duration, distance, distanceUnit, reps: 0, weight: 0, bodyweight: false, cardio: true });
+      }
+    } else {
+      const reps = +document.getElementById('reps-'+id)?.value || 0;
+      const isBW = document.getElementById('bw-'+id)?.checked || false;
+      const weight = isBW ? 0 : (+document.getElementById('weight-'+id)?.value || 0);
+      if (reps > 0) sets.push({ reps, weight, bodyweight: isBW });
+    }
   });
-  if (!date || !exId || sets.length === 0) { alert('Please select an exercise and fill in at least one set with reps.'); return; }
+  if (!date || !exId || sets.length === 0) {
+    alert(cardio
+      ? 'Please select an exercise and fill in time or distance for at least one interval.'
+      : 'Please select an exercise and fill in at least one set with reps.');
+    return;
+  }
   workouts.push({ date, exerciseId: exId, sets });
   persist();
   const msg = document.getElementById('success-msg');
@@ -6840,9 +6918,15 @@ function renderSessionHistoryCard({ sid, date, entries }) {
   const tmplName = entries[0].w.templateName ?? 'Session';
   const exRows = entries.map(({ w }) => {
     const ex = getExById(w.exerciseId);
-    const pills = w.sets.map(s =>
-      `<div class="set-pill"><span>${s.reps}</span> reps${s.weight > 0 ? ' @ <span>' + s.weight + '</span>lb' : ' BW'}</div>`
-    ).join('');
+    const pills = w.sets.map(s => {
+      if (s.cardio || s.duration != null || s.distance != null) {
+        const parts = [];
+        if (s.duration > 0) parts.push(`<span>${s.duration}</span>min`);
+        if (s.distance > 0) parts.push(`<span>${s.distance}</span>${s.distanceUnit || 'mi'}`);
+        return `<div class="set-pill">${parts.length ? parts.join(' · ') : '—'}</div>`;
+      }
+      return `<div class="set-pill"><span>${s.reps}</span> reps${s.weight > 0 ? ' @ <span>' + s.weight + '</span>lb' : ' BW'}</div>`;
+    }).join('');
     return `<div class="session-ex-row">
       <div class="session-ex-row-name">${ex?.name ?? 'Unknown'} <span class="ex-cat">${ex?.cat ?? ''}</span></div>
       <div class="session-ex-row-sets">${pills}</div>
@@ -6865,9 +6949,20 @@ function renderSessionHistoryCard({ sid, date, entries }) {
   </div>`;
 }
 
+// Format a single set for history display (handles cardio + lifting)
+function formatSetForHistory(s, n) {
+  if (s.cardio || s.duration != null || s.distance != null) {
+    const parts = [];
+    if (s.duration > 0) parts.push(`${s.duration} min`);
+    if (s.distance > 0) parts.push(`${s.distance} ${s.distanceUnit || 'mi'}`);
+    return `Set ${n+1}: <span>${parts.length ? parts.join(' · ') : '—'}</span>`;
+  }
+  return `Set ${n+1}: <span>${s.reps} reps @ ${s.weight>0?s.weight+'lbs':'BW'}</span>`;
+}
+
 function renderSoloHistoryCard({ w, i }) {
   const ex = getExById(w.exerciseId);
-  const setStr = w.sets.map((s,n) => `Set ${n+1}: <span>${s.reps} reps @ ${s.weight>0?s.weight+'lbs':'BW'}</span>`).join(' &nbsp;·&nbsp; ');
+  const setStr = w.sets.map((s,n) => formatSetForHistory(s, n)).join(' &nbsp;·&nbsp; ');
   return `<div class="history-card">
     <div class="history-card-body">
       <div class="history-date">${fmtDate(w.date)}</div>
