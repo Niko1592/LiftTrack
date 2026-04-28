@@ -2339,26 +2339,25 @@
 
   <!-- MAIN PLANNER VIEW -->
   <div id="planner-main">
-    <!-- Header with view toggles -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-      <div>
-        <div id="planner-week-label" style="font-weight:700;font-size:1.1rem;letter-spacing:-0.01em;">Today</div>
-        <div id="planner-week-range" style="font-size:0.78rem;color:var(--muted);"></div>
+    <!-- Single control bar: view switcher + nav (week/month only) + Edit Plan -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;">
+      <div style="display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;">
+        <button id="planner-view-today" onclick="setPlannerView('today')" class="planner-view-btn active">Today</button>
+        <button id="planner-view-week" onclick="setPlannerView('week')" class="planner-view-btn">Week</button>
+        <button id="planner-view-month" onclick="setPlannerView('month')" class="planner-view-btn">Month</button>
       </div>
-      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div id="planner-top-nav" style="display:none;gap:4px;align-items:center;">
+          <div id="planner-week-label" style="font-size:0.82rem;font-weight:600;color:var(--muted);margin-right:4px;"></div>
+          <button class="btn-sm" onclick="plannerNavigate(-1)" title="Previous" style="padding:5px 10px;">‹</button>
+          <button class="btn-sm" onclick="plannerGoToday()" style="padding:5px 10px;">Today</button>
+          <button class="btn-sm" onclick="plannerNavigate(1)" title="Next" style="padding:5px 10px;">›</button>
+        </div>
         <button class="btn-sm" onclick="openPlannerWizard()" title="Edit weekly template">Edit Plan</button>
-        <button class="btn-sm" onclick="plannerNavigate(-1)" title="Previous">‹</button>
-        <button class="btn-sm" onclick="plannerGoToday()">Today</button>
-        <button class="btn-sm" onclick="plannerNavigate(1)" title="Next">›</button>
       </div>
     </div>
-
-    <!-- View toggle: Today / Week / Month -->
-    <div style="display:flex;gap:6px;background:var(--surface2);border-radius:10px;padding:4px;width:fit-content;margin-bottom:16px;flex-wrap:wrap;">
-      <button id="planner-view-today" onclick="setPlannerView('today')" class="planner-view-btn active">Today</button>
-      <button id="planner-view-week" onclick="setPlannerView('week')" class="planner-view-btn">Week</button>
-      <button id="planner-view-month" onclick="setPlannerView('month')" class="planner-view-btn">Month</button>
-    </div>
+    <!-- Hidden label elements kept for JS compatibility -->
+    <div id="planner-week-range" style="display:none;"></div>
 
     <!-- Today view -->
     <div id="planner-today-view"></div>
@@ -3869,6 +3868,8 @@ function setPlannerView(v) {
   plannerView = v;
   document.querySelectorAll('.planner-view-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('planner-view-' + v)?.classList.add('active');
+  const topNav = document.getElementById('planner-top-nav');
+  if (topNav) topNav.style.display = v === 'today' ? 'none' : 'flex';
   renderPlanner();
 }
 
@@ -4152,6 +4153,11 @@ function renderPlannerToday() {
 
   document.getElementById('planner-today-view').innerHTML = `
     <div class="today-hero">
+      <div style="position:absolute;top:14px;right:14px;z-index:2;display:flex;gap:5px;align-items:center;">
+        <button onclick="plannerNavigate(-1)" style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.08);color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;backdrop-filter:blur(6px);">‹</button>
+        ${!isToday ? `<button onclick="plannerGoToday()" style="height:30px;padding:0 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.08);color:var(--text);font-size:0.7rem;font-weight:700;cursor:pointer;backdrop-filter:blur(6px);font-family:'Inter',system-ui,sans-serif;">Now</button>` : ''}
+        <button onclick="plannerNavigate(1)" style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.08);color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;backdrop-filter:blur(6px);">›</button>
+      </div>
       <div class="today-hero-content">
         <div class="today-day-pill">${isToday ? 'TODAY' : dayName.toUpperCase()}</div>
         <div class="today-date-big">${dayName}</div>
