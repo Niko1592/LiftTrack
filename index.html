@@ -3877,6 +3877,65 @@ function isDayCompleted(dateKey, plan) {
   return false;
 }
 
+function getUpcomingPlanDays(afterDateKey, lookAhead) {
+  const results = [];
+  const start = new Date(afterDateKey + 'T12:00:00');
+  for (let i = 1; i <= lookAhead && results.length < 4; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    const key = fmtDateKey(d);
+    const plan = getDayPlanItems(key);
+    if (plan) results.push({ dateKey: key, date: d, plan });
+  }
+  return results;
+}
+
+function planDayChip({ dateKey, date, plan }) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(date); d.setHours(0,0,0,0);
+  const diffDays = Math.round((d - today) / 86400000);
+  const dayLabel = diffDays === 1 ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  let icon = '📋', name = 'Planned';
+  if (plan.rest) { icon = '😴'; name = 'Rest Day'; }
+  else if (plan.templateId != null) {
+    const tmpl = templates.find(t => t.id === plan.templateId);
+    icon = '💪'; name = tmpl?.name || 'Workout';
+  } else if (plan.run) { icon = '🏃'; name = `Run${plan.run.distance ? ` · ${plan.run.distance} ${plan.run.unit || 'mi'}` : ''}`; }
+  else if (plan.stretch) { icon = '🧘'; name = 'Stretching'; }
+  return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);" class="planner-upcoming-chip">
+    <span style="font-size:1.1rem;width:24px;text-align:center;">${icon}</span>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+      <div style="font-size:0.7rem;color:var(--muted);">${dayLabel}</div>
+    </div>
+  </div>`;
+}
+
+function getLastTemplateSession(tmplName, beforeDateKey) {
+  const prev = workouts.filter(w => w.templateName === tmplName && w.date < beforeDateKey);
+  if (!prev.length) return null;
+  const lastDate = prev.reduce((max, w) => w.date > max ? w.date : max, prev[0].date);
+  const entries = prev.filter(w => w.date === lastDate);
+  const totalSets = entries.reduce((s, w) => s + (w.sets?.length || 0), 0);
+  const totalVol = entries.reduce((s, w) => s + w.sets.reduce((sv, set) => sv + (set.bodyweight ? 0 : (set.reps || 0) * (set.weight || 0)), 0), 0);
+  return { date: lastDate, totalSets, totalVol };
+}
+
+function getRecentWorkoutSummary() {
+  if (!workouts.length) return null;
+  const lastDate = workouts.reduce((max, w) => w.date > max ? w.date : max, workouts[0].date);
+  const entries = workouts.filter(w => w.date === lastDate);
+  const name = entries[0].templateName || getExById(entries[0].exerciseId)?.name || 'Workout';
+  const totalSets = entries.reduce((s, w) => s + (w.sets?.length || 0), 0);
+  const totalVol = entries.reduce((s, w) => s + w.sets.reduce((sv, set) => sv + (set.bodyweight ? 0 : (set.reps || 0) * (set.weight || 0)), 0), 0);
+  const exNames = [...new Set(entries.map(w => getExById(w.exerciseId)?.name).filter(Boolean))];
+  return { name, date: lastDate, totalSets, totalVol, exNames };
+}
+
+function daysBetween(dateKey1, dateKey2) {
+  return Math.round(Math.abs(new Date(dateKey2 + 'T12:00:00') - new Date(dateKey1 + 'T12:00:00')) / 86400000);
+}
+
 function renderPlannerToday() {
   const d = new Date(plannerCursor);
   d.setHours(0,0,0,0);
@@ -3886,7 +3945,6 @@ function renderPlannerToday() {
   const isPast = d < today;
   const isFuture = d > today;
 
-  // Update header label
   const headerLabel = isToday ? 'Today' : (isPast ? 'Past' : 'Upcoming');
   document.getElementById('planner-week-label').textContent = headerLabel;
   document.getElementById('planner-week-range').textContent = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
@@ -3896,7 +3954,6 @@ function renderPlannerToday() {
   const dateNum = d.getDate();
   const monthName = d.toLocaleDateString('en-US', { month: 'long' });
 
-  // Determine status
   let status = null;
   if (plan?.rest) status = 'rest';
   else if (plan) {
@@ -3906,13 +3963,25 @@ function renderPlannerToday() {
     else status = 'pending';
   }
 
-  // Build plan items HTML
+  function infoBox(label, bodyHtml) {
+    return `<div style="margin-top:14px;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;">
+      <div style="font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">${label}</div>
+      ${bodyHtml}
+    </div>`;
+  }
+
   let planItemsHtml = '';
+
   if (plan?.rest) {
+    const upcoming = getUpcomingPlanDays(dateKey, 10).filter(u => !u.plan.rest).slice(0, 3);
+    const upcomingHtml = upcoming.length
+      ? infoBox('Up Next', `<div style="display:flex;flex-direction:column;">${upcoming.map(planDayChip).join('')}</div>`)
+      : '';
     planItemsHtml = `
       <div class="today-rest-emoji">😴</div>
       <div style="text-align:center;font-size:1.05rem;font-weight:600;margin-bottom:6px;">Rest Day</div>
       <div style="text-align:center;color:var(--muted);font-size:0.85rem;">Recovery is part of the plan. Take it easy and let your body rebuild.</div>
+      ${upcomingHtml}
     `;
   } else if (plan && (plan.templateId != null || plan.run || plan.stretch)) {
     const items = [];
@@ -3920,39 +3989,67 @@ function renderPlannerToday() {
     if (plan.templateId != null) {
       const tmpl = templates.find(t => t.id === plan.templateId);
       const tmplName = tmpl?.name || 'Workout';
-      const isDone = workouts.some(w => w.date === dateKey && w.templateName === tmplName);
+      const completedEntries = workouts.filter(w => w.date === dateKey && w.templateName === tmplName);
+      const isDone = completedEntries.length > 0;
       const exCount = tmpl?.exerciseIds?.length || 0;
+
+      let subText, extraHtml = '';
+      if (isDone) {
+        const totalSets = completedEntries.reduce((s, w) => s + (w.sets?.length || 0), 0);
+        const totalVol = completedEntries.reduce((s, w) => s + w.sets.reduce((sv, set) => sv + (set.bodyweight ? 0 : (set.reps || 0) * (set.weight || 0)), 0), 0);
+        const exNames = [...new Set(completedEntries.map(w => getExById(w.exerciseId)?.name).filter(Boolean))];
+        subText = `${completedEntries.length} exercise${completedEntries.length !== 1 ? 's' : ''} · ${totalSets} sets${totalVol > 0 ? ` · ${totalVol.toLocaleString()} lbs` : ''}`;
+        if (exNames.length) extraHtml = `<div style="margin-top:7px;font-size:0.73rem;color:var(--muted);line-height:1.6;">${exNames.join(' · ')}</div>`;
+      } else {
+        subText = `${exCount} exercise${exCount !== 1 ? 's' : ''}`;
+        const exNames = (tmpl?.exerciseIds || []).map(id => getExById(id)?.name).filter(Boolean);
+        if (exNames.length) extraHtml += `<div style="margin-top:6px;font-size:0.73rem;color:var(--muted);line-height:1.6;">${exNames.join(' · ')}</div>`;
+        const last = getLastTemplateSession(tmplName, dateKey);
+        if (last) {
+          const ago = daysBetween(last.date, dateKey);
+          const agoText = ago === 1 ? 'Yesterday' : ago <= 13 ? `${ago}d ago` : fmtDate(last.date);
+          const volText = last.totalVol > 0 ? ` · ${last.totalVol.toLocaleString()} lbs` : '';
+          extraHtml += `<div style="margin-top:9px;display:inline-flex;align-items:center;gap:6px;font-size:0.72rem;padding:4px 9px;background:var(--surface);border:1px solid var(--border);border-radius:6px;">📅 Last: ${agoText}${volText} · ${last.totalSets} sets</div>`;
+        }
+      }
+
       items.push(`<div class="today-plan-card ${isDone ? 'completed' : ''}">
         <div class="today-plan-icon">💪</div>
         <div class="today-plan-info">
           <div class="today-plan-title">${tmplName}</div>
-          <div class="today-plan-sub">${exCount} exercise${exCount !== 1 ? 's' : ''}${isDone ? ' · Logged' : ''}</div>
+          <div class="today-plan-sub">${subText}</div>
+          ${extraHtml}
         </div>
         ${isDone
-          ? `<button class="today-plan-action done">✓ Done</button>`
-          : (isToday ? `<button class="today-plan-action" onclick="startTemplateFromPlanner(${plan.templateId})">Start</button>` : `<button class="today-plan-action" onclick="startTemplateFromPlanner(${plan.templateId})" style="background:var(--surface2);color:var(--text);">Open</button>`)
+          ? `<button class="today-plan-action done" style="align-self:flex-start;">✓ Done</button>`
+          : (isToday
+              ? `<button class="today-plan-action" onclick="startTemplateFromPlanner(${plan.templateId})">Start</button>`
+              : `<button class="today-plan-action" onclick="startTemplateFromPlanner(${plan.templateId})" style="background:var(--surface2);color:var(--text);">Open</button>`)
         }
       </div>`);
     }
 
     if (plan.run) {
-      const isDone = runs.some(r => r.date === dateKey);
-      const dist = plan.run.distance ? `${plan.run.distance} ${plan.run.unit || 'mi'}` : 'Run';
+      const runEntries = runs.filter(r => r.date === dateKey);
+      const isDone = runEntries.length > 0;
+      const plannedDist = plan.run.distance ? `${plan.run.distance} ${plan.run.unit || 'mi'}` : 'Run';
+      let runSub = isDone
+        ? `${runEntries[0].distance ?? ''} ${runEntries[0].unit || 'mi'}${runEntries[0].pace ? ` · ${runEntries[0].pace}/mi` : ''} · Logged`
+        : plannedDist;
       items.push(`<div class="today-plan-card ${isDone ? 'completed' : ''}">
         <div class="today-plan-icon">🏃</div>
         <div class="today-plan-info">
           <div class="today-plan-title">Run</div>
-          <div class="today-plan-sub">${dist}${isDone ? ' · Logged' : ''}</div>
+          <div class="today-plan-sub">${runSub}</div>
         </div>
         ${isDone
           ? `<button class="today-plan-action done">✓ Done</button>`
-          : `<button class="today-plan-action" onclick="goToRunFromPlanner()">${isToday ? 'Start' : 'Open'}</button>`
-        }
+          : `<button class="today-plan-action" onclick="goToRunFromPlanner()">${isToday ? 'Start' : 'Open'}</button>`}
       </div>`);
     }
 
     if (plan.stretch) {
-      const isDone = (typeof stretchLogs !== 'undefined' && stretchLogs) && stretchLogs.some(l => l.date === dateKey);
+      const isDone = stretchLogs?.some(l => l.date === dateKey);
       items.push(`<div class="today-plan-card ${isDone ? 'completed' : ''}" style="display:none;">
         <div class="today-plan-icon">🧘</div>
         <div class="today-plan-info">
@@ -3963,8 +4060,35 @@ function renderPlannerToday() {
       </div>`);
     }
 
-    planItemsHtml = `<div class="today-plan-list">${items.join('')}</div>`;
+    let extraSections = '';
+    if (isToday) {
+      const upcoming = getUpcomingPlanDays(dateKey, 10).slice(0, 3);
+      if (upcoming.length) {
+        extraSections = infoBox('Up Next', `<div style="display:flex;flex-direction:column;">${upcoming.map(planDayChip).join('')}</div>`);
+      }
+    }
+
+    planItemsHtml = `<div class="today-plan-list">${items.join('')}</div>${extraSections}`;
   } else {
+    let extraSections = '';
+    if (isToday) {
+      const recent = getRecentWorkoutSummary();
+      if (recent) {
+        const ago = daysBetween(recent.date, dateKey);
+        const agoText = ago === 0 ? 'Today' : ago === 1 ? 'Yesterday' : `${ago}d ago`;
+        const volText = recent.totalVol > 0 ? ` · ${recent.totalVol.toLocaleString()} lbs` : '';
+        const exHtml = recent.exNames.length ? `<div style="margin-top:5px;font-size:0.72rem;color:var(--muted);">${recent.exNames.join(' · ')}</div>` : '';
+        extraSections += infoBox('Last Workout', `
+          <div style="font-weight:600;font-size:0.9rem;">${recent.name}</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:3px;">${agoText}${volText} · ${recent.totalSets} sets</div>
+          ${exHtml}
+        `);
+      }
+      const upcoming = getUpcomingPlanDays(dateKey, 14).filter(u => !u.plan.rest).slice(0, 3);
+      if (upcoming.length) {
+        extraSections += infoBox('Coming Up', `<div style="display:flex;flex-direction:column;">${upcoming.map(planDayChip).join('')}</div>`);
+      }
+    }
     planItemsHtml = `
       <div class="today-empty">
         <div style="font-size:3rem;margin-bottom:14px;">📋</div>
@@ -3972,23 +4096,24 @@ function renderPlannerToday() {
         <div style="margin-bottom:18px;">Tap below to add a workout for this day.</div>
         <button class="btn-sm" onclick="openPlannerDayModal('${dateKey}')">+ Add Plan</button>
       </div>
+      ${extraSections}
     `;
   }
 
-  // Status badge
   let statusBadge = '';
   if (status === 'done') statusBadge = `<div class="today-status-badge done">✓ Completed</div>`;
   else if (status === 'pending' && isToday) statusBadge = `<div class="today-status-badge pending">● Pending</div>`;
   else if (status === 'rest') statusBadge = `<div class="today-status-badge rest">● Rest Day</div>`;
 
-  // Footer actions
   const footerHtml = (plan && !plan.rest && (plan.templateId != null || plan.run || plan.stretch))
     ? `<div style="display:flex;gap:8px;margin-top:auto;padding-top:18px;">
          <button class="btn-sm" onclick="openPlannerDayModal('${dateKey}')" style="flex:1;">Edit Day</button>
        </div>`
-    : (plan?.rest ? `<div style="display:flex;gap:8px;margin-top:auto;padding-top:18px;">
-         <button class="btn-sm" onclick="openPlannerDayModal('${dateKey}')" style="flex:1;">Change Plan</button>
-       </div>` : '');
+    : (plan?.rest
+        ? `<div style="display:flex;gap:8px;margin-top:auto;padding-top:18px;">
+             <button class="btn-sm" onclick="openPlannerDayModal('${dateKey}')" style="flex:1;">Change Plan</button>
+           </div>`
+        : '');
 
   document.getElementById('planner-today-view').innerHTML = `
     <div class="today-hero">
