@@ -9804,6 +9804,26 @@ async function launchApp() {
   if (!localStorage.getItem('lt_welcomed') && workouts.length === 0) {
     setTimeout(showWelcome, 600);
   }
+
+  scheduleMidnightReset();
+}
+
+function scheduleMidnightReset() {
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+  const msUntilMidnight = midnight - now;
+
+  setTimeout(() => {
+    // Re-render nutrition page and dashboard so today's log starts fresh
+    const todayStr = new Date().toISOString().slice(0,10);
+    const runDateEl = document.getElementById('run-date');
+    if (runDateEl) runDateEl.value = todayStr;
+    renderDashboard();
+    if (document.getElementById('page-nutrition')?.classList.contains('active')) {
+      renderNutrition();
+    }
+    scheduleMidnightReset();
+  }, msUntilMidnight);
 }
 </script>
 </body>
