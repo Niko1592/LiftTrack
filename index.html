@@ -224,16 +224,67 @@
   .chart-card.full { grid-column: 1 / -1; }
 
   /* Dashboard layout — panels flow in a 2-col grid, .full spans both */
-  .dash-welcome { background: color-mix(in srgb, var(--surface) 82%, transparent); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 26px; margin-bottom: 20px; position: relative; z-index: 1; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-  .dash-welcome-greeting { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); line-height: 1.2; position: relative; z-index: 1; }
+  .dash-welcome {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 44%, transparent) 0%, color-mix(in srgb, var(--surface2) 34%, transparent) 100%);
+    border: 1px solid color-mix(in srgb, var(--border) 92%, rgba(255,255,255,0.18));
+    border-radius: 16px;
+    padding: 26px 28px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    backdrop-filter: blur(20px) saturate(1.18);
+    -webkit-backdrop-filter: blur(20px) saturate(1.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.12),
+      inset 0 0 0 1px color-mix(in srgb, var(--border) 46%, transparent),
+      0 18px 42px rgba(0,0,0,0.10);
+  }
+  .dash-welcome::before {
+    content: '';
+    position: absolute;
+    top: -54px;
+    right: -44px;
+    width: 210px;
+    height: 210px;
+    background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+    opacity: 0.12;
+    pointer-events: none;
+  }
+  .dash-welcome::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 38%);
+    pointer-events: none;
+  }
+  .dash-welcome-greeting {
+    font-size: clamp(1.7rem, 3vw, 2.35rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    color: var(--text);
+    line-height: 1.02;
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+  }
   .dash-welcome-greeting .wave { display: inline-block; animation: wave 1.4s ease-in-out 0.4s 1; transform-origin: 70% 70%; }
   @keyframes wave { 0%,60%,100% { transform: rotate(0deg); } 15% { transform: rotate(14deg); } 30% { transform: rotate(-8deg); } 45% { transform: rotate(10deg); } }
-  .dash-welcome-sub { font-size: 0.88rem; color: var(--muted); margin-top: 6px; line-height: 1.45; position: relative; z-index: 1; }
-  .dash-welcome-sub strong { color: var(--text); font-weight: 600; }
+  .dash-welcome-sub {
+    font-size: 0.95rem;
+    color: color-mix(in srgb, var(--text) 72%, var(--muted));
+    margin-top: 12px;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    font-weight: 500;
+  }
+  .dash-welcome-sub strong { color: var(--text); font-weight: 800; }
   @media (max-width: 600px) {
-    .dash-welcome { padding: 18px 20px; }
-    .dash-welcome-greeting { font-size: 1.25rem; }
-    .dash-welcome-sub { font-size: 0.82rem; }
+    .dash-welcome { padding: 22px 20px; border-radius: 14px; }
+    .dash-welcome-greeting { font-size: 1.55rem; letter-spacing: -0.035em; }
+    .dash-welcome-sub { font-size: 0.86rem; margin-top: 10px; }
   }
 
   .dash-header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; }
@@ -752,7 +803,6 @@
   .today-hero { background:linear-gradient(160deg, var(--surface) 0%, var(--surface2) 100%); border:1px solid var(--border); border-radius:18px; padding:28px 24px; position:relative; overflow:hidden; min-height:60vh; display:flex; flex-direction:column; }
   .today-hero::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity:0.18; pointer-events:none; }
   .today-hero-content { position:relative; z-index:1; flex:1; display:flex; flex-direction:column; }
-  .today-day-pill { display:inline-block; font-size:0.7rem; color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:1.2px; margin-bottom:10px; padding:5px 12px; background:rgba(108,99,255,0.15); border:1px solid rgba(108,99,255,0.3); border-radius:20px; align-self:flex-start; }
   .today-date-big { font-size:2.6rem; font-weight:700; letter-spacing:-0.03em; line-height:1; margin-bottom:8px; }
   .today-date-sub { font-size:0.95rem; color:var(--muted); margin-bottom:24px; }
   .today-status-badge { display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; font-weight:700; padding:5px 12px; border-radius:20px; align-self:flex-start; margin-bottom:18px; }
@@ -3972,6 +4022,11 @@ function daysBetween(dateKey1, dateKey2) {
   return Math.round(Math.abs(new Date(dateKey2 + 'T12:00:00') - new Date(dateKey1 + 'T12:00:00')) / 86400000);
 }
 
+function setPlannerHeaderLabel(value) {
+  const el = document.getElementById('planner-week-label');
+  if (el) el.textContent = value;
+}
+
 function renderPlannerToday() {
   const d = new Date(plannerCursor);
   d.setHours(0,0,0,0);
@@ -3982,7 +4037,7 @@ function renderPlannerToday() {
   const isFuture = d > today;
 
   const headerLabel = isToday ? 'Today' : (isPast ? 'Past' : 'Upcoming');
-  document.getElementById('planner-week-label').textContent = headerLabel;
+  setPlannerHeaderLabel(headerLabel);
   document.getElementById('planner-week-range').textContent = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
   const plan = getDayPlanItems(dateKey);
@@ -4159,7 +4214,6 @@ function renderPlannerToday() {
         <button onclick="plannerNavigate(1)" style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.08);color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;backdrop-filter:blur(6px);">›</button>
       </div>
       <div class="today-hero-content">
-        <div class="today-day-pill">${isToday ? 'TODAY' : dayName.toUpperCase()}</div>
         <div class="today-date-big">${dayName}</div>
         <div class="today-date-sub">${monthName} ${dateNum}, ${d.getFullYear()}</div>
         ${statusBadge}
@@ -4196,7 +4250,7 @@ function renderPlannerWeek() {
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
   const isCurrentWeek = today >= weekStart && today <= weekEnd;
-  document.getElementById('planner-week-label').textContent = isCurrentWeek ? 'This Week' : `Week of ${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  setPlannerHeaderLabel(isCurrentWeek ? 'This Week' : `Week of ${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
   const sameMonth = weekStart.getMonth() === weekEnd.getMonth();
   const range = sameMonth
     ? `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${weekEnd.getDate()}, ${weekEnd.getFullYear()}`
@@ -4264,7 +4318,7 @@ function renderPlannerMonth() {
   const today = new Date(); today.setHours(0,0,0,0);
 
   const monthName = cursor.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  document.getElementById('planner-week-label').textContent = monthName;
+  setPlannerHeaderLabel(monthName);
   document.getElementById('planner-week-range').textContent = '';
 
   const firstDay = new Date(year, month, 1);
@@ -4391,7 +4445,7 @@ function renderPlannerYear() {
   const year = plannerCursor.getFullYear();
   const today = new Date(); today.setHours(0,0,0,0);
 
-  document.getElementById('planner-week-label').textContent = year.toString();
+  setPlannerHeaderLabel(year.toString());
   document.getElementById('planner-week-range').textContent = '';
 
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
