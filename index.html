@@ -2467,24 +2467,63 @@
         <div class="live-set-current-label" id="live-set-current-label">Set 1</div>
         <div class="live-set-progress" id="live-set-progress">1 of 3</div>
       </div>
-      <div class="live-set-inputs">
-        <div class="live-set-input-group">
-          <label>Weight (lbs)</label>
-          <div class="wheel-picker" id="live-weight-wheel" data-value="0"></div>
-          <div style="font-size:0.62rem;color:var(--muted);text-align:center;margin-top:2px;">Swipe or tap center to type</div>
-          <input type="hidden" id="live-weight-input" value="0">
+
+      <!-- Lifting inputs (hidden for cardio) -->
+      <div id="live-lifting-panel">
+        <div class="live-set-inputs">
+          <div class="live-set-input-group">
+            <label>Weight (lbs)</label>
+            <div class="wheel-picker" id="live-weight-wheel" data-value="0"></div>
+            <div style="font-size:0.62rem;color:var(--muted);text-align:center;margin-top:2px;">Swipe or tap center to type</div>
+            <input type="hidden" id="live-weight-input" value="0">
+          </div>
+          <div class="live-set-input-group">
+            <label>Reps</label>
+            <div class="wheel-picker" id="live-reps-wheel" data-value="0"></div>
+            <div style="font-size:0.62rem;color:var(--muted);text-align:center;margin-top:2px;">Swipe or tap center to type</div>
+            <input type="hidden" id="live-reps-input" value="0">
+          </div>
         </div>
-        <div class="live-set-input-group">
-          <label>Reps</label>
-          <div class="wheel-picker" id="live-reps-wheel" data-value="0"></div>
-          <div style="font-size:0.62rem;color:var(--muted);text-align:center;margin-top:2px;">Swipe or tap center to type</div>
-          <input type="hidden" id="live-reps-input" value="0">
+        <label class="live-bw-toggle">
+          <input type="checkbox" id="live-bw-checkbox" onchange="liveToggleBWCurrent(this.checked)">
+          <span>Bodyweight only</span>
+        </label>
+      </div>
+
+      <!-- Cardio inputs: stopwatch + distance (hidden for lifting) -->
+      <div id="live-cardio-panel" style="display:none;">
+        <!-- Stopwatch -->
+        <div style="text-align:center;margin-bottom:20px;">
+          <div id="live-stopwatch-display" style="font-size:3.5rem;font-weight:800;letter-spacing:-0.03em;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums;">0:00</div>
+          <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:4px;">Elapsed</div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;">
+            <button id="live-stopwatch-btn" onclick="liveStopwatchToggle()" class="btn" style="min-width:110px;padding:12px 20px;font-size:0.95rem;">▶ Start</button>
+            <button onclick="liveStopwatchReset()" class="btn-sm" style="padding:12px 14px;font-size:0.9rem;" title="Reset">↺</button>
+          </div>
+        </div>
+        <!-- Distance input -->
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+          <div class="form-group" style="flex:1;margin:0;">
+            <label style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);font-weight:700;">Distance</label>
+            <input type="number" id="live-cardio-distance" placeholder="0.0" min="0" step="0.01" inputmode="decimal"
+              style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:1.1rem;font-weight:600;outline:none;font-family:'Inter',system-ui,sans-serif;width:100%;text-align:center;">
+          </div>
+          <div class="form-group" style="margin:0;padding-top:22px;">
+            <select id="live-cardio-dist-unit" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 10px;border-radius:10px;font-size:0.9rem;font-family:'Inter',system-ui,sans-serif;outline:none;">
+              <option value="mi">mi</option>
+              <option value="km">km</option>
+            </select>
+          </div>
+        </div>
+        <!-- Manual time override -->
+        <div style="font-size:0.7rem;color:var(--muted);text-align:center;margin-top:8px;">Tap Start to time automatically, or the stopwatch will use your manual time entry.</div>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+          <label style="font-size:0.68rem;color:var(--muted);white-space:nowrap;">Manual time (min):</label>
+          <input type="number" id="live-cardio-manual-min" placeholder="e.g. 30" min="0" step="0.1" inputmode="decimal"
+            style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;outline:none;font-family:'Inter',system-ui,sans-serif;">
         </div>
       </div>
-      <label class="live-bw-toggle">
-        <input type="checkbox" id="live-bw-checkbox" onchange="liveToggleBWCurrent(this.checked)">
-        <span>Bodyweight only</span>
-      </label>
+
       <button class="live-complete-btn" id="live-complete-btn" onclick="liveCompleteSet()">Complete Set ✓</button>
     </div>
 
@@ -3007,7 +3046,7 @@ async function loadData() {
       if ('weekly_template' in data && data.weekly_template && typeof data.weekly_template === 'object') weeklyTemplate = data.weekly_template;
       lsSet();
       // If any of the newer fields are missing from the schema, surface a friendly warning
-      const missing = ['nutrition_log','nutrition_goals','nutrition_presets','weight_goal','stretch_presets']
+      const missing = ['nutrition_log','nutrition_goals','nutrition_presets','weight_goal','stretch_presets','workout_plan','weekly_template']
         .filter(k => !(k in data));
       if (missing.length > 0) {
         console.warn('Supabase is missing columns: ' + missing.join(', ') + '. Run the column-add SQL in Supabase to enable cross-device sync for these fields.');
@@ -3031,6 +3070,8 @@ async function loadData() {
         nutrition_goals: { calories: 0, protein: 0 },
         nutrition_presets: [],
         weight_goal: null,
+        workout_plan: {},
+        weekly_template: null,
       };
       try {
         await sbFetch('/rest/v1/lifttrack_data', { method: 'POST', prefer: 'return=minimal', body: JSON.stringify(initialPayload) });
@@ -3045,7 +3086,7 @@ async function loadData() {
         }
       }
       exercises = DEFAULTS.exercises; workouts = []; templates = DEFAULTS.templates; runs = []; stretchLogs = []; bodyWeightLog = []; proteinLog = []; proteinGoal = 0;
-      nutritionLog = []; nutritionGoals = { calories: 0, protein: 0 }; nutritionPresets = []; weightGoal = null;
+      nutritionLog = []; nutritionGoals = { calories: 0, protein: 0 }; nutritionPresets = []; weightGoal = null; workoutPlan = {}; weeklyTemplate = null;
       setStatus('synced');
     }
   } catch(e) {
@@ -8243,16 +8284,27 @@ function startLiveFromSingle() {
   const date = document.getElementById('log-date').value || new Date().toISOString().slice(0,10);
 
   // Pull any sets the user has already entered on the form — seed values, but nothing is "done" yet
+  const cardio = isCardio(exId);
   const seedSets = [];
   document.querySelectorAll('.set-row').forEach(row => {
     const id = row.id.replace('set-row-','');
-    const reps = +document.getElementById('reps-'+id)?.value || 0;
-    const isBW = document.getElementById('bw-'+id)?.checked || false;
-    const weight = isBW ? 0 : (+document.getElementById('weight-'+id)?.value || 0);
-    seedSets.push({ status: 'pending', reps, weight, bodyweight: isBW });
+    if (cardio) {
+      const duration = +document.getElementById('duration-'+id)?.value || 0;
+      const distance = +document.getElementById('distance-'+id)?.value || 0;
+      const distanceUnit = document.getElementById('distunit-'+id)?.value || 'mi';
+      seedSets.push({ status: 'pending', duration, distance, distanceUnit, reps: 0, weight: 0, bodyweight: false, cardio: true });
+    } else {
+      const reps = +document.getElementById('reps-'+id)?.value || 0;
+      const isBW = document.getElementById('bw-'+id)?.checked || false;
+      const weight = isBW ? 0 : (+document.getElementById('weight-'+id)?.value || 0);
+      seedSets.push({ status: 'pending', reps, weight, bodyweight: isBW });
+    }
   });
   const planned = seedSets.length || 3;
-  const setResults = seedSets.length ? seedSets : Array.from({length: 3}, () => ({ status: 'pending', reps: 0, weight: 0, bodyweight: false }));
+  const blankSet = cardio
+    ? { status: 'pending', duration: 0, distance: 0, distanceUnit: 'mi', reps: 0, weight: 0, bodyweight: false, cardio: true }
+    : { status: 'pending', reps: 0, weight: 0, bodyweight: false };
+  const setResults = seedSets.length ? seedSets : Array.from({length: 3}, () => ({ ...blankSet }));
 
   liveSession = {
     sessionId: Date.now().toString(36),
@@ -8277,18 +8329,29 @@ function startLiveFromSession() {
 
   const plan = blocks.map(block => {
     const exId = +block.id.replace('session-block-', '');
+    const cardio = isCardio(exId);
     // Pull pre-entered sets (as seeds) from the session form
     const seedSets = [];
     block.querySelectorAll('.session-set-row').forEach(row => {
       const parts = row.id.split('-');
       const n = parts[parts.length - 1];
-      const reps = +document.getElementById(`sreps-${exId}-${n}`)?.value || 0;
-      const isBW = document.getElementById(`sbw-${exId}-${n}`)?.checked || false;
-      const weight = isBW ? 0 : (+document.getElementById(`sweight-${exId}-${n}`)?.value || 0);
-      seedSets.push({ status: 'pending', reps, weight, bodyweight: isBW });
+      if (cardio) {
+        const duration = +document.getElementById(`sduration-${exId}-${n}`)?.value || 0;
+        const distance = +document.getElementById(`sdistance-${exId}-${n}`)?.value || 0;
+        const distanceUnit = document.getElementById(`sdistunit-${exId}-${n}`)?.value || 'mi';
+        seedSets.push({ status: 'pending', duration, distance, distanceUnit, reps: 0, weight: 0, bodyweight: false, cardio: true });
+      } else {
+        const reps = +document.getElementById(`sreps-${exId}-${n}`)?.value || 0;
+        const isBW = document.getElementById(`sbw-${exId}-${n}`)?.checked || false;
+        const weight = isBW ? 0 : (+document.getElementById(`sweight-${exId}-${n}`)?.value || 0);
+        seedSets.push({ status: 'pending', reps, weight, bodyweight: isBW });
+      }
     });
     const planned = seedSets.length || 3;
-    const setResults = seedSets.length ? seedSets : Array.from({length: 3}, () => ({ status: 'pending', reps: 0, weight: 0, bodyweight: false }));
+    const blankSet = cardio
+      ? { status: 'pending', duration: 0, distance: 0, distanceUnit: 'mi', reps: 0, weight: 0, bodyweight: false, cardio: true }
+      : { status: 'pending', reps: 0, weight: 0, bodyweight: false };
+    const setResults = seedSets.length ? seedSets : Array.from({length: 3}, () => ({ ...blankSet }));
     return { exId, status: 'pending', plannedCount: planned, setResults };
   }).filter(p => p.exId);
 
@@ -8314,6 +8377,13 @@ function exitLiveMode() {
   const hasDone = liveSession?.plan?.some(p => p.setResults.some(s => s.status === 'done'));
   if (hasDone) {
     if (!confirm('Exit Live mode? Completed sets will be lost. (Use "Finish" to save your workout.)')) return;
+  }
+  // Stop any running stopwatch
+  if (liveStopwatchInterval) {
+    clearInterval(liveStopwatchInterval);
+    liveStopwatchInterval = null;
+    liveStopwatchStart = null;
+    liveStopwatchAccum = 0;
   }
   document.getElementById('live-overlay').classList.remove('open');
   liveSession = null;
@@ -8422,12 +8492,21 @@ function renderLiveDoneStrip() {
   const { plan, currentIdx, currentSetIdx } = liveSession;
   const current = plan[currentIdx];
   const strip = document.getElementById('live-done-strip');
-  // Show previous sets for the current exercise
   const html = current.setResults.map((s, i) => {
-    if (i === currentSetIdx) return ''; // skip the current (active) set
-    if (s.status === 'pending') return ''; // skip future untouched sets
+    if (i === currentSetIdx) return '';
+    if (s.status === 'pending') return '';
     if (s.status === 'skipped') {
       return `<div class="live-done-pill skipped" onclick="liveReopenSet(${i})" title="Skipped — click to reopen">Set ${i+1}: skipped</div>`;
+    }
+    if (s.cardio) {
+      const parts = [];
+      if (s.duration > 0) {
+        const m = Math.floor(s.duration);
+        const sec = Math.round((s.duration - m) * 60);
+        parts.push(sec > 0 ? `${m}:${sec.toString().padStart(2,'0')}` : `${m} min`);
+      }
+      if (s.distance > 0) parts.push(`${s.distance} ${s.distanceUnit || 'mi'}`);
+      return `<div class="live-done-pill" onclick="liveReopenSet(${i})" title="Click to edit">Set ${i+1}: ${parts.join(' · ') || '—'}</div>`;
     }
     const w = s.bodyweight ? 'BW' : (s.weight + ' lb');
     return `<div class="live-done-pill" onclick="liveReopenSet(${i})" title="Click to edit">Set ${i+1}: ${s.reps} × ${w}</div>`;
@@ -8435,11 +8514,75 @@ function renderLiveDoneStrip() {
   strip.innerHTML = html;
 }
 
+// ── LIVE CARDIO STOPWATCH ─────────────────────────────
+let liveStopwatchStart = null;  // Date.now() when started
+let liveStopwatchAccum = 0;     // ms accumulated before last pause
+let liveStopwatchInterval = null;
+
+function liveStopwatchToggle() {
+  const btn = document.getElementById('live-stopwatch-btn');
+  if (liveStopwatchInterval) {
+    // Pause
+    clearInterval(liveStopwatchInterval);
+    liveStopwatchInterval = null;
+    liveStopwatchAccum += Date.now() - liveStopwatchStart;
+    liveStopwatchStart = null;
+    if (btn) { btn.textContent = '▶ Resume'; btn.style.background = 'var(--surface2)'; btn.style.color = 'var(--text)'; }
+  } else {
+    // Start / Resume
+    liveStopwatchStart = Date.now();
+    liveStopwatchInterval = setInterval(updateStopwatchDisplay, 200);
+    if (btn) { btn.textContent = '⏸ Pause'; btn.style.background = ''; btn.style.color = ''; }
+  }
+}
+
+function liveStopwatchReset() {
+  clearInterval(liveStopwatchInterval);
+  liveStopwatchInterval = null;
+  liveStopwatchStart = null;
+  liveStopwatchAccum = 0;
+  const btn = document.getElementById('live-stopwatch-btn');
+  if (btn) { btn.textContent = '▶ Start'; btn.style.background = ''; btn.style.color = ''; }
+  const disp = document.getElementById('live-stopwatch-display');
+  if (disp) disp.textContent = '0:00';
+  const manualEl = document.getElementById('live-cardio-manual-min');
+  if (manualEl) manualEl.value = '';
+}
+
+function updateStopwatchDisplay() {
+  const totalMs = liveStopwatchAccum + (liveStopwatchStart ? Date.now() - liveStopwatchStart : 0);
+  const totalSec = Math.floor(totalMs / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  const disp = document.getElementById('live-stopwatch-display');
+  if (disp) disp.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  // Keep manual-min in sync so user can see elapsed
+  const manualEl = document.getElementById('live-cardio-manual-min');
+  if (manualEl && document.activeElement !== manualEl) {
+    manualEl.value = (totalMs / 60000).toFixed(1);
+  }
+}
+
+function getStopwatchMinutes() {
+  // If user typed a manual time, prefer that
+  const manualEl = document.getElementById('live-cardio-manual-min');
+  if (manualEl?.value && !liveStopwatchInterval && !liveStopwatchAccum) {
+    return parseFloat(manualEl.value) || 0;
+  }
+  const totalMs = liveStopwatchAccum + (liveStopwatchStart ? Date.now() - liveStopwatchStart : 0);
+  const fromStopwatch = totalMs / 60000;
+  // If stopwatch ran, use it; otherwise fall back to manual input
+  if (fromStopwatch > 0.05) return fromStopwatch;
+  return parseFloat(manualEl?.value) || 0;
+}
+
 function renderLiveCurrentSet() {
   const { plan, currentIdx, currentSetIdx } = liveSession;
   const current = plan[currentIdx];
   const set = current.setResults[currentSetIdx];
   if (!set) return;
+  const ex = getExById(current.exId);
+  const cardio = ex?.cat === 'Cardio';
 
   // Label: "Set 3" (and "extra set" if beyond planned count)
   const setNum = currentSetIdx + 1;
@@ -8450,32 +8593,73 @@ function renderLiveCurrentSet() {
   const totalShown = Math.max(current.plannedCount, current.setResults.length);
   document.getElementById('live-set-progress').textContent = `${setNum} of ${totalShown}`;
 
-  // Pre-fill: if this set has saved values use them, otherwise seed from last done set on this exercise
-  const weightInput = document.getElementById('live-weight-input');
-  const repsInput = document.getElementById('live-reps-input');
-  const bwCheck = document.getElementById('live-bw-checkbox');
+  // Switch between cardio and lifting panels
+  document.getElementById('live-lifting-panel').style.display = cardio ? 'none' : '';
+  document.getElementById('live-cardio-panel').style.display = cardio ? '' : 'none';
 
-  let weight = set.weight, reps = set.reps, bw = set.bodyweight;
-  if (set.status === 'pending' && !reps && !weight && !bw) {
-    // Seed from the most recent done set on this exercise
-    const prevDone = [...current.setResults.slice(0, currentSetIdx)].reverse().find(s => s.status === 'done');
-    if (prevDone) {
-      weight = prevDone.weight; reps = prevDone.reps; bw = prevDone.bodyweight;
-    } else {
-      // Or fall back to last known weight from history
-      const last = getLastWeight(current.exId);
-      if (last !== null && last > 0) weight = last;
+  if (cardio) {
+    // Reset stopwatch for fresh set
+    liveStopwatchReset();
+    // Pre-fill distance from saved set or previous done set
+    let distance = set.distance || 0;
+    let distUnit = set.distanceUnit || 'mi';
+    if (!distance) {
+      const prevDone = [...current.setResults.slice(0, currentSetIdx)].reverse().find(s => s.status === 'done');
+      if (prevDone) { distance = prevDone.distance || 0; distUnit = prevDone.distanceUnit || 'mi'; }
     }
+    const distEl = document.getElementById('live-cardio-distance');
+    const unitEl = document.getElementById('live-cardio-dist-unit');
+    if (distEl) distEl.value = distance || '';
+    if (unitEl) unitEl.value = distUnit;
+    // Last-hint: show last duration/distance
+    const hintEl = document.getElementById('live-last-hint');
+    const lastCardio = getLastCardioData(current.exId);
+    if (lastCardio) {
+      const parts = [];
+      if (lastCardio.duration > 0) parts.push(`${lastCardio.duration.toFixed(1)} min`);
+      if (lastCardio.distance > 0) parts.push(`${lastCardio.distance} ${lastCardio.distanceUnit || 'mi'}`);
+      hintEl.innerHTML = parts.length ? `Last time: <strong>${parts.join(' · ')}</strong>` : '';
+      hintEl.style.display = parts.length ? '' : 'none';
+    } else {
+      hintEl.style.display = 'none';
+    }
+  } else {
+    // Lifting: original wheel logic
+    const weightInput = document.getElementById('live-weight-input');
+    const repsInput = document.getElementById('live-reps-input');
+    const bwCheck = document.getElementById('live-bw-checkbox');
+
+    let weight = set.weight, reps = set.reps, bw = set.bodyweight;
+    if (set.status === 'pending' && !reps && !weight && !bw) {
+      const prevDone = [...current.setResults.slice(0, currentSetIdx)].reverse().find(s => s.status === 'done');
+      if (prevDone) {
+        weight = prevDone.weight; reps = prevDone.reps; bw = prevDone.bodyweight;
+      } else {
+        const last = getLastWeight(current.exId);
+        if (last !== null && last > 0) weight = last;
+      }
+    }
+
+    bwCheck.checked = !!bw;
+    weightInput.value = bw ? 0 : (weight || 0);
+    repsInput.value = reps || 0;
+
+    initWheelPicker('live-weight-wheel', 'live-weight-input', 0, 600, 2.5, bw ? 0 : (weight || 0), !!bw);
+    initWheelPicker('live-reps-wheel', 'live-reps-input', 0, 50, 1, reps || 0, false);
   }
-
-  bwCheck.checked = !!bw;
-  weightInput.value = bw ? 0 : (weight || 0);
-  repsInput.value = reps || 0;
-
-  // Initialize wheel pickers
-  initWheelPicker('live-weight-wheel', 'live-weight-input', 0, 600, 2.5, bw ? 0 : (weight || 0), !!bw);
-  initWheelPicker('live-reps-wheel', 'live-reps-input', 0, 50, 1, reps || 0, false);
 }
+
+function getLastCardioData(exId) {
+  // Returns the most recent set for this cardio exercise
+  const relevant = workouts
+    .filter(w => w.exerciseId === exId && w.sets.some(s => s.cardio))
+    .sort((a, b) => b.date.localeCompare(a.date));
+  if (!relevant.length) return null;
+  const cardioSets = relevant[0].sets.filter(s => s.cardio);
+  return cardioSets.length ? cardioSets[0] : null;
+}
+
+
 
 // ── iOS-style wheel picker ───────────────────────────
 const wheelState = {};
@@ -8974,22 +9158,39 @@ function liveCompleteSet() {
   const { plan, currentIdx, currentSetIdx } = liveSession;
   const current = plan[currentIdx];
   const set = current.setResults[currentSetIdx];
+  const ex = getExById(current.exId);
+  const cardio = ex?.cat === 'Cardio';
 
-  const bw = document.getElementById('live-bw-checkbox').checked;
-  const weight = bw ? 0 : (+document.getElementById('live-weight-input').value || 0);
-  const reps = +document.getElementById('live-reps-input').value || 0;
-
-  if (reps <= 0) {
-    // Gentle nudge, but don't block — allow zero-rep = skip flow via Skip button
-    document.getElementById('live-reps-input').focus();
-    alert('Enter the rep count for this set (or tap "Skip Set").');
-    return;
+  if (cardio) {
+    // Stop the stopwatch if it's running
+    if (liveStopwatchInterval) { liveStopwatchToggle(); }
+    const duration = parseFloat(getStopwatchMinutes().toFixed(2));
+    const distance = parseFloat(document.getElementById('live-cardio-distance')?.value) || 0;
+    const distUnit = document.getElementById('live-cardio-dist-unit')?.value || 'mi';
+    if (duration <= 0 && distance <= 0) {
+      alert('Enter a time or distance for this interval (or tap "Skip Set").');
+      return;
+    }
+    set.duration = duration;
+    set.distance = distance;
+    set.distanceUnit = distUnit;
+    set.reps = 0; set.weight = 0; set.bodyweight = false; set.cardio = true;
+    set.status = 'done';
+    liveStopwatchReset();
+  } else {
+    const bw = document.getElementById('live-bw-checkbox').checked;
+    const weight = bw ? 0 : (+document.getElementById('live-weight-input').value || 0);
+    const reps = +document.getElementById('live-reps-input').value || 0;
+    if (reps <= 0) {
+      document.getElementById('live-reps-input').focus();
+      alert('Enter the rep count for this set (or tap "Skip Set").');
+      return;
+    }
+    set.reps = reps;
+    set.weight = weight;
+    set.bodyweight = bw;
+    set.status = 'done';
   }
-
-  set.reps = reps;
-  set.weight = weight;
-  set.bodyweight = bw;
-  set.status = 'done';
 
   advanceAfterSet();
 }
@@ -9157,11 +9358,15 @@ function liveAddExercise() {
   const match = exercises.find(e => e.name.toLowerCase() === name.toLowerCase()) ||
                 exercises.find(e => e.name.toLowerCase().includes(name.toLowerCase()));
   if (!match) { alert('No exercise found matching "' + name + '".'); return; }
+  const cardio = match.cat === 'Cardio';
+  const seedSet = cardio
+    ? { status: 'pending', duration: 0, distance: 0, distanceUnit: 'mi', reps: 0, weight: 0, bodyweight: false, cardio: true }
+    : { status: 'pending', reps: 0, weight: 0, bodyweight: false };
   liveSession.plan.push({
     exId: match.id,
     status: 'pending',
     plannedCount: 3,
-    setResults: Array.from({length: 3}, () => ({ status: 'pending', reps: 0, weight: 0, bodyweight: false })),
+    setResults: Array.from({length: 3}, () => ({ ...seedSet })),
   });
   liveSession.currentIdx = liveSession.plan.length - 1;
   liveSession.currentSetIdx = 0;
@@ -9175,12 +9380,25 @@ function liveFinish() {
   const isSession = plan.length > 1 || templateId !== null;
   let saved = 0;
   plan.forEach(p => {
-    const doneSets = p.setResults.filter(s => s.status === 'done' && s.reps > 0);
+    const ex = getExById(p.exId);
+    const cardio = ex?.cat === 'Cardio';
+
+    let doneSets;
+    if (cardio) {
+      // Cardio: a "done" set has duration or distance
+      doneSets = p.setResults.filter(s => s.status === 'done' && (s.duration > 0 || s.distance > 0));
+    } else {
+      doneSets = p.setResults.filter(s => s.status === 'done' && s.reps > 0);
+    }
     if (doneSets.length === 0) return;
+
     const entry = {
       date,
       exerciseId: p.exId,
-      sets: doneSets.map(s => ({ reps: s.reps, weight: s.weight, bodyweight: s.bodyweight })),
+      sets: doneSets.map(s => cardio
+        ? { duration: s.duration || 0, distance: s.distance || 0, distanceUnit: s.distanceUnit || 'mi', reps: 0, weight: 0, bodyweight: false, cardio: true }
+        : { reps: s.reps, weight: s.weight, bodyweight: s.bodyweight }
+      ),
     };
     if (isSession) {
       entry.sessionId = sessionId;
@@ -9189,6 +9407,14 @@ function liveFinish() {
     workouts.push(entry);
     saved++;
   });
+
+  // Stop any running stopwatch
+  if (liveStopwatchInterval) {
+    clearInterval(liveStopwatchInterval);
+    liveStopwatchInterval = null;
+    liveStopwatchStart = null;
+    liveStopwatchAccum = 0;
+  }
 
   if (saved === 0) {
     if (!confirm('No sets logged. Exit anyway?')) return;
@@ -9201,9 +9427,7 @@ function liveFinish() {
 
   if (saved > 0) {
     if (typeof renderDashboard === 'function') renderDashboard();
-    setTimeout(() => {
-      showPage('history');
-    }, 100);
+    setTimeout(() => { showPage('history'); }, 100);
   }
 }
 
