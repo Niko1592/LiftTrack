@@ -1058,6 +1058,41 @@
   .settings-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 0.82rem; color: var(--text); cursor: pointer; transition: background 0.12s; background: none; border: none; width: 100%; text-align: left; font-family: 'Inter', system-ui, sans-serif; }
   .settings-item:hover { background: var(--surface2); }
 
+  /* ── Glassmorphism panels ── */
+  .chart-card,
+  .stat-card,
+  .today-hero,
+  .today-plan-card,
+  .nutr-section,
+  .nutrition-hero,
+  .tmpl-card,
+  .history-session-card,
+  .planner-day-card,
+  .session-ex-block,
+  .food-result,
+  .form-card,
+  .stretch-library,
+  .stretch-panel,
+  .live-set-card {
+    border-color: rgba(255,255,255,0.10);
+    background-image: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.12),
+      inset 1px 0 0 rgba(255,255,255,0.04),
+      0 0 0 1px rgba(0,0,0,0.40),
+      0 4px 16px rgba(0,0,0,0.18);
+  }
+  .planner-day-card.today {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.12),
+      inset 1px 0 0 rgba(255,255,255,0.04),
+      0 0 0 1px rgba(0,0,0,0.40),
+      0 0 0 3px rgba(108,99,255,0.22),
+      0 4px 16px rgba(0,0,0,0.18);
+  }
+
 </style>
 </head>
 <body>
@@ -3313,7 +3348,7 @@ function renderPRs() {
   const tbody = document.getElementById('pr-tbody');
   tbody.innerHTML = prs.map(p => `
     <tr>
-      <td>${p.ex.name} <span class="ex-cat">${p.ex.cat}</span></td>
+      <td>${escapeHtml(p.ex.name)} <span class="ex-cat">${escapeHtml(p.ex.cat)}</span></td>
       <td><span class="pr-badge">${p.weight > 0 ? p.weight + ' lbs' : 'BW'}</span></td>
       <td>${p.reps} reps</td>
       <td>${fmtDate(p.date)}</td>
@@ -3327,7 +3362,7 @@ function populateExSelect() {
   const usedIds = [...new Set(workouts.map(w => w.exerciseId))];
   sel.innerHTML = usedIds.map(id => {
     const ex = getExById(id);
-    return ex ? `<option value="${id}">${ex.name}</option>` : '';
+    return ex ? `<option value="${id}">${escapeHtml(ex.name)}</option>` : '';
   }).join('');
 }
 
@@ -3691,7 +3726,7 @@ function renderWizardDays() {
   const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
   const dayShort = ['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7'];
   const tmplOptions = '<option value="">— No workout —</option>' +
-    templates.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    templates.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
 
   container.innerHTML = dayNames.map((name, i) => {
     const existing = weeklyTemplate?.[i] || null;
@@ -3905,7 +3940,7 @@ function planDayChip({ dateKey, date, plan }) {
   return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);" class="planner-upcoming-chip">
     <span style="font-size:1.1rem;width:24px;text-align:center;">${icon}</span>
     <div style="flex:1;min-width:0;">
-      <div style="font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+      <div style="font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(name)}</div>
       <div style="font-size:0.7rem;color:var(--muted);">${dayLabel}</div>
     </div>
   </div>`;
@@ -4016,7 +4051,7 @@ function renderPlannerToday() {
       items.push(`<div class="today-plan-card ${isDone ? 'completed' : ''}">
         <div class="today-plan-icon">💪</div>
         <div class="today-plan-info">
-          <div class="today-plan-title">${tmplName}</div>
+          <div class="today-plan-title">${escapeHtml(tmplName)}</div>
           <div class="today-plan-sub">${subText}</div>
           ${extraHtml}
         </div>
@@ -4079,7 +4114,7 @@ function renderPlannerToday() {
         const volText = recent.totalVol > 0 ? ` · ${recent.totalVol.toLocaleString()} lbs` : '';
         const exHtml = recent.exNames.length ? `<div style="margin-top:5px;font-size:0.72rem;color:var(--muted);">${recent.exNames.join(' · ')}</div>` : '';
         extraSections += infoBox('Last Workout', `
-          <div style="font-weight:600;font-size:0.9rem;">${recent.name}</div>
+          <div style="font-weight:600;font-size:0.9rem;">${escapeHtml(recent.name)}</div>
           <div style="font-size:0.78rem;color:var(--muted);margin-top:3px;">${agoText}${volText} · ${recent.totalSets} sets</div>
           ${exHtml}
         `);
@@ -4181,7 +4216,7 @@ function renderPlannerWeek() {
         const tmpl = templates.find(t => t.id === plan.templateId);
         const tmplName = tmpl?.name || 'Unknown';
         const isDone = workouts.some(w => w.date === dateKey && w.templateName === tmplName);
-        itemsHtml += `<div class="planner-item workout ${isDone ? 'completed' : ''}">${tmplName}</div>`;
+        itemsHtml += `<div class="planner-item workout ${isDone ? 'completed' : ''}">${escapeHtml(tmplName)}</div>`;
       }
       if (plan.run) {
         const isDone = runs.some(r => r.date === dateKey);
@@ -4300,7 +4335,7 @@ function showPlannerDayDetails(dateKey) {
       items.push(`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid ${isDone ? 'rgba(67,233,123,0.3)' : 'var(--border)'};border-radius:8px;">
         <span style="font-size:1.3rem;">💪</span>
         <div style="flex:1;min-width:0;">
-          <div style="font-weight:700;font-size:0.88rem;">${tmplName}</div>
+          <div style="font-weight:700;font-size:0.88rem;">${escapeHtml(tmplName)}</div>
           <div style="font-size:0.72rem;color:var(--muted);">${exCount} exercise${exCount !== 1 ? 's' : ''}${isDone ? ' · ✓ Logged' : ''}</div>
         </div>
       </div>`);
@@ -4446,7 +4481,7 @@ function openPlannerDayModal(dateKey) {
 
   // Populate templates select
   const sel = document.getElementById('planner-modal-template');
-  sel.innerHTML = '<option value="">— None —</option>' + templates.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  sel.innerHTML = '<option value="">— None —</option>' + templates.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
 
   const plan = workoutPlan[dateKey];
   if (plan) {
@@ -4606,9 +4641,9 @@ function renderNutritionPresets() {
 }
 
 function logNutrition() {
-  const name = document.getElementById('nutr-input-name').value.trim();
-  const calories = parseInt(document.getElementById('nutr-input-cal').value) || 0;
-  const protein = parseInt(document.getElementById('nutr-input-prot').value) || 0;
+  const name = sanitizeText(document.getElementById('nutr-input-name').value, 120);
+  const calories = Math.min(99999, Math.max(0, parseInt(document.getElementById('nutr-input-cal').value) || 0));
+  const protein  = Math.min(9999,  Math.max(0, parseInt(document.getElementById('nutr-input-prot').value) || 0));
   const saveAsPreset = document.getElementById('nutr-save-as-preset').checked;
 
   if (!name) { alert('Please enter a name for the food.'); return; }
@@ -4746,8 +4781,43 @@ function guessFoodIcon(name) {
 }
 
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
+
+// Strip control characters, trim, enforce max length
+function sanitizeText(s, maxLen = 200) {
+  return String(s ?? '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim().slice(0, maxLen);
+}
+
+// Clamp a numeric value to [min, max]; returns NaN for non-numeric input
+function sanitizeNumber(v, min, max) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return NaN;
+  return Math.min(max, Math.max(min, n));
+}
+
+// ── RATE LIMITER ──────────────────────────────────────
+class RateLimiter {
+  constructor(maxCalls, windowMs) {
+    this.maxCalls = maxCalls;
+    this.windowMs = windowMs;
+    this.timestamps = [];
+  }
+  allow() {
+    const now = Date.now();
+    this.timestamps = this.timestamps.filter(t => now - t < this.windowMs);
+    if (this.timestamps.length >= this.maxCalls) return false;
+    this.timestamps.push(now);
+    return true;
+  }
+  msUntilReset() {
+    if (this.timestamps.length < this.maxCalls) return 0;
+    return Math.ceil(this.windowMs - (Date.now() - this.timestamps[0]));
+  }
+}
+
+const authLimiter       = new RateLimiter(5, 5 * 60 * 1000); // 5 attempts per 5 min
+const foodSearchLimiter = new RateLimiter(20, 60 * 1000);     // 20 searches per min
 
 // ── NUTRITION TRENDS & STATS ──────────────────────────
 
@@ -5200,10 +5270,15 @@ function closeFoodSearchModal() {
 }
 
 async function performFoodSearch() {
-  const query = document.getElementById('food-search-input').value.trim();
+  const query = sanitizeText(document.getElementById('food-search-input').value, 200);
   const resultsEl = document.getElementById('food-search-results');
   if (!query) {
     resultsEl.innerHTML = '<div class="nutr-empty">Enter a search term.</div>';
+    return;
+  }
+  if (!foodSearchLimiter.allow()) {
+    const secs = Math.ceil(foodSearchLimiter.msUntilReset() / 1000);
+    resultsEl.innerHTML = `<div class="nutr-empty">Too many searches. Please wait ${secs}s and try again.</div>`;
     return;
   }
 
@@ -5224,7 +5299,7 @@ async function performFoodSearch() {
     renderFoodSearchResults(data.products || []);
   } catch(e) {
     if (e.name === 'AbortError') return;
-    resultsEl.innerHTML = `<div class="nutr-empty">Search failed: ${e.message || 'Network error'}. Try again or log manually.</div>`;
+    resultsEl.innerHTML = `<div class="nutr-empty">Search failed: ${escapeHtml(e.message || 'Network error')}. Try again or log manually.</div>`;
   }
 }
 
@@ -5876,7 +5951,7 @@ function renderRecentPRs() {
     const ex = getExById(ev.exId);
     if (!ex) return '';
     return `<div class="recent-pr-row">
-      <div class="recent-pr-name">${ex.name}</div>
+      <div class="recent-pr-name">${escapeHtml(ex.name)}</div>
       <div class="recent-pr-val">${ev.weight} lb × ${ev.reps}</div>
       <div class="recent-pr-date">${fmtDate(ev.date)}</div>
     </div>`;
@@ -6155,8 +6230,8 @@ function filterExerciseDropdown() {
   dropdown.innerHTML = filtered.map(e => `
     <div class="ex-dropdown-item ${e.id === selectedExerciseId ? 'selected' : ''}"
       onmousedown="selectExercise(${e.id}, '${e.name.replace(/'/g,"\\'")}')">
-      ${e.name}
-      <span class="ex-dropdown-cat">${e.cat}</span>
+      ${escapeHtml(e.name)}
+      <span class="ex-dropdown-cat">${escapeHtml(e.cat)}</span>
     </div>`).join('');
 }
 
@@ -6185,8 +6260,8 @@ function renderTemplates() {
     const isActive = activeTemplateId === t.id;
     const isPreset = t.id <= 11; // presets can be edited but not deleted
     return `<div class="tmpl-card ${isActive?'active':''}" id="tmpl-card-${t.id}" onclick="selectTemplate(${t.id})">
-      <div class="tmpl-name">${t.name}</div>
-      <div class="tmpl-exlist">${exNames}</div>
+      <div class="tmpl-name">${escapeHtml(t.name)}</div>
+      <div class="tmpl-exlist">${escapeHtml(exNames)}</div>
       <div class="tmpl-actions">
         <button class="tmpl-action-btn" onclick="event.stopPropagation();openEditTemplate(${t.id})" title="Edit">Edit</button>
         ${!isPreset ? `<button class="tmpl-action-btn del" onclick="event.stopPropagation();deleteTemplate(${t.id})" title="Delete">×</button>` : ''}
@@ -6229,7 +6304,7 @@ function openEditTemplate(id) {
     const items = catExs.map(e => `
       <label class="tmpl-ex-check" style="padding:4px 8px;">
         <input type="checkbox" value="${e.id}" ${tmpl.exerciseIds.includes(e.id) ? 'checked' : ''}>
-        ${e.name}
+        ${escapeHtml(e.name)}
       </label>`).join('');
     return `<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:4px;">
       <div onclick="toggleEditCat('${catId}')" style="padding:8px 12px;background:var(--surface2);cursor:pointer;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center;">
@@ -6429,7 +6504,7 @@ function saveWorkoutSession() {
 
   const tmpl = templates.find(t => t.id === activeTemplateId);
   const sessionId = Date.now().toString(36);
-  const sessionName = document.getElementById('session-title')?.value?.trim() || tmpl?.name || 'Session';
+  const sessionName = sanitizeText(document.getElementById('session-title')?.value || tmpl?.name || 'Session', 100);
   let saved = 0;
 
   allBlocks.forEach(block => {
@@ -6572,8 +6647,8 @@ function handleCSVImport(event) {
           const hint = lastWeight !== null ? `Last: ${lastWeight > 0 ? lastWeight + ' lbs' : 'BW'}` : '';
           block.innerHTML = `
             <div class="session-ex-header" onclick="toggleSessionBlock(${row.ex.id})">
-              <div class="session-ex-name">${row.ex.name}</div>
-              <span class="ex-cat">${row.ex.cat}</span>
+              <div class="session-ex-name">${escapeHtml(row.ex.name)}</div>
+              <span class="ex-cat">${escapeHtml(row.ex.cat)}</span>
               ${hint ? `<div class="session-ex-hint">${hint}</div>` : ''}
               <span class="session-ex-toggle">▼</span>
             </div>
@@ -6631,8 +6706,8 @@ function filterSessionAddEx() {
   results.innerHTML = filtered.map(e => `
     <div onmousedown="addExToSession(${e.id})"
       style="padding:8px 10px;border-radius:6px;cursor:pointer;font-size:0.82rem;display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);margin-bottom:2px;">
-      <span>${e.name}</span>
-      <span style="font-size:0.65rem;color:var(--muted);background:var(--surface2);padding:1px 7px;border-radius:4px;">${e.cat}</span>
+      <span>${escapeHtml(e.name)}</span>
+      <span style="font-size:0.65rem;color:var(--muted);background:var(--surface2);padding:1px 7px;border-radius:4px;">${escapeHtml(e.cat)}</span>
     </div>`).join('');
 }
 
@@ -6652,8 +6727,8 @@ function addExToSession(exId) {
   block.id = `session-block-${exId}`;
   block.innerHTML = `
     <div class="session-ex-header" onclick="toggleSessionBlock(${exId})">
-      <div class="session-ex-name">${ex.name}</div>
-      <span class="ex-cat">${ex.cat}</span>
+      <div class="session-ex-name">${escapeHtml(ex.name)}</div>
+      <span class="ex-cat">${escapeHtml(ex.cat)}</span>
       ${hint ? `<div class="session-ex-hint">${hint}</div>` : ''}
       <span class="session-ex-toggle">▼</span>
     </div>
@@ -6721,7 +6796,7 @@ function toggleNewTmpl() {
 }
 
 function saveTemplate() {
-  const name = document.getElementById('tmpl-name-input').value.trim();
+  const name = sanitizeText(document.getElementById('tmpl-name-input').value, 100);
   if (!name) { alert('Give your template a name.'); return; }
   const checked = [...document.querySelectorAll('#tmpl-ex-checks input:checked')].map(i => +i.value);
   if (!checked.length) { alert('Pick at least one exercise.'); return; }
@@ -6826,7 +6901,7 @@ function saveWorkout() {
 
 // ── EXERCISES ────────────────────────────────────────
 function addExercise() {
-  const name = document.getElementById('new-ex-name').value.trim();
+  const name = sanitizeText(document.getElementById('new-ex-name').value, 80);
   const cat = document.getElementById('new-ex-cat').value;
   if (!name) return;
   const id = Math.max(0,...exercises.map(e=>e.id)) + 1;
@@ -6837,7 +6912,7 @@ function addExercise() {
   renderTemplates(); // refresh template checkbox list
   // refresh log dropdown
   const sel = document.getElementById('log-exercise');
-  sel.innerHTML = exercises.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+  sel.innerHTML = exercises.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
 }
 
 const CAT_META = {
@@ -6904,7 +6979,7 @@ function renderExFilteredList() {
       style="padding:12px 14px;margin-bottom:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all 0.12s;"
       onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
       <div style="min-width:0;flex:1;">
-        <div style="font-weight:600;font-size:0.88rem;margin-bottom:2px;">${e.name}</div>
+        <div style="font-weight:600;font-size:0.88rem;margin-bottom:2px;">${escapeHtml(e.name)}</div>
         <div style="font-size:0.72rem;color:var(--muted);">${prText}</div>
       </div>
       ${selectedExCat === 'All' ? `<span style="font-size:0.62rem;color:${meta.color};background:var(--surface);padding:3px 8px;border-radius:4px;font-weight:600;letter-spacing:0.3px;flex-shrink:0;margin-left:8px;">${e.cat.toUpperCase()}</span>` : ''}
@@ -7098,7 +7173,7 @@ function renderSessionHistoryCard({ sid, date, entries }) {
       return `<div class="set-pill"><span>${s.reps}</span> reps${s.weight > 0 ? ' @ <span>' + s.weight + '</span>lb' : ' BW'}</div>`;
     }).join('');
     return `<div class="session-ex-row">
-      <div class="session-ex-row-name">${ex?.name ?? 'Unknown'} <span class="ex-cat">${ex?.cat ?? ''}</span></div>
+      <div class="session-ex-row-name">${escapeHtml(ex?.name ?? 'Unknown')} <span class="ex-cat">${escapeHtml(ex?.cat ?? '')}</span></div>
       <div class="session-ex-row-sets">${pills}</div>
     </div>`;
   }).join('');
@@ -7106,7 +7181,7 @@ function renderSessionHistoryCard({ sid, date, entries }) {
   return `<div class="history-session-card">
     <div class="history-session-header">
       <div>
-        <div class="history-session-title">${tmplName}</div>
+        <div class="history-session-title">${escapeHtml(tmplName)}</div>
         <div class="history-session-date">${fmtDate(date)}</div>
       </div>
       <div class="history-session-meta">
@@ -7351,7 +7426,7 @@ function renderStretchPresets() {
     const mins = Math.floor(total/60), secs = total % 60;
     const dur = mins > 0 ? `${mins}m ${secs > 0 ? secs+'s' : ''}` : `${secs}s`;
     return `<div class="tmpl-card" style="margin-bottom:8px;">
-      <div class="tmpl-name" style="padding-right:80px;">${p.name}</div>
+      <div class="tmpl-name" style="padding-right:80px;">${escapeHtml(p.name)}</div>
       <div class="tmpl-exlist">${p.stretches.length} stretches · ${dur}</div>
       <div class="tmpl-actions">
         <button class="tmpl-action-btn" onclick="event.stopPropagation();loadStretchPreset(${p.id})" title="Load">▶</button>
@@ -7416,7 +7491,7 @@ function populateStretchPresetChecks() {
 }
 
 function saveStretchPreset() {
-  const name = document.getElementById('new-sp-name').value.trim();
+  const name = sanitizeText(document.getElementById('new-sp-name').value, 80);
   if (!name) { alert('Give your routine a name.'); return; }
   const checked = [...document.querySelectorAll('#new-sp-checks input:checked')];
   if (!checked.length) { alert('Select at least one stretch.'); return; }
@@ -9751,6 +9826,11 @@ async function handleAuth() {
     const password = document.getElementById('auth-password').value;
     if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; return; }
     if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+    if (!authLimiter.allow()) {
+      const secs = Math.ceil(authLimiter.msUntilReset() / 1000);
+      errEl.textContent = `Too many attempts. Please wait ${secs} second${secs !== 1 ? 's' : ''} and try again.`;
+      return;
+    }
 
     btn.textContent = 'Signing in…';
     btn.disabled = true;
@@ -9780,6 +9860,11 @@ async function handleAuth() {
   }
 
   // Final step — collect everything and submit
+  if (!authLimiter.allow()) {
+    const secs = Math.ceil(authLimiter.msUntilReset() / 1000);
+    errEl.textContent = `Too many attempts. Please wait ${secs} second${secs !== 1 ? 's' : ''} and try again.`;
+    return;
+  }
   const email = document.getElementById('su-email').value.trim();
   const password = document.getElementById('su-password').value;
   const firstName = document.getElementById('su-firstname').value.trim();
