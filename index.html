@@ -1176,7 +1176,7 @@
 <div class="topbar">
   <div class="logo"><span class="logo-lift">Lift</span><span class="logo-track">Track</span></div>
   <nav class="nav-tabs" id="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-tab active" onclick="showPage('dashboard')">Home</button>
     <button class="nav-tab" onclick="showPage('log')">Log</button>
     <button class="nav-tab" onclick="showPage('planner')">Planner</button>
     <button class="nav-tab" onclick="showPage('nutrition')">Nutrition</button>
@@ -1406,7 +1406,7 @@
 
   <!-- Dashboard header: customize control -->
   <div class="dash-header-bar">
-    <div class="dash-header-label" id="dash-header-label">Your Dashboard</div>
+    <div class="dash-header-label" id="dash-header-label">Home</div>
     <div class="dash-edit-actions" id="dash-edit-actions">
       <span class="dash-edit-hint">Drag panels to rearrange</span>
       <button class="dash-edit-done" onclick="exitDashboardEditMode()">Done</button>
@@ -7548,6 +7548,9 @@ function repeatSession(sid) {
   if (!entries.length) return;
 
   showPage('log');
+  document.getElementById('log-selection-view').style.display = 'none';
+  document.getElementById('log-run-view').style.display = 'none';
+  document.getElementById('log-form-view').style.display = '';
   document.getElementById('log-single-panel').style.display = 'none';
   document.getElementById('log-session-panel').style.display = '';
 
@@ -7603,6 +7606,11 @@ function repeatSolo(idx) {
   const w = workouts[idx];
   if (!w) return;
   showPage('log');
+  document.getElementById('log-selection-view').style.display = 'none';
+  document.getElementById('log-run-view').style.display = 'none';
+  document.getElementById('log-form-view').style.display = '';
+  document.getElementById('log-single-panel').style.display = '';
+  document.getElementById('log-session-panel').style.display = 'none';
   selectedExerciseId = w.exerciseId;
   const ex = getExById(w.exerciseId);
   if (ex) {
