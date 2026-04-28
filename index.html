@@ -3261,7 +3261,7 @@ function renderStats() {
   const latestBW = bodyWeightLog.length ? bodyWeightLog[bodyWeightLog.length - 1].weight : null;
 
   // Today's calories vs goal
-  const todayKey = new Date().toISOString().slice(0,10);
+  const todayKey = localToday();
   const todayCal = (nutritionLog || [])
     .filter(e => e.date === todayKey)
     .reduce((s, e) => s + (e.calories || 0), 0);
@@ -3524,7 +3524,7 @@ function renderBWChart() {
 // ── PROTEIN TRACKER ──────────────────────────────────
 
 function getTodayProtein() {
-  const today = new Date().toISOString().slice(0,10);
+  const today = localToday();
   return proteinLog.find(p => p.date === today) || null;
 }
 
@@ -3540,7 +3540,7 @@ function logProtein() {
   const amount = parseInt(document.getElementById('protein-amount').value) || 0;
   const source = document.getElementById('protein-source').value.trim() || 'Food';
   if (!amount) { alert('Enter a protein amount.'); return; }
-  const today = new Date().toISOString().slice(0,10);
+  const today = localToday();
   let dayLog = proteinLog.find(p => p.date === today);
   if (!dayLog) { dayLog = { date: today, entries: [] }; proteinLog.push(dayLog); }
   dayLog.entries.push({ amount, source });
@@ -3551,7 +3551,7 @@ function logProtein() {
 }
 
 function deleteProteinEntry(entryIdx) {
-  const today = new Date().toISOString().slice(0,10);
+  const today = localToday();
   const dayLog = proteinLog.find(p => p.date === today);
   if (!dayLog) return;
   dayLog.entries.splice(entryIdx, 1);
@@ -3561,7 +3561,7 @@ function deleteProteinEntry(entryIdx) {
 
 function renderProteinTracker() {
   // Always work off today's date — auto-resets each new day
-  const today = new Date().toISOString().slice(0,10);
+  const today = localToday();
   const goalInput = document.getElementById('protein-goal');
   if (goalInput && proteinGoal && !goalInput.value) goalInput.value = proteinGoal;
 
@@ -4390,7 +4390,7 @@ function clearPlannerDay() {
 }
 
 function renderNutrition() {
-  const today = new Date().toISOString().slice(0,10);
+  const today = localToday();
   // Today's totals
   const todays = nutritionLog.filter(e => e.date === today);
   const totalCal = todays.reduce((s, e) => s + (e.calories || 0), 0);
@@ -4489,7 +4489,7 @@ function logNutrition() {
   if (!name) { alert('Please enter a name for the food.'); return; }
   if (calories === 0 && protein === 0) { alert('Enter calories or protein (or both).'); return; }
 
-  const today = new Date().toISOString().slice(0,10);
+  const today = localToday();
   const now = new Date();
   const time = now.toTimeString().slice(0,5);
 
@@ -4529,7 +4529,7 @@ function logNutrition() {
 function logNutritionFromPreset(presetId) {
   const preset = nutritionPresets.find(p => p.id === presetId);
   if (!preset) return;
-  const today = new Date().toISOString().slice(0,10);
+  const today = localToday();
   const time = new Date().toTimeString().slice(0,5);
   nutritionLog.push({
     date: today, time,
@@ -4912,7 +4912,7 @@ function renderNutritionHistory(listEl) {
 function renderBodyWeightSection() {
   // Default the date input to today
   const dateInput = document.getElementById('nutr-bw-date');
-  if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
+  if (dateInput && !dateInput.value) dateInput.value = localToday();
 
   // Pre-fill goal inputs
   const targetInput = document.getElementById('nutr-wgoal-target');
@@ -5021,7 +5021,7 @@ function renderBodyWeightSection() {
 
 function logBodyWeightFromNutrition() {
   const val = parseFloat(document.getElementById('nutr-bw-input').value);
-  const date = document.getElementById('nutr-bw-date').value || new Date().toISOString().slice(0,10);
+  const date = document.getElementById('nutr-bw-date').value || localToday();
   if (!val || val < 50 || val > 700) { alert('Please enter a valid weight (50–700 lbs).'); return; }
   // Replace any existing entry for that date
   const existingIdx = bodyWeightLog.findIndex(e => e.date === date);
@@ -5205,7 +5205,7 @@ function logFoodFromSearch(idx) {
 }
 
 function renderDashboard() {
-  const today = new Date().toISOString().slice(0,10);
+  const today = localToday();
   const bwDate = document.getElementById('bw-date');
   if (bwDate && !bwDate.value) bwDate.value = today;
 
@@ -5641,7 +5641,7 @@ function resetDashboardLayout() {
 function getWeekRange() {
   // Rolling 7-day window ending today
   const now = new Date();
-  const end = now.toISOString().slice(0,10);
+  const end = localToday();
   const startDate = new Date(now);
   startDate.setDate(startDate.getDate() - 6);
   const start = startDate.toISOString().slice(0,10);
@@ -5809,7 +5809,7 @@ function renderRestDay() {
 // At-a-glance Nutrition panel (dashboard)
 function renderNutritionPanel() {
   if (!document.getElementById('dash-nutr-cal')) return;
-  const today = new Date().toISOString().slice(0,10);
+  const today = localToday();
   const todays = (nutritionLog || []).filter(e => e.date === today);
   const totalCal = todays.reduce((s, e) => s + (e.calories || 0), 0);
   const totalProt = todays.reduce((s, e) => s + (e.protein || 0), 0);
@@ -6423,7 +6423,7 @@ function handleCSVImport(event) {
         document.getElementById('log-single-panel').style.display = 'none';
         document.getElementById('log-session-panel').style.display = '';
         document.getElementById('session-title').value = file.name.replace('.csv','');
-        const today = new Date().toISOString().slice(0,10);
+        const today = localToday();
         document.getElementById('session-date').value = today;
         container.innerHTML = '';
         sessionSetCounters = {};
@@ -7389,7 +7389,7 @@ function tickTimer() {
     // Current stretch finished — log it
     const cur = stretchQueue[stretchTimerState.currentIdx];
     if (cur) {
-      stretchLogs.push({ name: cur.name, secs: cur.secs, date: new Date().toISOString().slice(0,10) });
+      stretchLogs.push({ name: cur.name, secs: cur.secs, date: localToday() });
       persistAll();
     }
     stretchTimerState.currentIdx++;
@@ -8285,7 +8285,7 @@ function closeExDetailModal() {
 function startLiveFromSingle() {
   const exId = selectedExerciseId || +document.getElementById('log-exercise').value;
   if (!exId) { alert('Please select an exercise first.'); return; }
-  const date = document.getElementById('log-date').value || new Date().toISOString().slice(0,10);
+  const date = document.getElementById('log-date').value || localToday();
 
   // Pull any sets the user has already entered on the form — seed values, but nothing is "done" yet
   const cardio = isCardio(exId);
@@ -8324,7 +8324,7 @@ function startLiveFromSingle() {
 
 function startLiveFromSession() {
   const tmpl = templates.find(t => t.id === activeTemplateId);
-  const date = document.getElementById('session-date').value || new Date().toISOString().slice(0,10);
+  const date = document.getElementById('session-date').value || localToday();
   const sessionName = document.getElementById('session-title')?.value?.trim() || tmpl?.name || 'Live Workout';
 
   // Collect exercises currently in session form (includes user-added ones)
@@ -9679,7 +9679,7 @@ async function handleAuth() {
 
     // Seed first body weight entry with today's date
     if (!Array.isArray(bodyWeightLog)) bodyWeightLog = [];
-    const today = new Date().toISOString().slice(0,10);
+    const today = localToday();
     // Avoid duplicating if there's already an entry for today (shouldn't be, on a fresh account)
     if (!bodyWeightLog.some(e => e.date === today)) {
       bodyWeightLog.push({ date: today, weight });
