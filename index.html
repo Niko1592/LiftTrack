@@ -5,14 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<!-- Favicon + PWA manifest -->
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
-<link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
-
 <title>LiftTrack</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -215,6 +207,9 @@
   /* STAT CARDS */
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
   .stat-card { background: color-mix(in srgb, var(--surface) 82%, transparent); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; min-width: 0; position: relative; z-index: 1; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .stat-card.clickable { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; }
+  .stat-card.clickable:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 4px 20px rgba(108,99,255,0.10); transform: translateY(-1px); }
+  .stat-card.clickable:active { transform: translateY(0); }
   .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
   .stat-value { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.02em; }
   .stat-value.purple { color: var(--accent); }
@@ -230,6 +225,11 @@
   .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
   .chart-card { background: color-mix(in srgb, var(--surface) 82%, transparent); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; position: relative; z-index: 1; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .chart-card.full { grid-column: 1 / -1; }
+  .chart-card.clickable { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; }
+  .chart-card.clickable:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 4px 20px rgba(108,99,255,0.10); transform: translateY(-1px); }
+  .chart-card.clickable:active { transform: translateY(0); }
+  .chart-card.clickable .chart-title::after { content: ' →'; font-size: 0.7rem; color: var(--muted); font-weight: 400; opacity: 0; transition: opacity 0.15s; }
+  .chart-card.clickable:hover .chart-title::after { opacity: 1; }
 
   /* Dashboard layout — panels flow in a 2-col grid, .full spans both */
   .dash-welcome {
@@ -570,46 +570,53 @@
   .run-stat-chip { font-size: 0.78rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; color: var(--text); }
   .run-stat-chip span { color: var(--accent); font-weight: 600; }
 
-  /* STRETCH PAGE */
-  .stretch-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
-  @media(max-width:860px){ .stretch-layout { grid-template-columns: 1fr; } }
-  .stretch-library { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
 
-  /* Stretch accordion */
-  .stretch-accordion { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 6px; }
-  .stretch-accordion-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--surface2); cursor: pointer; user-select: none; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.3px; color: var(--text); transition: background 0.15s; }
-  .stretch-accordion-header:hover { background: rgba(108,99,255,0.08); }
-  .stretch-accordion-header .acc-arrow { font-size: 0.65rem; color: var(--muted); transition: transform 0.2s; }
-  .stretch-accordion-header.open .acc-arrow { transform: rotate(180deg); }
-  .stretch-accordion-body { display: none; border-top: 1px solid var(--border); }
-  .stretch-accordion-body.open { display: block; }
-  .stretch-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; cursor: pointer; transition: background 0.15s; font-size: 0.82rem; font-weight: 500; border-bottom: 1px solid var(--border); }
-  .stretch-item:last-child { border-bottom: none; }
-  .stretch-item:hover { background: rgba(108,99,255,0.07); color: var(--accent); }
-  .stretch-item-dur { font-size: 0.68rem; color: var(--muted); margin-left: auto; white-space: nowrap; font-weight: 500; letter-spacing: 0.3px; }
 
-  /* STRETCH ACTIVE PANEL */
-  .stretch-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
-  .stretch-queue { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
-  .stretch-queue-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; display: flex; align-items: center; gap: 10px; font-size: 0.82rem; font-weight: 500; }
-  .stretch-queue-item.active-stretch { border-color: var(--accent); background: rgba(108,99,255,0.1); }
-  .stretch-queue-item.done-stretch { opacity: 0.4; text-decoration: line-through; }
-  .stretch-queue-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; margin-left: auto; padding: 0 4px; }
-  .stretch-queue-remove:hover { color: var(--accent2); }
-
-  /* TIMER RING */
-  .timer-display { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 0; }
-  .timer-ring-wrap { position: relative; width: 160px; height: 160px; }
-  .timer-ring-wrap svg { transform: rotate(-90deg); }
-  .timer-ring-bg { fill: none; stroke: var(--surface2); stroke-width: 10; }
-  .timer-ring-prog { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 0.9s linear; }
-  .timer-number { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 700; color: var(--text); letter-spacing: -0.03em; }
-  .timer-label { font-size: 0.78rem; color: var(--muted); text-align: center; font-weight: 500; letter-spacing: 0.2px; }
-  .stretch-controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-  .stretch-log-history { margin-top: 20px; }
-  .stretch-log-entry { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .stretch-log-name { color: var(--text); font-weight: 500; }
-  .stretch-log-meta { color: var(--muted); font-size: 0.72rem; }
+  /* ── TEMPLATE BUILDER TAKEOVER ──────────────────── */
+  .tmpl-builder-overlay { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 900; flex-direction: column; overflow: hidden; }
+  .tmpl-builder-overlay.open { display: flex; }
+  .tmpl-builder-topbar { display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 56px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tmpl-builder-title { font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; flex: 1; }
+  .tmpl-builder-body { display: grid; grid-template-columns: 1fr 340px; flex: 1; overflow: hidden; }
+  .tmpl-builder-left { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+  .tmpl-builder-search { padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tmpl-builder-search-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .tmpl-builder-search-row input { flex: 1; min-width: 0; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 16px; outline: none; font-family: 'Inter', system-ui, sans-serif; }
+  .tmpl-builder-search-row input:focus { border-color: var(--accent); }
+  .tmpl-builder-cats { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tmpl-builder-cat-btn { padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: 'Inter', system-ui, sans-serif; }
+  .tmpl-builder-cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tmpl-builder-cat-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .tmpl-builder-ex-list { flex: 1; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .tmpl-builder-ex-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: all 0.15s; font-size: 0.85rem; font-weight: 500; }
+  .tmpl-builder-ex-item:hover { border-color: var(--accent); background: rgba(108,99,255,0.07); color: var(--accent); }
+  .tmpl-builder-ex-item.added { border-color: var(--accent); background: rgba(108,99,255,0.12); color: var(--accent); }
+  .tmpl-builder-ex-item .ex-cat-badge { font-size: 0.65rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+  .tmpl-builder-ex-item.added .ex-cat-badge { color: var(--accent); opacity: 0.7; }
+  .tmpl-builder-add-icon { font-size: 1.1rem; color: var(--muted); transition: color 0.15s; flex-shrink: 0; }
+  .tmpl-builder-ex-item:hover .tmpl-builder-add-icon,
+  .tmpl-builder-ex-item.added .tmpl-builder-add-icon { color: var(--accent); }
+  .tmpl-builder-right { display: flex; flex-direction: column; overflow: hidden; background: var(--surface); }
+  .tmpl-builder-right-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tmpl-builder-right-header input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 16px; font-weight: 700; outline: none; font-family: 'Inter', system-ui, sans-serif; letter-spacing: -0.01em; }
+  .tmpl-builder-right-header input:focus { border-color: var(--accent); }
+  .tmpl-builder-selected { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .tmpl-builder-empty { color: var(--muted); font-size: 0.82rem; text-align: center; padding: 32px 16px; line-height: 1.6; }
+  .tmpl-builder-selected-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); font-size: 0.85rem; font-weight: 500; }
+  .tmpl-builder-selected-item .item-num { font-size: 0.7rem; color: var(--muted); font-weight: 700; width: 18px; text-align: center; flex-shrink: 0; }
+  .tmpl-builder-selected-item .item-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tmpl-builder-selected-item .item-cat { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  .tmpl-builder-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; padding: 0 2px; flex-shrink: 0; transition: color 0.15s; }
+  .tmpl-builder-remove:hover { color: var(--accent2); }
+  .tmpl-builder-footer { padding: 14px 20px; border-top: 1px solid var(--border); flex-shrink: 0; display: flex; gap: 10px; align-items: center; }
+  /* add-exercise inline form inputs — 16px prevents iOS zoom */
+  #tmpl-builder-new-name, #tmpl-builder-new-cat { font-size: 16px !important; }
+  @media(max-width: 700px) {
+    .tmpl-builder-body { grid-template-columns: 1fr; grid-template-rows: 55% 45%; }
+    .tmpl-builder-left { border-right: none; border-bottom: 1px solid var(--border); overflow: hidden; }
+    .tmpl-builder-right { overflow: hidden; }
+    .tmpl-builder-footer { padding: 10px 14px; }
+  }
 
   /* ── LIVE WORKOUT TAKEOVER ───────────────────────── */
   .live-overlay { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 1000; flex-direction: column; overflow-y: auto; }
@@ -852,7 +859,7 @@
   .planner-item { font-size:0.7rem; padding:3px 6px; border-radius:5px; background:var(--surface2); border:1px solid var(--border); margin-bottom:3px; line-height:1.2; }
   .planner-item.workout { border-left:3px solid var(--accent); }
   .planner-item.run { border-left:3px solid var(--green); }
-  .planner-item.stretch { border-left:3px solid var(--yellow); }
+  .planner-item.run { border-left:3px solid var(--green); }
   .planner-item.rest { color:var(--muted); font-style:italic; text-align:center; border-left:none; }
   .planner-item.completed { opacity:0.6; }
   .planner-item.completed::before { content:'✓ '; color:var(--green); font-weight:700; }
@@ -881,7 +888,6 @@
   .planner-month-mini-dot { width:6px; height:6px; border-radius:50%; }
   .planner-month-mini-dot.workout { background:var(--accent); }
   .planner-month-mini-dot.run { background:var(--green); }
-  .planner-month-mini-dot.stretch { background:var(--yellow); }
   .planner-month-mini-dot.rest { background:var(--muted); opacity:0.5; }
 
   /* Year view */
@@ -1008,9 +1014,6 @@
     .run-layout { grid-template-columns: 1fr; }
     .run-stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
-    /* Stretch layout */
-    .stretch-layout { grid-template-columns: 1fr; }
-
     /* Exercise grid */
     .ex-cards-row { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 
@@ -1129,8 +1132,6 @@
   .session-ex-block,
   .food-result,
   .form-card,
-  .stretch-library,
-  .stretch-panel,
   .live-set-card {
     border-color: rgba(255,255,255,0.10);
     background-image: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, transparent 60%);
@@ -1273,7 +1274,6 @@
     <button class="nav-tab" onclick="showPage('log')">Log</button>
     <button class="nav-tab" onclick="showPage('planner')">Planner</button>
     <button class="nav-tab" onclick="showPage('nutrition')">Nutrition</button>
-    <button class="nav-tab" onclick="showPage('library')">Library</button>
     <button class="nav-tab" onclick="showPage('history')">History</button>
   </nav>
   <div class="user-badge">
@@ -1383,35 +1383,31 @@
 </div>
 
 <!-- WELCOME MODAL -->
-<div id="welcome-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;">
+<div id="welcome-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:2000;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;padding:32px 28px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
     <div style="font-size:2rem;text-align:center;margin-bottom:12px;">💪</div>
     <h2 style="text-align:center;font-size:1.3rem;font-weight:700;margin-bottom:8px;">Welcome to LiftTrack</h2>
-    <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-bottom:24px;">Here's a quick tour of what you can do:</p>
+    <p style="text-align:center;font-size:0.82rem;color:var(--muted);margin-bottom:24px;">Here's a quick look at what's waiting for you:</p>
     <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;">
       <div style="display:flex;gap:12px;align-items:flex-start;">
         <span style="font-size:1.2rem;flex-shrink:0;">📊</span>
-        <div><div style="font-weight:600;font-size:0.85rem;">Dashboard</div><div style="font-size:0.75rem;color:var(--muted);">Your personalized home — track activity, body weight, PRs, and more. Tap "Customize" to drag and reorder panels.</div></div>
+        <div><div style="font-weight:600;font-size:0.85rem;">Home</div><div style="font-size:0.75rem;color:var(--muted);">Your dashboard — PRs, nutrition, body weight, and activity at a glance. Tap any panel to jump straight there, or hit Customize to rearrange them.</div></div>
       </div>
       <div style="display:flex;gap:12px;align-items:flex-start;">
         <span style="font-size:1.2rem;flex-shrink:0;">💪</span>
-        <div><div style="font-weight:600;font-size:0.85rem;">Log Workout</div><div style="font-size:0.75rem;color:var(--muted);">Log lifts, runs, or full session templates. Tap <strong>Start Live</strong> for a guided, set-by-set workout.</div></div>
-      </div>
-      <div style="display:flex;gap:12px;align-items:flex-start;">
-        <span style="font-size:1.2rem;flex-shrink:0;">📋</span>
-        <div><div style="font-weight:600;font-size:0.85rem;">Library</div><div style="font-size:0.75rem;color:var(--muted);">Browse every exercise with demo silhouettes and PRs.</div></div>
-      </div>
-      <div style="display:flex;gap:12px;align-items:flex-start;">
-        <span style="font-size:1.2rem;flex-shrink:0;">🍎</span>
-        <div><div style="font-weight:600;font-size:0.85rem;">Nutrition</div><div style="font-size:0.75rem;color:var(--muted);">Log calories &amp; protein, search packaged foods, save quick presets, and set body weight goals with ETAs.</div></div>
+        <div><div style="font-weight:600;font-size:0.85rem;">Log</div><div style="font-size:0.75rem;color:var(--muted);">Log a single exercise, a run, or a full session. Build reusable templates with the template builder — search exercises, add ones that don't exist yet, and save. Hit <strong>Start Live</strong> for guided, set-by-set mode.</div></div>
       </div>
       <div style="display:flex;gap:12px;align-items:flex-start;">
         <span style="font-size:1.2rem;flex-shrink:0;">📅</span>
-        <div><div style="font-weight:600;font-size:0.85rem;">History</div><div style="font-size:0.75rem;color:var(--muted);">Review every session, repeat past workouts, and watch your progress compound over time.</div></div>
+        <div><div style="font-weight:600;font-size:0.85rem;">Planner</div><div style="font-size:0.75rem;color:var(--muted);">Plan your week ahead. Assign templates or runs to specific days, set up a repeating weekly schedule, and see today's plan right on the dashboard.</div></div>
       </div>
       <div style="display:flex;gap:12px;align-items:flex-start;">
-        <span style="font-size:1.2rem;flex-shrink:0;">⚙️</span>
-        <div><div style="font-weight:600;font-size:0.85rem;">Settings</div><div style="font-size:0.75rem;color:var(--muted);">Pick your color scheme or edit your profile from the gear icon in the top right.</div></div>
+        <span style="font-size:1.2rem;flex-shrink:0;">🍎</span>
+        <div><div style="font-weight:600;font-size:0.85rem;">Nutrition</div><div style="font-size:0.75rem;color:var(--muted);">Track calories and protein daily, search packaged foods, save quick-add presets, and set a body weight goal with an estimated arrival date.</div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:1.2rem;flex-shrink:0;">🗂️</span>
+        <div><div style="font-weight:600;font-size:0.85rem;">History</div><div style="font-size:0.75rem;color:var(--muted);">Every session, run, and PR in one place. Repeat past workouts, track long-term progress, and see how far you've come.</div></div>
       </div>
     </div>
     <button class="btn" style="width:100%;" onclick="closeWelcome()">Let's Go 🚀</button>
@@ -1518,7 +1514,7 @@
   <div id="dashboard-panels" class="dashboard-panels">
 
     <!-- Activity Calendar -->
-    <div class="chart-card full dash-panel" data-panel-id="calendar">
+    <div class="chart-card clickable full dash-panel" data-panel-id="calendar" onclick="showPage('planner')" title="Open Planner">
       <div class="chart-title" id="freq-title">Activity</div>
       <div style="display:flex;gap:2px;margin-bottom:6px;" id="freq-day-labels"></div>
       <div class="freq-grid" id="freq-grid"></div>
@@ -1526,7 +1522,7 @@
     </div>
 
     <!-- Nutrition at a Glance -->
-    <div class="chart-card dash-panel" data-panel-id="nutrition">
+    <div class="chart-card clickable dash-panel" data-panel-id="nutrition" onclick="showPage('nutrition')" title="Open Nutrition">
       <div class="chart-title">
         <span>Nutrition</span>
         <span style="font-size:0.65rem;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;margin-left:4px;">Today</span>
@@ -1572,7 +1568,7 @@
     </div>
 
     <!-- Nutrition 7-Day Trend -->
-    <div class="chart-card dash-panel" data-panel-id="nutrition-trend">
+    <div class="chart-card clickable dash-panel" data-panel-id="nutrition-trend" onclick="showPage('nutrition')" title="Open Nutrition">
       <div class="chart-title">
         <span>Nutrition Trend</span>
         <span style="font-size:0.65rem;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;margin-left:4px;">Last 7 days</span>
@@ -1584,7 +1580,7 @@
     </div>
 
     <!-- Protein Tracker -->
-    <div class="chart-card dash-panel" data-panel-id="protein">
+    <div class="chart-card clickable dash-panel" data-panel-id="protein" onclick="showPage('nutrition')" title="Open Nutrition">
       <div class="chart-title">Protein Tracker</div>
       <div style="position:relative;z-index:2;">
 
@@ -1602,10 +1598,6 @@
         <!-- Today's entries (view-only) -->
         <div id="protein-log-list" style="max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:12px;"></div>
 
-        <!-- CTA to Nutrition page -->
-        <button class="btn-sm" onclick="showPage('nutrition')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <span>🍎</span> Log in Nutrition
-        </button>
       </div>
     </div>
 
@@ -1624,7 +1616,7 @@
     </div>
 
     <!-- Running This Week -->
-    <div class="chart-card dash-panel" data-panel-id="running-week">
+    <div class="chart-card clickable dash-panel" data-panel-id="running-week" onclick="showPage('log')" title="Go to Log">
       <div class="chart-title">
         <span>Running</span>
         <span style="font-size:0.65rem;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;margin-left:4px;">This Week</span>
@@ -1649,13 +1641,13 @@
     </div>
 
     <!-- Recent Runs -->
-    <div class="chart-card dash-panel" data-panel-id="recent-runs">
+    <div class="chart-card clickable dash-panel" data-panel-id="recent-runs" onclick="showPage('log')" title="Go to Log">
       <div class="chart-title">Recent Runs</div>
       <div id="recent-runs-body" style="display:flex;flex-direction:column;gap:8px;margin-top:6px;"></div>
     </div>
 
     <!-- Running Totals -->
-    <div class="chart-card dash-panel" data-panel-id="running-totals">
+    <div class="chart-card clickable dash-panel" data-panel-id="running-totals" onclick="showPage('log')" title="Go to Log">
       <div class="chart-title">Running Totals <span style="font-size:0.6rem;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;margin-left:4px;">Lifetime</span></div>
       <div id="run-totals-body" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:6px;">
         <div class="wk-stat">
@@ -1681,7 +1673,7 @@
     </div>
 
     <!-- Personal Records -->
-    <div class="chart-card dash-panel" data-panel-id="prs">
+    <div class="chart-card clickable dash-panel" data-panel-id="prs" onclick="showPage('history')" title="View History">
       <div class="chart-title">Personal Records</div>
       <table class="pr-table" id="pr-table">
         <thead><tr><th>Exercise</th><th>PR Weight</th><th>Reps</th><th>Date</th></tr></thead>
@@ -1690,16 +1682,16 @@
     </div>
 
     <!-- Weight Progress -->
-    <div class="chart-card dash-panel" data-panel-id="weight-progress">
+    <div class="chart-card clickable dash-panel" data-panel-id="weight-progress" onclick="showPage('history')" title="View History">
       <div class="chart-title">
         Weight Progress
-        <select id="ex-select" onchange="renderWeightChart()"></select>
+        <select id="ex-select" onchange="renderWeightChart()" onclick="event.stopPropagation()"></select>
       </div>
       <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
     </div>
 
     <!-- NEW: This Week -->
-    <div class="chart-card dash-panel" data-panel-id="week-summary" style="display:none;">
+    <div class="chart-card clickable dash-panel" data-panel-id="week-summary" onclick="showPage('history')" title="View History" style="display:none;">
       <div class="chart-title">This Week</div>
       <div id="week-summary-body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;">
         <div class="wk-stat">
@@ -1720,19 +1712,19 @@
     </div>
 
     <!-- NEW: Muscle Group Balance -->
-    <div class="chart-card dash-panel" data-panel-id="muscle-balance" style="display:none;">
+    <div class="chart-card clickable dash-panel" data-panel-id="muscle-balance" onclick="showPage('history')" title="View History" style="display:none;">
       <div class="chart-title">Muscle Group Balance <span style="font-size:0.6rem;color:var(--muted);font-weight:500;margin-left:4px;text-transform:none;letter-spacing:0;">(last 30 days)</span></div>
       <div id="muscle-balance-body" style="display:flex;flex-direction:column;gap:10px;margin-top:8px;"></div>
     </div>
 
     <!-- NEW: Recent PRs -->
-    <div class="chart-card dash-panel" data-panel-id="recent-prs" style="display:none;">
+    <div class="chart-card clickable dash-panel" data-panel-id="recent-prs" onclick="showPage('history')" title="View History" style="display:none;">
       <div class="chart-title">Recent PRs</div>
       <div id="recent-prs-body" style="display:flex;flex-direction:column;gap:8px;margin-top:6px;"></div>
     </div>
 
     <!-- NEW: Lifetime Stats -->
-    <div class="chart-card dash-panel" data-panel-id="lifetime-stats" style="display:none;">
+    <div class="chart-card clickable dash-panel" data-panel-id="lifetime-stats" onclick="showPage('history')" title="View History" style="display:none;">
       <div class="chart-title">Lifetime Stats</div>
       <div id="lifetime-body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;">
         <div class="wk-stat">
@@ -1975,23 +1967,13 @@
 </div>
 <!-- /page-log -->
 
-<!-- LIBRARY (Exercises + Stretch combined) -->
+<!-- LIBRARY (Exercises) -->
 <div id="page-library" class="page">
-  <div style="display:none;gap:8px;margin-bottom:20px;background:var(--surface2);border-radius:10px;padding:4px;width:fit-content;">
-    <button id="lib-tab-exercises" onclick="switchLibTab('exercises')"
-      style="padding:8px 20px;border-radius:8px;border:none;font-family:'Inter',system-ui,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.15s;background:var(--accent);color:#fff;">
-      📋 Exercises
-    </button>
-    <button id="lib-tab-stretch" onclick="switchLibTab('stretch')"
-      style="padding:8px 20px;border-radius:8px;border:none;font-family:'Inter',system-ui,sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.15s;background:none;color:var(--muted);">
-      🧘 Stretch
-    </button>
-  </div>
   <div id="lib-exercises">
-    <div class="stretch-layout">
+    <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start;">
 
       <!-- LEFT SIDEBAR: CATEGORIES + ADD NEW -->
-      <div class="stretch-library">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;">
         <div style="font-weight:700;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:10px;">Categories</div>
         <div id="ex-category-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
 
@@ -2023,199 +2005,6 @@
       </div>
 
     </div>
-  </div><!-- /lib-exercises -->
-
-  <div id="lib-stretch" style="display:none;">
-  <div class="stretch-layout">
-
-    <!-- LEFT: LIBRARY + PRESETS -->
-    <div class="stretch-library">
-
-      <!-- PRESETS SECTION -->
-      <div style="font-weight:700;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:10px;">Stretch Routines</div>
-      <div id="stretch-preset-list"></div>
-      <button class="new-tmpl-toggle" onclick="toggleNewStretchPreset()" style="margin-bottom:14px;">+ Create Routine</button>
-      <div id="new-stretch-preset-form" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;">
-        <div class="form-group" style="margin-bottom:8px;">
-          <label>Routine Name</label>
-          <input type="text" id="new-sp-name" placeholder="e.g. Post-Leg Day">
-        </div>
-        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Pick stretches</div>
-        <div id="new-sp-checks" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:10px;"></div>
-        <button class="btn" style="width:100%;" onclick="saveStretchPreset()">Save Routine</button>
-      </div>
-
-      <hr class="tmpl-divider">
-      <div style="font-weight:700;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:10px;margin-top:4px;">Library</div>
-      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">Tap any stretch to add to queue.</div>
-
-      <!-- HIPS & GLUTES -->
-      <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Hips &amp; Glutes <span class="acc-arrow">▼</span></div>
-        <div class="stretch-accordion-body">
-          <div class="stretch-item" onclick="addToQueue('Hip Flexor Stretch',60)">Hip Flexor Stretch<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Pigeon Pose',90)">Pigeon Pose<span class="stretch-item-dur">90s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Figure-4 Stretch',45)">Figure-4 Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Seated Glute Stretch',45)">Seated Glute Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Low Lunge Hip Opener',60)">Low Lunge Hip Opener<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Deep Squat Hold',45)">Deep Squat Hold<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Supine Hip Rotation',30)">Supine Hip Rotation<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('90-90 Hip Stretch',60)">90-90 Hip Stretch<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Lateral Hip Flexor Stretch',45)">Lateral Hip Flexor Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Glute Kickback Stretch',30)">Glute Kickback Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Standing Hip Circle',30)">Standing Hip Circle<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Butterfly Stretch',45)">Butterfly Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Half-Pigeon Pose',90)">Half-Pigeon Pose<span class="stretch-item-dur">90s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Fire Log Pose',60)">Fire Log Pose<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Thread the Needle Glute',45)">Thread the Needle Glute<span class="stretch-item-dur">45s</span></div>
-        </div>
-      </div>
-
-      <!-- HAMSTRINGS & QUADS -->
-      <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Hamstrings &amp; Quads <span class="acc-arrow">▼</span></div>
-        <div class="stretch-accordion-body">
-          <div class="stretch-item" onclick="addToQueue('Standing Hamstring Stretch',45)">Standing Hamstring Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Seated Forward Fold',60)">Seated Forward Fold<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Quad Stretch',30)">Quad Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Couch Stretch',60)">Couch Stretch<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Lying Hamstring Stretch',45)">Lying Hamstring Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Doorway Hamstring Stretch',45)">Doorway Hamstring Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Standing Toe Touch',30)">Standing Toe Touch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Kneeling Quad Stretch',45)">Kneeling Quad Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Supine Hamstring Stretch',45)">Supine Hamstring Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Wide-Leg Forward Fold',60)">Wide-Leg Forward Fold<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Single-Leg Forward Fold',45)">Single-Leg Forward Fold<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Prone Quad Stretch',30)">Prone Quad Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Hurdler Stretch',45)">Hurdler Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Nordic Hamstring Lowering',45)">Nordic Hamstring Lowering<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Reclined Quad Stretch',30)">Reclined Quad Stretch<span class="stretch-item-dur">30s</span></div>
-        </div>
-      </div>
-
-      <!-- THORACIC & BACK -->
-      <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Thoracic &amp; Back <span class="acc-arrow">▼</span></div>
-        <div class="stretch-accordion-body">
-          <div class="stretch-item" onclick="addToQueue('Thoracic Rotation',30)">Thoracic Rotation<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Cat-Cow',45)">Cat-Cow<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Child\'s Pose',60)">Child's Pose<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Doorway Chest Stretch',30)">Doorway Chest Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Thread the Needle',45)">Thread the Needle<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Foam Roller Thoracic Extension',60)">Foam Roller T-Spine Extension<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Seated Spinal Twist',30)">Seated Spinal Twist<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Extended Puppy Pose',60)">Extended Puppy Pose<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Cobra Stretch',30)">Cobra Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Supine Spinal Twist',45)">Supine Spinal Twist<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Book Opener Stretch',30)">Book Opener Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Standing Backbend',20)">Standing Backbend<span class="stretch-item-dur">20s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Lat Stretch Overhead',30)">Lat Stretch Overhead<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Wall Chest Opener',30)">Wall Chest Opener<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Lower Back Knee Hug',45)">Lower Back Knee Hug<span class="stretch-item-dur">45s</span></div>
-        </div>
-      </div>
-
-      <!-- SHOULDERS & NECK -->
-      <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Shoulders &amp; Neck <span class="acc-arrow">▼</span></div>
-        <div class="stretch-accordion-body">
-          <div class="stretch-item" onclick="addToQueue('Cross-Body Shoulder Stretch',30)">Cross-Body Shoulder Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Neck Side Stretch',20)">Neck Side Stretch<span class="stretch-item-dur">20s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Overhead Tricep Stretch',30)">Overhead Tricep Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Sleeper Stretch',45)">Sleeper Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Band Shoulder Stretch',30)">Band Shoulder Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Neck Forward Bend',20)">Neck Forward Bend<span class="stretch-item-dur">20s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Neck Rotation',20)">Neck Rotation<span class="stretch-item-dur">20s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Pec Minor Stretch',30)">Pec Minor Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Wall Angel',30)">Wall Angel<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Behind-Back Shoulder Stretch',30)">Behind-Back Shoulder Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Shoulder Pendulum',30)">Shoulder Pendulum<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Levator Scapulae Stretch',20)">Levator Scapulae Stretch<span class="stretch-item-dur">20s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Upper Trap Stretch',20)">Upper Trap Stretch<span class="stretch-item-dur">20s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Doorway Pec Stretch',30)">Doorway Pec Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Eagle Arms Stretch',30)">Eagle Arms Stretch<span class="stretch-item-dur">30s</span></div>
-        </div>
-      </div>
-
-      <!-- CALVES & ANKLES -->
-      <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Calves &amp; Ankles <span class="acc-arrow">▼</span></div>
-        <div class="stretch-accordion-body">
-          <div class="stretch-item" onclick="addToQueue('Standing Calf Stretch',45)">Standing Calf Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Ankle Circles',30)">Ankle Circles<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Soleus Stretch',45)">Soleus Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Downward Dog Calf Stretch',45)">Downward Dog Calf Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Seated Calf Stretch with Band',45)">Seated Calf Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Ankle Dorsiflexion Stretch',30)">Ankle Dorsiflexion Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Heel Drop Stretch',45)">Heel Drop Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Peroneal Stretch',30)">Peroneal Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Achilles Tendon Stretch',45)">Achilles Tendon Stretch<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Plantar Fascia Stretch',30)">Plantar Fascia Stretch<span class="stretch-item-dur">30s</span></div>
-        </div>
-      </div>
-
-      <!-- FULL BODY & MOBILITY -->
-      <div class="stretch-accordion">
-        <div class="stretch-accordion-header" onclick="toggleAcc(this)">Full Body &amp; Mobility <span class="acc-arrow">▼</span></div>
-        <div class="stretch-accordion-body">
-          <div class="stretch-item" onclick="addToQueue('World\'s Greatest Stretch',60)">World's Greatest Stretch<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Downward Dog',45)">Downward Dog<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Sun Salutation Flow',90)">Sun Salutation Flow<span class="stretch-item-dur">90s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Standing Windmill',30)">Standing Windmill<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Inchworm',45)">Inchworm<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Hip 90-90 Flow',60)">Hip 90-90 Flow<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Bear Sit Rotation',30)">Bear Sit Rotation<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Deep Lunge with Rotation',45)">Deep Lunge with Rotation<span class="stretch-item-dur">45s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Yoga Flow',120)">Yoga Flow<span class="stretch-item-dur">120s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Turkish Get-Up Stretch',60)">Turkish Get-Up Stretch<span class="stretch-item-dur">60s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Scorpion Stretch',30)">Scorpion Stretch<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Standing Side Bend',30)">Standing Side Bend<span class="stretch-item-dur">30s</span></div>
-          <div class="stretch-item" onclick="addToQueue('Bridge Hold',45)">Bridge Hold<span class="stretch-item-dur">45s</span></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- RIGHT: QUEUE + TIMER -->
-    <div>
-      <div class="stretch-panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-          <div style="font-weight:700;font-size:0.82rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);">Queue</div>
-          <div style="display:flex;gap:6px;">
-            <button class="btn-sm" onclick="saveQueueAsPreset()">Save as Routine</button>
-            <button class="btn-sm" onclick="clearStretchQueue()">Clear</button>
-          </div>
-        </div>
-
-        <div id="stretch-queue-empty" style="color:var(--muted);font-size:0.82rem;padding:10px 0;">Add stretches from the library or load a routine.</div>
-        <div class="stretch-queue" id="stretch-queue"></div>
-
-        <!-- TIMER -->
-        <div class="timer-display" id="timer-display" style="display:none;">
-          <div class="timer-ring-wrap">
-            <svg width="160" height="160" viewBox="0 0 160 160">
-              <circle class="timer-ring-bg" cx="80" cy="80" r="70"/>
-              <circle class="timer-ring-prog" id="timer-ring" cx="80" cy="80" r="70"
-                stroke-dasharray="439.8" stroke-dashoffset="0"/>
-            </svg>
-            <div class="timer-number" id="timer-number">0</div>
-          </div>
-          <div class="timer-label" id="timer-stretch-name">–</div>
-        </div>
-
-        <div class="stretch-controls" id="stretch-controls" style="display:none;">
-          <button class="btn-sm" id="btn-pause-resume" onclick="togglePause()">Pause</button>
-          <button class="btn-sm" onclick="skipStretch()">Skip</button>
-          <button class="btn" onclick="startQueue()">Start Queue</button>
-        </div>
-        <div id="start-btn-wrap" style="text-align:center;margin-top:10px;">
-          <button class="btn" onclick="startQueue()">Start Queue</button>
-        </div>
-      </div>
-
-      <div class="stretch-log-history" id="stretch-log-history" style="margin-top:16px;"></div>
-    </div>
-  </div>
   </div>
 </div>
 
@@ -2459,15 +2248,9 @@
         </div>
       </div>
 
-      <!-- Stretch routine -->
-      <label style="display:none;align-items:center;gap:10px;font-size:0.875rem;cursor:pointer;margin-bottom:14px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
-        <input type="checkbox" id="planner-modal-stretch" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer;">
-        <span>Include stretching</span>
-      </label>
-
       <!-- Rest day -->
       <label style="display:flex;align-items:center;gap:10px;font-size:0.875rem;cursor:pointer;margin-bottom:14px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
-        <input type="checkbox" id="planner-modal-rest" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer;" onchange="if(this.checked){document.getElementById('planner-modal-template').value='';document.getElementById('planner-modal-run').checked=false;document.getElementById('planner-modal-run-details').style.display='none';document.getElementById('planner-modal-stretch').checked=false;}">
+        <input type="checkbox" id="planner-modal-rest" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer;" onchange="if(this.checked){document.getElementById('planner-modal-template').value='';document.getElementById('planner-modal-run').checked=false;document.getElementById('planner-modal-run-details').style.display='none';}">
         <span>Rest day</span>
       </label>
 
@@ -2533,6 +2316,68 @@
       <button class="btn-sm" onclick="closeEditModal()">Cancel</button>
       <button class="btn" onclick="saveEditTemplate()">Save Changes</button>
     </div>
+  </div>
+</div>
+
+<!-- ── TEMPLATE BUILDER TAKEOVER ─────────────────── -->
+<div class="tmpl-builder-overlay" id="tmpl-builder-overlay">
+  <div class="tmpl-builder-topbar">
+    <button class="btn-sm" onclick="closeTmplBuilder()">← Back</button>
+    <div class="tmpl-builder-title" id="tmpl-builder-heading">Create Template</div>
+  </div>
+  <div class="tmpl-builder-body">
+
+    <!-- LEFT: exercise browser -->
+    <div class="tmpl-builder-left">
+      <div class="tmpl-builder-search">
+        <div class="tmpl-builder-search-row">
+          <input type="text" id="tmpl-builder-search-input" placeholder="Search exercises…" oninput="tmplBuilderFilter()" autocomplete="off">
+          <button class="btn-sm" onclick="toggleTmplBuilderAddForm()" id="tmpl-builder-add-btn" style="white-space:nowrap;flex-shrink:0;">+ New</button>
+        </div>
+        <div class="tmpl-builder-cats" id="tmpl-builder-cats">
+          <button class="tmpl-builder-cat-btn active" data-cat="" onclick="tmplBuilderSetCat(this, '')">All</button>
+          <button class="tmpl-builder-cat-btn" data-cat="Push" onclick="tmplBuilderSetCat(this, 'Push')">Push</button>
+          <button class="tmpl-builder-cat-btn" data-cat="Pull" onclick="tmplBuilderSetCat(this, 'Pull')">Pull</button>
+          <button class="tmpl-builder-cat-btn" data-cat="Legs" onclick="tmplBuilderSetCat(this, 'Legs')">Legs</button>
+          <button class="tmpl-builder-cat-btn" data-cat="Core" onclick="tmplBuilderSetCat(this, 'Core')">Core</button>
+          <button class="tmpl-builder-cat-btn" data-cat="Cardio" onclick="tmplBuilderSetCat(this, 'Cardio')">Cardio</button>
+          <button class="tmpl-builder-cat-btn" data-cat="Other" onclick="tmplBuilderSetCat(this, 'Other')">Other</button>
+        </div>
+        <!-- Inline add new exercise form -->
+        <div id="tmpl-builder-add-form" style="display:none;margin-top:10px;padding:10px;background:var(--surface2);border:1px solid var(--accent);border-radius:8px;">
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <input type="text" id="tmpl-builder-new-name" placeholder="Exercise name…" autocomplete="off"
+              style="flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:7px;font-size:16px;outline:none;font-family:'Inter',system-ui,sans-serif;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+              onkeydown="if(event.key==='Enter')addExerciseFromBuilder()">
+            <select id="tmpl-builder-new-cat"
+              style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:7px;font-size:16px;outline:none;font-family:'Inter',system-ui,sans-serif;flex-shrink:0;">
+              <option>Push</option><option>Pull</option><option>Legs</option><option>Core</option><option>Cardio</option><option>Other</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn" style="flex:1;padding:8px;" onclick="addExerciseFromBuilder()">Add &amp; Select</button>
+            <button class="btn-sm" onclick="toggleTmplBuilderAddForm()">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="tmpl-builder-ex-list" id="tmpl-builder-ex-list"></div>
+    </div>
+
+    <!-- RIGHT: selected exercises + name -->
+    <div class="tmpl-builder-right">
+      <div class="tmpl-builder-right-header">
+        <input type="text" id="tmpl-builder-name" placeholder="Template name…">
+      </div>
+      <div class="tmpl-builder-selected" id="tmpl-builder-selected">
+        <div class="tmpl-builder-empty" id="tmpl-builder-empty">Tap exercises on the left<br>to add them here</div>
+      </div>
+      <div class="tmpl-builder-footer">
+        <button class="btn" style="flex:1;" onclick="saveTmplBuilder()">Save Template</button>
+        <span id="tmpl-builder-count" style="font-size:0.78rem;color:var(--muted);white-space:nowrap;"></span>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -3188,7 +3033,6 @@ async function loadData() {
   }
   migrateExercises();
   migrateTemplates();
-  migrateStretchPresets();
 }
 
 function setStatus(mode) {
@@ -3294,19 +3138,18 @@ function getWeekKey(dateStr) {
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  // Map old routes to current pages
-  let pageName = (name === 'exercises' || name === 'stretch') ? 'library' : name;
-  if (pageName === 'run') pageName = 'log'; // Run lives inside Log now
+  let pageName = name;
+  if (pageName === 'run') pageName = 'log';
+  if (pageName === 'exercises') pageName = 'library';
   document.getElementById('page-' + pageName)?.classList.add('active');
   if (event?.target) event.target.classList.add('active');
   if (pageName === 'dashboard') renderDashboard();
   if (pageName === 'history') { historyTab = historyTab || 'lifts'; renderHistory(); }
-  if (pageName === 'library') { switchLibTab('exercises'); }
+  if (pageName === 'library') renderExercises();
   if (pageName === 'nutrition') renderNutrition();
   if (pageName === 'planner') renderPlanner();
   if (pageName === 'log') {
     if (name === 'run') {
-      // Came in via the (now-removed) run nav route — open the run view directly
       selectRun();
     } else {
       document.getElementById('log-form-view').style.display = 'none';
@@ -3314,31 +3157,6 @@ function showPage(name) {
       document.getElementById('log-selection-view').style.display = '';
       renderTemplates();
     }
-  }
-}
-
-let currentLibTab = 'exercises';
-function switchLibTab(tab) {
-  currentLibTab = tab;
-  const exDiv = document.getElementById('lib-exercises');
-  const strDiv = document.getElementById('lib-stretch');
-  const exBtn = document.getElementById('lib-tab-exercises');
-  const strBtn = document.getElementById('lib-tab-stretch');
-  if (!exDiv || !strDiv) return;
-
-  if (tab === 'exercises') {
-    exDiv.style.display = '';
-    strDiv.style.display = 'none';
-    if (exBtn) { exBtn.style.background = 'var(--accent)'; exBtn.style.color = '#fff'; }
-    if (strBtn) { strBtn.style.background = 'none'; strBtn.style.color = 'var(--muted)'; }
-    renderExercises();
-  } else {
-    exDiv.style.display = 'none';
-    strDiv.style.display = '';
-    if (strBtn) { strBtn.style.background = 'var(--accent)'; strBtn.style.color = '#fff'; }
-    if (exBtn) { exBtn.style.background = 'none'; exBtn.style.color = 'var(--muted)'; }
-    renderStretchLog();
-    renderStretchPresets();
   }
 }
 
@@ -3378,9 +3196,9 @@ function renderStats() {
   const prs = computePRs();
   const g = document.getElementById('stat-grid');
   g.innerHTML = `
-    <div class="stat-card"><div class="stat-label">Total Sessions</div><div class="stat-value purple">${total}</div><div class="stat-sub">All time</div></div>
-    <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value green">${thisWeek}</div><div class="stat-sub">sessions</div></div>
-    <div class="stat-card"><div class="stat-label">Calories Today</div><div class="stat-value ${calColor}">${calDisplay}</div><div class="stat-sub">${calSub}</div></div>
+    <div class="stat-card clickable" onclick="showPage('history')" title="View History"><div class="stat-label">Total Sessions</div><div class="stat-value purple">${total}</div><div class="stat-sub">All time</div></div>
+    <div class="stat-card clickable" onclick="showPage('history')" title="View History"><div class="stat-label">This Week</div><div class="stat-value green">${thisWeek}</div><div class="stat-sub">sessions</div></div>
+    <div class="stat-card clickable" onclick="showPage('nutrition')" title="Open Nutrition"><div class="stat-label">Calories Today</div><div class="stat-value ${calColor}">${calDisplay}</div><div class="stat-sub">${calSub}</div></div>
     <div class="stat-card"><div class="stat-label">Body Weight</div><div class="stat-value red">${latestBW ? latestBW + '<span style="font-size:1rem"> lbs</span>' : '–'}</div><div class="stat-sub">most recent</div></div>
   `;
 }
@@ -3821,10 +3639,6 @@ function renderWizardDays() {
           <input type="checkbox" id="wizard-run-${i}" ${hasRun ? 'checked' : ''} ${isRest ? 'disabled' : ''} onchange="wizardOnPillChange(${i},'run')">
           <span class="wizard-pill-icon">🏃</span> Run
         </label>
-        <label class="wizard-pill ${hasStretch ? 'active' : ''}" id="wizard-stretch-pill-${i}" style="display:none;">
-          <input type="checkbox" id="wizard-stretch-${i}" ${hasStretch ? 'checked' : ''} ${isRest ? 'disabled' : ''} onchange="wizardOnPillChange(${i},'stretch')">
-          <span class="wizard-pill-icon">🧘</span> Stretch
-        </label>
       </div>
     </div>`;
   }).join('');
@@ -3860,8 +3674,7 @@ function updateWizardRowState(i) {
   const isRest = document.getElementById('wizard-rest-' + i)?.checked;
   const tmplId = document.getElementById('wizard-tmpl-' + i)?.value;
   const run = document.getElementById('wizard-run-' + i)?.checked;
-  const stretch = document.getElementById('wizard-stretch-' + i)?.checked;
-  const hasContent = !isRest && (tmplId || run || stretch);
+  const hasContent = !isRest && (tmplId || run);
   row.classList.toggle('has-content', hasContent);
 }
 
@@ -3872,9 +3685,7 @@ function wizardOnRestToggle(i) {
   const row = document.getElementById('wizard-row-' + i);
   const tmpl = document.getElementById('wizard-tmpl-' + i);
   const run = document.getElementById('wizard-run-' + i);
-  const stretch = document.getElementById('wizard-stretch-' + i);
   const runPill = document.getElementById('wizard-run-pill-' + i);
-  const stretchPill = document.getElementById('wizard-stretch-pill-' + i);
 
   if (isRest) {
     row.classList.add('is-rest');
@@ -3882,14 +3693,12 @@ function wizardOnRestToggle(i) {
     restPill.classList.add('active');
     tmpl.value = ''; tmpl.disabled = true;
     run.checked = false; run.disabled = true; if (runPill) runPill.classList.remove('active');
-    stretch.checked = false; stretch.disabled = true; if (stretchPill) stretchPill.classList.remove('active');
     document.getElementById('wizard-tmpl-edit-' + i).style.display = 'none';
   } else {
     row.classList.remove('is-rest');
     restPill.classList.remove('active');
     tmpl.disabled = false;
     run.disabled = false;
-    stretch.disabled = false;
     updateWizardRowState(i);
   }
 }
@@ -3910,11 +3719,9 @@ function saveWeeklyTemplate() {
     if (isRest) { newTemplate[i] = { rest: true }; continue; }
     const tmplId = document.getElementById('wizard-tmpl-' + i).value;
     const run = document.getElementById('wizard-run-' + i).checked;
-    const stretch = document.getElementById('wizard-stretch-' + i).checked;
     const plan = {};
     if (tmplId) plan.templateId = +tmplId;
     if (run) plan.run = { distance: null, unit: 'mi' };
-    if (stretch) plan.stretch = true;
     if (Object.keys(plan).length > 0) newTemplate[i] = plan;
   }
   weeklyTemplate = newTemplate;
@@ -3960,10 +3767,6 @@ function isDayCompleted(dateKey, plan) {
     needed++;
     if (runs.some(r => r.date === dateKey)) done++;
   }
-  if (plan.stretch) {
-    needed++;
-    if (stretchLogs && stretchLogs.some(l => l.date === dateKey)) done++;
-  }
   if (needed === 0) return false;
   if (done === needed) return 'done';
   if (done > 0) return 'partial';
@@ -3998,7 +3801,6 @@ function planDayChip({ dateKey, date, plan }) {
     const tmpl = templates.find(t => t.id === plan.templateId);
     icon = '💪'; name = tmpl?.name || 'Workout';
   } else if (plan.run) { icon = '🏃'; name = `Run${plan.run.distance ? ` · ${plan.run.distance} ${plan.run.unit || 'mi'}` : ''}`; }
-  else if (plan.stretch) { icon = '🧘'; name = 'Stretching'; }
   return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);" class="planner-upcoming-chip">
     <span style="font-size:1.1rem;width:24px;text-align:center;">${icon}</span>
     <div style="flex:1;min-width:0;">
@@ -4085,7 +3887,7 @@ function renderPlannerToday() {
       <div style="text-align:center;color:var(--muted);font-size:0.85rem;">Recovery is part of the plan. Take it easy and let your body rebuild.</div>
       ${upcomingHtml}
     `;
-  } else if (plan && (plan.templateId != null || plan.run || plan.stretch)) {
+  } else if (plan && (plan.templateId != null || plan.run)) {
     const items = [];
 
     if (plan.templateId != null) {
@@ -4150,17 +3952,6 @@ function renderPlannerToday() {
       </div>`);
     }
 
-    if (plan.stretch) {
-      const isDone = stretchLogs?.some(l => l.date === dateKey);
-      items.push(`<div class="today-plan-card ${isDone ? 'completed' : ''}" style="display:none;">
-        <div class="today-plan-icon">🧘</div>
-        <div class="today-plan-info">
-          <div class="today-plan-title">Stretching</div>
-          <div class="today-plan-sub">${isDone ? 'Logged' : 'Routine'}</div>
-        </div>
-        ${isDone ? `<button class="today-plan-action done">✓ Done</button>` : `<button class="today-plan-action">Open</button>`}
-      </div>`);
-    }
 
     let extraSections = '';
     if (isToday) {
@@ -4207,7 +3998,7 @@ function renderPlannerToday() {
   else if (status === 'pending' && isToday) statusBadge = `<div class="today-status-badge pending">● Pending</div>`;
   else if (status === 'rest') statusBadge = `<div class="today-status-badge rest">● Rest Day</div>`;
 
-  const footerHtml = (plan && !plan.rest && (plan.templateId != null || plan.run || plan.stretch))
+  const footerHtml = (plan && !plan.rest && (plan.templateId != null || plan.run))
     ? `<div style="display:flex;gap:8px;margin-top:auto;padding-top:18px;">
          <button class="btn-sm" onclick="openPlannerDayModal('${dateKey}')" style="flex:1;">Edit Day</button>
        </div>`
@@ -4292,10 +4083,6 @@ function renderPlannerWeek() {
       if (plan.run) {
         const isDone = runs.some(r => r.date === dateKey);
         itemsHtml += `<div class="planner-item run ${isDone ? 'completed' : ''}">🏃 ${plan.run.distance ? plan.run.distance + ' ' + plan.run.unit : 'Run'}</div>`;
-      }
-      if (plan.stretch) {
-        const isDone = stretchLogs && stretchLogs.some(l => l.date === dateKey);
-        itemsHtml += `<div class="planner-item stretch ${isDone ? 'completed' : ''}">🧘 Stretch</div>`;
       }
     }
     if (!itemsHtml) {
@@ -4396,7 +4183,7 @@ function showPlannerDayDetails(dateKey) {
       <div style="font-weight:700;font-size:1rem;margin-bottom:4px;">Rest Day</div>
       <div style="font-size:0.82rem;color:var(--muted);">Recovery is part of the plan.</div>
     </div>`;
-  } else if (plan && (plan.templateId != null || plan.run || plan.stretch)) {
+  } else if (plan && (plan.templateId != null || plan.run)) {
     const items = [];
     if (plan.templateId != null) {
       const tmpl = templates.find(t => t.id === plan.templateId);
@@ -4485,10 +4272,9 @@ function renderPlannerYear() {
       // Count actually-completed activities for this day
       const lifts = workouts.filter(w => w.date === dateKey).length;
       const ranToday = (runs || []).some(r => r.date === dateKey) ? 1 : 0;
-      const stretchedToday = (typeof stretchLogs !== 'undefined' && stretchLogs && stretchLogs.some(l => l.date === dateKey)) ? 1 : 0;
       const liftSessions = new Set(workouts.filter(w => w.date === dateKey && w.sessionId).map(w => w.sessionId));
-      const liftSessionCount = liftSessions.size + (lifts - workouts.filter(w => w.date === dateKey && w.sessionId).length); // sessions + lone exercises
-      const totalActivities = liftSessionCount + ranToday + stretchedToday;
+      const liftSessionCount = liftSessions.size + (lifts - workouts.filter(w => w.date === dateKey && w.sessionId).length);
+      const totalActivities = liftSessionCount + ranToday;
 
       // Intensity 0-4
       let opacity = 0;
@@ -4524,7 +4310,7 @@ function renderPlannerSummary() {
     const d = new Date(weekStart);
     d.setDate(weekStart.getDate() + i);
     const plan = getDayPlanItems(fmtDateKey(d));
-    if (plan && (plan.templateId != null || plan.run || plan.stretch || plan.rest)) {
+    if (plan && (plan.templateId != null || plan.run || plan.rest)) {
       planned++;
       const status = isDayCompleted(fmtDateKey(d), plan);
       if (status === 'done') done++;
@@ -4563,14 +4349,12 @@ function openPlannerDayModal(dateKey) {
       document.getElementById('planner-modal-run-distance').value = plan.run.distance || '';
       document.getElementById('planner-modal-run-unit').value = plan.run.unit || 'mi';
     }
-    document.getElementById('planner-modal-stretch').checked = !!plan.stretch;
     document.getElementById('planner-modal-rest').checked = !!plan.rest;
   } else {
     sel.value = '';
     document.getElementById('planner-modal-run').checked = false;
     document.getElementById('planner-modal-run-details').style.display = 'none';
     document.getElementById('planner-modal-run-distance').value = '';
-    document.getElementById('planner-modal-stretch').checked = false;
     document.getElementById('planner-modal-rest').checked = false;
   }
 
@@ -4590,7 +4374,6 @@ function savePlannerDay() {
   } else {
     const tmplId = document.getElementById('planner-modal-template').value;
     const runChecked = document.getElementById('planner-modal-run').checked;
-    const stretch = document.getElementById('planner-modal-stretch').checked;
     const plan = {};
     if (tmplId) plan.templateId = +tmplId;
     if (runChecked) {
@@ -4598,7 +4381,6 @@ function savePlannerDay() {
       const unit = document.getElementById('planner-modal-run-unit').value || 'mi';
       plan.run = { distance: dist, unit };
     }
-    if (stretch) plan.stretch = true;
     if (Object.keys(plan).length === 0) {
       delete workoutPlan[plannerEditingDate];
     } else {
@@ -6362,29 +6144,7 @@ function renderTemplates() {
 let editingTemplateId = null;
 
 function openEditTemplate(id) {
-  const tmpl = templates.find(t => t.id === id);
-  if (!tmpl) return;
-  editingTemplateId = id;
-  document.getElementById('edit-tmpl-name').value = tmpl.name;
-  const checks = document.getElementById('edit-tmpl-checks');
-  const categories = ['Push', 'Pull', 'Legs', 'Core', 'Cardio', 'Other'];
-  checks.innerHTML = categories.map(cat => {
-    const catExs = exercises.filter(e => e.cat === cat);
-    if (!catExs.length) return '';
-    const catId = `edit-cat-${cat}`;
-    const items = catExs.map(e => `
-      <label class="tmpl-ex-check" style="padding:4px 8px;">
-        <input type="checkbox" value="${e.id}" ${tmpl.exerciseIds.includes(e.id) ? 'checked' : ''}>
-        ${escapeHtml(e.name)}
-      </label>`).join('');
-    return `<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:4px;">
-      <div onclick="toggleEditCat('${catId}')" style="padding:8px 12px;background:var(--surface2);cursor:pointer;font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center;">
-        ${cat} <span id="${catId}-arrow" style="font-size:0.6rem;transition:transform 0.2s;">▶</span>
-      </div>
-      <div id="${catId}" style="display:none;flex-direction:column;gap:2px;padding:6px 4px;">${items}</div>
-    </div>`;
-  }).join('');
-  document.getElementById('edit-modal').classList.add('open');
+  openTmplBuilder(id);
 }
 
 function toggleEditCat(catId) {
@@ -6862,22 +6622,228 @@ function toggleSessionBlock(exId) {
 }
 
 function toggleNewTmpl() {
-  const form = document.getElementById('new-tmpl-form');
-  form.classList.toggle('open');
+  openTmplBuilder(null);
 }
 
 function saveTemplate() {
-  const name = sanitizeText(document.getElementById('tmpl-name-input').value, 100);
-  if (!name) { alert('Give your template a name.'); return; }
-  const checked = [...document.querySelectorAll('#tmpl-ex-checks input:checked')].map(i => +i.value);
-  if (!checked.length) { alert('Pick at least one exercise.'); return; }
-  const id = Math.max(0, ...templates.map(t=>t.id)) + 1;
-  templates.push({ id, name, exerciseIds: checked });
-  persist();
-  document.getElementById('tmpl-name-input').value = '';
-  document.getElementById('new-tmpl-form').classList.remove('open');
-  renderTemplates();
+  // legacy path — now handled by saveTmplBuilder
+  saveTmplBuilder();
 }
+
+// ── TEMPLATE BUILDER ─────────────────────────────────
+let tmplBuilderSelectedIds = []; // ordered list of exercise IDs
+let tmplBuilderCat = '';
+let tmplBuilderEditId = null; // null = create, number = edit
+
+function openTmplBuilder(editId) {
+  tmplBuilderEditId = editId;
+  tmplBuilderSelectedIds = [];
+
+  if (editId !== null) {
+    const tmpl = templates.find(t => t.id === editId);
+    if (!tmpl) return;
+    tmplBuilderSelectedIds = [...tmpl.exerciseIds];
+    document.getElementById('tmpl-builder-name').value = tmpl.name;
+    document.getElementById('tmpl-builder-heading').textContent = 'Edit Template';
+  } else {
+    document.getElementById('tmpl-builder-name').value = '';
+    document.getElementById('tmpl-builder-heading').textContent = 'Create Template';
+  }
+
+  // Reset search/filter
+  tmplBuilderCat = '';
+  document.getElementById('tmpl-builder-search-input').value = '';
+  document.querySelectorAll('.tmpl-builder-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === ''));
+
+  tmplBuilderRenderList();
+  tmplBuilderRenderSelected();
+  document.getElementById('tmpl-builder-overlay').classList.add('open');
+}
+
+function closeTmplBuilder() {
+  document.getElementById('tmpl-builder-overlay').classList.remove('open');
+  // Reset add form
+  const form = document.getElementById('tmpl-builder-add-form');
+  const btn = document.getElementById('tmpl-builder-add-btn');
+  if (form) form.style.display = 'none';
+  if (btn) btn.textContent = '+ New';
+  tmplBuilderEditId = null;
+  tmplBuilderSelectedIds = [];
+}
+
+function tmplBuilderSetCat(btn, cat) {
+  tmplBuilderCat = cat;
+  document.querySelectorAll('.tmpl-builder-cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  tmplBuilderRenderList();
+}
+
+function tmplBuilderFilter() {
+  tmplBuilderRenderList();
+}
+
+function tmplBuilderRenderList() {
+  const q = document.getElementById('tmpl-builder-search-input').value.toLowerCase().trim();
+  const list = document.getElementById('tmpl-builder-ex-list');
+  let exs = exercises;
+  if (tmplBuilderCat) exs = exs.filter(e => e.cat === tmplBuilderCat);
+  if (q) exs = exs.filter(e => e.name.toLowerCase().includes(q));
+
+  if (!exs.length) {
+    list.innerHTML = `<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:24px;">No exercises found</div>`;
+    return;
+  }
+
+  list.innerHTML = exs.map(e => {
+    const added = tmplBuilderSelectedIds.includes(e.id);
+    return `<div class="tmpl-builder-ex-item ${added ? 'added' : ''}" onclick="tmplBuilderToggleEx(${e.id})" id="tmpl-builder-item-${e.id}">
+      <div>
+        <div>${escapeHtml(e.name)}</div>
+        <div class="ex-cat-badge">${e.cat}</div>
+      </div>
+      <span class="tmpl-builder-add-icon">${added ? '✓' : '+'}</span>
+    </div>`;
+  }).join('');
+}
+
+function tmplBuilderToggleEx(id) {
+  const idx = tmplBuilderSelectedIds.indexOf(id);
+  if (idx === -1) {
+    tmplBuilderSelectedIds.push(id);
+  } else {
+    tmplBuilderSelectedIds.splice(idx, 1);
+  }
+  // update the clicked item in the list without full re-render
+  const item = document.getElementById('tmpl-builder-item-' + id);
+  if (item) {
+    const added = tmplBuilderSelectedIds.includes(id);
+    item.classList.toggle('added', added);
+    item.querySelector('.tmpl-builder-add-icon').textContent = added ? '✓' : '+';
+  }
+  tmplBuilderRenderSelected();
+}
+
+function tmplBuilderRemoveEx(id) {
+  tmplBuilderSelectedIds = tmplBuilderSelectedIds.filter(i => i !== id);
+  // update list item if visible
+  const item = document.getElementById('tmpl-builder-item-' + id);
+  if (item) {
+    item.classList.remove('added');
+    item.querySelector('.tmpl-builder-add-icon').textContent = '+';
+  }
+  tmplBuilderRenderSelected();
+}
+
+function tmplBuilderRenderSelected() {
+  const container = document.getElementById('tmpl-builder-selected');
+  const empty = document.getElementById('tmpl-builder-empty');
+  const count = document.getElementById('tmpl-builder-count');
+
+  count.textContent = tmplBuilderSelectedIds.length ? `${tmplBuilderSelectedIds.length} exercise${tmplBuilderSelectedIds.length !== 1 ? 's' : ''}` : '';
+
+  if (!tmplBuilderSelectedIds.length) {
+    empty.style.display = '';
+    // remove any selected items
+    container.querySelectorAll('.tmpl-builder-selected-item').forEach(el => el.remove());
+    return;
+  }
+  empty.style.display = 'none';
+
+  container.innerHTML = tmplBuilderSelectedIds.map((id, i) => {
+    const ex = getExById(id);
+    if (!ex) return '';
+    return `<div class="tmpl-builder-selected-item">
+      <span class="item-num">${i + 1}</span>
+      <div style="flex:1;min-width:0;">
+        <div class="item-name">${escapeHtml(ex.name)}</div>
+        <div class="item-cat">${ex.cat}</div>
+      </div>
+      <button class="tmpl-builder-remove" onclick="tmplBuilderRemoveEx(${id})" title="Remove">×</button>
+    </div>`;
+  }).join('');
+}
+
+function toggleTmplBuilderAddForm() {
+  const form = document.getElementById('tmpl-builder-add-form');
+  const btn = document.getElementById('tmpl-builder-add-btn');
+  const isHidden = form.style.display === 'none' || !form.style.display;
+  form.style.display = isHidden ? 'block' : 'none';
+  if (btn) btn.textContent = isHidden ? '✕ Cancel' : '+ New';
+  if (isHidden) {
+    document.getElementById('tmpl-builder-new-name').focus();
+    if (tmplBuilderCat) document.getElementById('tmpl-builder-new-cat').value = tmplBuilderCat;
+  } else {
+    document.getElementById('tmpl-builder-new-name').value = '';
+  }
+}
+
+function addExerciseFromBuilder() {
+  const nameInput = document.getElementById('tmpl-builder-new-name');
+  const catInput = document.getElementById('tmpl-builder-new-cat');
+  const name = sanitizeText(nameInput.value, 80);
+  if (!name) { nameInput.focus(); return; }
+  const cat = catInput.value;
+
+  // Duplicate check — if it already exists just select it
+  const dupe = exercises.find(e => e.name.toLowerCase() === name.toLowerCase());
+  if (dupe) {
+    if (!tmplBuilderSelectedIds.includes(dupe.id)) {
+      tmplBuilderSelectedIds.push(dupe.id);
+      tmplBuilderRenderSelected();
+    }
+    nameInput.value = '';
+    toggleTmplBuilderAddForm();
+    tmplBuilderRenderList();
+    return;
+  }
+
+  // Create the new exercise exactly like addExercise() in the library
+  const id = Math.max(0, ...exercises.map(e => e.id)) + 1;
+  exercises.push({ id, name, cat });
+  persist();
+
+  // Immediately add to selected list
+  tmplBuilderSelectedIds.push(id);
+
+  // Keep library page in sync if it happens to be open
+  renderExercises();
+  renderTemplates();
+
+  // Reset form and refresh builder list
+  nameInput.value = '';
+  toggleTmplBuilderAddForm();
+  tmplBuilderRenderList();
+  tmplBuilderRenderSelected();
+}
+
+function saveTmplBuilder() {
+  const name = sanitizeText(document.getElementById('tmpl-builder-name').value, 100);
+  if (!name) { alert('Give your template a name.'); return; }
+  if (!tmplBuilderSelectedIds.length) { alert('Add at least one exercise.'); return; }
+
+  if (tmplBuilderEditId !== null) {
+    // editing
+    const tmpl = templates.find(t => t.id === tmplBuilderEditId);
+    if (!tmpl) return;
+    tmpl.name = name;
+    tmpl.exerciseIds = [...tmplBuilderSelectedIds];
+    persist();
+    closeTmplBuilder();
+    renderTemplates();
+    if (activeTemplateId === tmpl.id) buildSessionForm(tmpl.id);
+    const wizard = document.getElementById('planner-wizard');
+    if (wizard && wizard.style.display !== 'none' && typeof renderWizardDays === 'function') renderWizardDays();
+  } else {
+    // creating
+    const id = Math.max(0, ...templates.map(t => t.id)) + 1;
+    templates.push({ id, name, exerciseIds: [...tmplBuilderSelectedIds] });
+    persist();
+    closeTmplBuilder();
+    renderTemplates();
+  }
+}
+
+
 
 function addSet() {
   setCount++;
@@ -7443,280 +7409,6 @@ function renderRunPage() {
   }).reverse().join('');
 }
 
-// ── STRETCH LOG ───────────────────────────────────────
-let stretchQueue = []; // [{name, secs}]
-let stretchTimerState = { active: false, paused: false, currentIdx: 0, remaining: 0, interval: null, total: 0 };
-
-// ── STRETCH PRESETS ───────────────────────────────────
-const DEFAULT_STRETCH_PRESETS = [
-  { id: 1, name: 'Full Body Morning', stretches: [
-    {name:"Cat-Cow",secs:45},{name:"Child's Pose",secs:60},{name:"Downward Dog",secs:45},
-    {name:"Hip Flexor Stretch",secs:60},{name:"Standing Hamstring Stretch",secs:45},
-    {name:"Thoracic Rotation",secs:30},{name:"Neck Side Stretch",secs:20},{name:"Standing Calf Stretch",secs:45}
-  ]},
-  { id: 2, name: 'Post-Leg Day', stretches: [
-    {name:"Pigeon Pose",secs:90},{name:"Couch Stretch",secs:60},{name:"Seated Forward Fold",secs:60},
-    {name:"Figure-4 Stretch",secs:45},{name:"Low Lunge Hip Opener",secs:60},
-    {name:"Lying Hamstring Stretch",secs:45},{name:"Standing Calf Stretch",secs:45},{name:"Soleus Stretch",secs:45}
-  ]},
-  { id: 3, name: 'Post-Upper Body', stretches: [
-    {name:"Cross-Body Shoulder Stretch",secs:30},{name:"Doorway Chest Stretch",secs:30},
-    {name:"Overhead Tricep Stretch",secs:30},{name:"Sleeper Stretch",secs:45},
-    {name:"Neck Side Stretch",secs:20},{name:"Thread the Needle",secs:45},
-    {name:"Lat Stretch Overhead",secs:30},{name:"Eagle Arms Stretch",secs:30}
-  ]},
-  { id: 4, name: 'Hip Mobility', stretches: [
-    {name:"90-90 Hip Stretch",secs:60},{name:"Pigeon Pose",secs:90},{name:"Butterfly Stretch",secs:45},
-    {name:"Deep Squat Hold",secs:45},{name:"Hip Flexor Stretch",secs:60},
-    {name:"Lateral Hip Flexor Stretch",secs:45},{name:"Hip 90-90 Flow",secs:60}
-  ]},
-  { id: 5, name: 'Pre-Workout Warmup', stretches: [
-    {name:"Inchworm",secs:45},{name:"World's Greatest Stretch",secs:60},{name:"Hip Circles",secs:30},
-    {name:"Ankle Circles",secs:30},{name:"Standing Windmill",secs:30},{name:"Cat-Cow",secs:45}
-  ]},
-];
-
-function migrateStretchPresets() {
-  let changed = false;
-  for (const def of DEFAULT_STRETCH_PRESETS) {
-    if (!stretchPresets.find(p => p.name === def.name)) {
-      stretchPresets.push(def);
-      changed = true;
-    }
-  }
-  // Don't call persist here — it'll be called by the normal save cycle
-  // This avoids errors if the stretch_presets column doesn't exist yet
-}
-
-function renderStretchPresets() {
-  const list = document.getElementById('stretch-preset-list');
-  if (!list) return;
-  if (!stretchPresets.length) { list.innerHTML = ''; return; }
-  list.innerHTML = stretchPresets.map(p => {
-    const total = p.stretches.reduce((s,x) => s + x.secs, 0);
-    const mins = Math.floor(total/60), secs = total % 60;
-    const dur = mins > 0 ? `${mins}m ${secs > 0 ? secs+'s' : ''}` : `${secs}s`;
-    return `<div class="tmpl-card" style="margin-bottom:8px;">
-      <div class="tmpl-name" style="padding-right:80px;">${escapeHtml(p.name)}</div>
-      <div class="tmpl-exlist">${p.stretches.length} stretches · ${dur}</div>
-      <div class="tmpl-actions">
-        <button class="tmpl-action-btn" onclick="event.stopPropagation();loadStretchPreset(${p.id})" title="Load">▶</button>
-        <button class="tmpl-action-btn del" onclick="event.stopPropagation();deleteStretchPreset(${p.id})" title="Delete">×</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function loadStretchPreset(id) {
-  const preset = stretchPresets.find(p => p.id === id);
-  if (!preset) return;
-  stretchQueue = preset.stretches.map(s => ({...s}));
-  renderStretchQueue();
-  // scroll to queue
-  document.getElementById('stretch-queue')?.scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-function deleteStretchPreset(id) {
-  if (!confirm('Delete this routine?')) return;
-  stretchPresets = stretchPresets.filter(p => p.id !== id);
-  persist();
-  renderStretchPresets();
-}
-
-function toggleNewStretchPreset() {
-  const form = document.getElementById('new-stretch-preset-form');
-  if (!form) return;
-  const isOpen = form.style.display !== 'none';
-  form.style.display = isOpen ? 'none' : 'block';
-  if (!isOpen) populateStretchPresetChecks();
-}
-
-function populateStretchPresetChecks() {
-  // Collect all stretch names from the library
-  const allStretches = [
-    {name:"Hip Flexor Stretch",secs:60},{name:"Pigeon Pose",secs:90},{name:"Figure-4 Stretch",secs:45},
-    {name:"Seated Glute Stretch",secs:45},{name:"Low Lunge Hip Opener",secs:60},{name:"Deep Squat Hold",secs:45},
-    {name:"Supine Hip Rotation",secs:30},{name:"90-90 Hip Stretch",secs:60},{name:"Butterfly Stretch",secs:45},
-    {name:"Half-Pigeon Pose",secs:90},{name:"Standing Hamstring Stretch",secs:45},{name:"Seated Forward Fold",secs:60},
-    {name:"Quad Stretch",secs:30},{name:"Couch Stretch",secs:60},{name:"Lying Hamstring Stretch",secs:45},
-    {name:"Standing Toe Touch",secs:30},{name:"Kneeling Quad Stretch",secs:45},{name:"Wide-Leg Forward Fold",secs:60},
-    {name:"Thoracic Rotation",secs:30},{name:"Cat-Cow",secs:45},{name:"Child's Pose",secs:60},
-    {name:"Doorway Chest Stretch",secs:30},{name:"Thread the Needle",secs:45},{name:"Cobra Stretch",secs:30},
-    {name:"Supine Spinal Twist",secs:45},{name:"Lat Stretch Overhead",secs:30},{name:"Lower Back Knee Hug",secs:45},
-    {name:"Cross-Body Shoulder Stretch",secs:30},{name:"Neck Side Stretch",secs:20},{name:"Overhead Tricep Stretch",secs:30},
-    {name:"Sleeper Stretch",secs:45},{name:"Neck Rotation",secs:20},{name:"Wall Angel",secs:30},
-    {name:"Upper Trap Stretch",secs:20},{name:"Doorway Pec Stretch",secs:30},{name:"Eagle Arms Stretch",secs:30},
-    {name:"Standing Calf Stretch",secs:45},{name:"Ankle Circles",secs:30},{name:"Soleus Stretch",secs:45},
-    {name:"Downward Dog Calf Stretch",secs:45},{name:"Achilles Tendon Stretch",secs:45},
-    {name:"World's Greatest Stretch",secs:60},{name:"Downward Dog",secs:45},{name:"Inchworm",secs:45},
-    {name:"Deep Lunge with Rotation",secs:45},{name:"Standing Side Bend",secs:30},{name:"Bridge Hold",secs:45},
-  ];
-  const checks = document.getElementById('new-sp-checks');
-  if (!checks) return;
-  checks.innerHTML = allStretches.map((s,i) =>
-    `<label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;cursor:pointer;padding:3px 0;">
-      <input type="checkbox" data-name="${s.name}" data-secs="${s.secs}" style="accent-color:var(--accent);">
-      ${s.name} <span style="color:var(--muted);font-size:0.7rem;">${s.secs}s</span>
-    </label>`
-  ).join('');
-}
-
-function saveStretchPreset() {
-  const name = sanitizeText(document.getElementById('new-sp-name').value, 80);
-  if (!name) { alert('Give your routine a name.'); return; }
-  const checked = [...document.querySelectorAll('#new-sp-checks input:checked')];
-  if (!checked.length) { alert('Select at least one stretch.'); return; }
-  const stretches = checked.map(c => ({ name: c.dataset.name, secs: +c.dataset.secs }));
-  const id = Math.max(0, ...stretchPresets.map(p => p.id)) + 1;
-  stretchPresets.push({ id, name, stretches });
-  persist();
-  document.getElementById('new-sp-name').value = '';
-  document.getElementById('new-stretch-preset-form').style.display = 'none';
-  renderStretchPresets();
-}
-
-function saveQueueAsPreset() {
-  if (!stretchQueue.length) { alert('Add stretches to your queue first.'); return; }
-  const name = prompt('Name this routine:');
-  if (!name) return;
-  const id = Math.max(0, ...stretchPresets.map(p => p.id)) + 1;
-  stretchPresets.push({ id, name, stretches: stretchQueue.map(s => ({...s})) });
-  persist();
-  renderStretchPresets();
-  alert(`Routine "${name}" saved!`);
-}
-
-function toggleAcc(header) {
-  header.classList.toggle('open');
-  const body = header.nextElementSibling;
-  body.classList.toggle('open');
-}
-
-function addToQueue(name, secs) {
-  stretchQueue.push({ name, secs });
-  renderStretchQueue();
-}
-
-function removeFromQueue(idx) {
-  stretchQueue.splice(idx, 1);
-  renderStretchQueue();
-}
-
-function clearStretchQueue() {
-  if (stretchTimerState.interval) clearInterval(stretchTimerState.interval);
-  stretchTimerState = { active: false, paused: false, currentIdx: 0, remaining: 0, interval: null, total: 0 };
-  stretchQueue = [];
-  renderStretchQueue();
-  document.getElementById('timer-display').style.display = 'none';
-  document.getElementById('stretch-controls').style.display = 'none';
-  document.getElementById('start-btn-wrap').style.display = 'block';
-}
-
-function renderStretchQueue() {
-  const qEl = document.getElementById('stretch-queue');
-  const emptyEl = document.getElementById('stretch-queue-empty');
-  const startWrap = document.getElementById('start-btn-wrap');
-  if (!stretchQueue.length) {
-    qEl.innerHTML = '';
-    emptyEl.style.display = '';
-    startWrap.style.display = 'none';
-    return;
-  }
-  emptyEl.style.display = 'none';
-  startWrap.style.display = stretchTimerState.active ? 'none' : 'block';
-  qEl.innerHTML = stretchQueue.map((s, i) => {
-    const isDone = stretchTimerState.active && i < stretchTimerState.currentIdx;
-    const isCur = stretchTimerState.active && i === stretchTimerState.currentIdx;
-    return `<div class="stretch-queue-item ${isCur ? 'active-stretch' : ''} ${isDone ? 'done-stretch' : ''}">
-      <span>${s.name}</span>
-      <span style="color:var(--muted);font-size:0.72rem;margin-left:8px;">${s.secs}s</span>
-      ${!stretchTimerState.active ? `<button class="stretch-queue-remove" onclick="removeFromQueue(${i})">×</button>` : ''}
-    </div>`;
-  }).join('');
-}
-
-function startQueue() {
-  if (!stretchQueue.length) { alert('Add some stretches to your queue first.'); return; }
-  if (stretchTimerState.interval) clearInterval(stretchTimerState.interval);
-  stretchTimerState = {
-    active: true, paused: false, currentIdx: 0,
-    remaining: stretchQueue[0].secs, total: stretchQueue[0].secs, interval: null
-  };
-  document.getElementById('timer-display').style.display = 'flex';
-  document.getElementById('stretch-controls').style.display = 'flex';
-  document.getElementById('start-btn-wrap').style.display = 'none';
-  renderStretchQueue();
-  updateTimerDisplay();
-  // Start interval — tick every second, don't call tickTimer immediately
-  stretchTimerState.interval = setInterval(tickTimer, 1000);
-}
-
-function tickTimer() {
-  if (stretchTimerState.paused) return;
-
-  stretchTimerState.remaining--;
-
-  if (stretchTimerState.remaining < 0) {
-    // Current stretch finished — log it
-    const cur = stretchQueue[stretchTimerState.currentIdx];
-    if (cur) {
-      stretchLogs.push({ name: cur.name, secs: cur.secs, date: localToday() });
-      persistAll();
-    }
-    stretchTimerState.currentIdx++;
-
-    if (stretchTimerState.currentIdx >= stretchQueue.length) {
-      // All done
-      clearInterval(stretchTimerState.interval);
-      stretchTimerState.active = false;
-      document.getElementById('timer-display').style.display = 'none';
-      document.getElementById('stretch-controls').style.display = 'none';
-      stretchQueue = [];
-      renderStretchQueue();
-      renderStretchLog();
-      return;
-    }
-    // Load next stretch
-    const next = stretchQueue[stretchTimerState.currentIdx];
-    stretchTimerState.remaining = next.secs;
-    stretchTimerState.total = next.secs;
-    renderStretchQueue();
-  }
-
-  updateTimerDisplay();
-}
-
-function updateTimerDisplay() {
-  const cur = stretchQueue[stretchTimerState.currentIdx];
-  if (!cur) return;
-  document.getElementById('timer-number').textContent = stretchTimerState.remaining;
-  document.getElementById('timer-stretch-name').textContent = cur.name;
-  const circ = 439.8;
-  const frac = stretchTimerState.remaining / stretchTimerState.total;
-  document.getElementById('timer-ring').style.strokeDashoffset = circ * (1 - frac);
-}
-
-function togglePause() {
-  stretchTimerState.paused = !stretchTimerState.paused;
-  document.getElementById('btn-pause-resume').textContent = stretchTimerState.paused ? 'Resume' : 'Pause';
-}
-
-function skipStretch() {
-  stretchTimerState.remaining = 0;
-  tickTimer();
-}
-
-function renderStretchLog() {
-  const el = document.getElementById('stretch-log-history');
-  if (!el) return;
-  if (!stretchLogs.length) { el.innerHTML = ''; return; }
-  const recent = [...stretchLogs].reverse().slice(0, 10);
-  el.innerHTML = `<div class="chart-title" style="padding-bottom:10px;">Recent Stretches</div>` +
-    recent.map(l => `<div class="stretch-log-entry">
-      <span class="stretch-log-name">${l.name}</span>
-      <span class="stretch-log-meta">${l.secs}s · ${fmtDate(l.date)}</span>
-    </div>`).join('');
-}
 
 
 // ── WELCOME ───────────────────────────────────────────
