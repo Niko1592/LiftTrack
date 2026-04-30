@@ -573,11 +573,12 @@
 
 
   /* ── TEMPLATE BUILDER TAKEOVER ──────────────────── */
-  .tmpl-builder-overlay { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 900; flex-direction: column; overflow: hidden; }
+  .tmpl-builder-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 900; align-items: center; justify-content: center; padding: 24px; }
   .tmpl-builder-overlay.open { display: flex; }
-  .tmpl-builder-topbar { display: flex; align-items: center; gap: 16px; padding: 0 24px; height: 56px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tmpl-builder-inner { display: flex; flex-direction: column; width: 100%; max-width: 860px; height: 80vh; max-height: 680px; background: var(--bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.4); }
+  .tmpl-builder-topbar { display: flex; align-items: center; gap: 16px; padding: 0 20px; height: 52px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; border-radius: 16px 16px 0 0; }
   .tmpl-builder-title { font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; flex: 1; }
-  .tmpl-builder-body { display: grid; grid-template-columns: 1fr 340px; flex: 1; overflow: hidden; }
+  .tmpl-builder-body { display: grid; grid-template-columns: 1fr 300px; flex: 1; overflow: hidden; }
   .tmpl-builder-left { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
   .tmpl-builder-search { padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .tmpl-builder-search-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
@@ -588,7 +589,7 @@
   .tmpl-builder-cat-btn:hover { border-color: var(--accent); color: var(--accent); }
   .tmpl-builder-cat-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   .tmpl-builder-ex-list { flex: 1; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
-  .tmpl-builder-ex-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: all 0.15s; font-size: 0.85rem; font-weight: 500; }
+  .tmpl-builder-ex-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: all 0.15s; font-size: 0.85rem; font-weight: 500; }
   .tmpl-builder-ex-item:hover { border-color: var(--accent); background: rgba(108,99,255,0.07); color: var(--accent); }
   .tmpl-builder-ex-item.added { border-color: var(--accent); background: rgba(108,99,255,0.12); color: var(--accent); }
   .tmpl-builder-ex-item .ex-cat-badge { font-size: 0.65rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -597,7 +598,7 @@
   .tmpl-builder-ex-item:hover .tmpl-builder-add-icon,
   .tmpl-builder-ex-item.added .tmpl-builder-add-icon { color: var(--accent); }
   .tmpl-builder-right { display: flex; flex-direction: column; overflow: hidden; background: var(--surface); }
-  .tmpl-builder-right-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tmpl-builder-right-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .tmpl-builder-right-header input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 16px; font-weight: 700; outline: none; font-family: 'Inter', system-ui, sans-serif; letter-spacing: -0.01em; }
   .tmpl-builder-right-header input:focus { border-color: var(--accent); }
   .tmpl-builder-selected { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
@@ -608,10 +609,13 @@
   .tmpl-builder-selected-item .item-cat { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
   .tmpl-builder-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; padding: 0 2px; flex-shrink: 0; transition: color 0.15s; }
   .tmpl-builder-remove:hover { color: var(--accent2); }
-  .tmpl-builder-footer { padding: 14px 20px; border-top: 1px solid var(--border); flex-shrink: 0; display: flex; gap: 10px; align-items: center; }
+  .tmpl-builder-footer { padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; display: flex; gap: 10px; align-items: center; }
   /* add-exercise inline form inputs — 16px prevents iOS zoom */
   #tmpl-builder-new-name, #tmpl-builder-new-cat { font-size: 16px !important; }
   @media(max-width: 700px) {
+    .tmpl-builder-overlay { padding: 0; align-items: stretch; }
+    .tmpl-builder-inner { max-width: 100%; height: 100%; max-height: 100%; border-radius: 0; border: none; }
+    .tmpl-builder-topbar { border-radius: 0; }
     .tmpl-builder-body { grid-template-columns: 1fr; grid-template-rows: 55% 45%; }
     .tmpl-builder-left { border-right: none; border-bottom: 1px solid var(--border); overflow: hidden; }
     .tmpl-builder-right { overflow: hidden; }
@@ -2320,7 +2324,8 @@
 </div>
 
 <!-- ── TEMPLATE BUILDER TAKEOVER ─────────────────── -->
-<div class="tmpl-builder-overlay" id="tmpl-builder-overlay">
+<div class="tmpl-builder-overlay" id="tmpl-builder-overlay" onclick="if(event.target===this)closeTmplBuilder()">
+  <div class="tmpl-builder-inner">
   <div class="tmpl-builder-topbar">
     <button class="btn-sm" onclick="closeTmplBuilder()">← Back</button>
     <div class="tmpl-builder-title" id="tmpl-builder-heading">Create Template</div>
@@ -2379,6 +2384,7 @@
     </div>
 
   </div>
+  </div><!-- /tmpl-builder-inner -->
 </div>
 
 <!-- ── LIVE WORKOUT TAKEOVER ───────────────────────── -->
@@ -6741,26 +6747,30 @@ function tmplBuilderRenderSelected() {
 
   count.textContent = tmplBuilderSelectedIds.length ? `${tmplBuilderSelectedIds.length} exercise${tmplBuilderSelectedIds.length !== 1 ? 's' : ''}` : '';
 
+  // Remove only the item rows, never touch the empty placeholder
+  container.querySelectorAll('.tmpl-builder-selected-item').forEach(el => el.remove());
+
   if (!tmplBuilderSelectedIds.length) {
-    empty.style.display = '';
-    // remove any selected items
-    container.querySelectorAll('.tmpl-builder-selected-item').forEach(el => el.remove());
+    if (empty) empty.style.display = '';
     return;
   }
-  empty.style.display = 'none';
 
-  container.innerHTML = tmplBuilderSelectedIds.map((id, i) => {
+  if (empty) empty.style.display = 'none';
+
+  tmplBuilderSelectedIds.forEach((id, i) => {
     const ex = getExById(id);
-    if (!ex) return '';
-    return `<div class="tmpl-builder-selected-item">
+    if (!ex) return;
+    const div = document.createElement('div');
+    div.className = 'tmpl-builder-selected-item';
+    div.innerHTML = `
       <span class="item-num">${i + 1}</span>
       <div style="flex:1;min-width:0;">
         <div class="item-name">${escapeHtml(ex.name)}</div>
         <div class="item-cat">${ex.cat}</div>
       </div>
-      <button class="tmpl-builder-remove" onclick="tmplBuilderRemoveEx(${id})" title="Remove">×</button>
-    </div>`;
-  }).join('');
+      <button class="tmpl-builder-remove" onclick="tmplBuilderRemoveEx(${id})" title="Remove">×</button>`;
+    container.appendChild(div);
+  });
 }
 
 function toggleTmplBuilderAddForm() {
